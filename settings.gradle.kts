@@ -35,3 +35,6 @@ plugins {
 include(":composeApp")
 include(":server")
 include(":shared")
+include(":auth-api")
+include(":auth-impl")
+include(":core-navigation")
