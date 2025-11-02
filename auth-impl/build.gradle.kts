@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.androidKotlinMultiplatformLibrary)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.kotlinSerialization)
 }
 
 kotlin {
@@ -65,6 +66,7 @@ kotlin {
                 implementation(projects.authApi)
 
                 implementation(libs.kotlin.stdlib)
+                implementation(libs.kotlin.serialization.json)
 
                 // compose
                 implementation(compose.runtime)
@@ -114,5 +116,4 @@ kotlin {
             }
         }
     }
-
 }

@@ -58,7 +58,10 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
+                implementation(projects.coreNavigation)
+
                 implementation(libs.kotlin.stdlib)
+                implementation(libs.decompose)
                 // Add KMP dependencies here
             }
         }

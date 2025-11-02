@@ -3,14 +3,23 @@ package com.itapp.auth_impl.password_validation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.arkivanov.decompose.ComponentContext
-import com.itapp.core_navigation.BaseUiComponent
+import com.itapp.auth_api.password_validation.PasswordValidationComponent
+import com.itapp.core_navigation.BaseComponent
 
 internal class PasswordValidationComponentImpl(
-    componentContext: ComponentContext
-) : BaseUiComponent(componentContext), PasswordValidationComponent {
+    componentContext: ComponentContext,
+    private val openSmsScreen: () -> Unit
+) : BaseComponent(componentContext), PasswordValidationComponent {
+
+    override fun onNextClicked() {
+        openSmsScreen()
+    }
 
     @Composable
     override fun render(modifier: Modifier) {
-        PasswordValidationScreen(modifier)
+        PasswordValidationScreen(
+            modifier = modifier,
+            component = this
+        )
     }
 }
