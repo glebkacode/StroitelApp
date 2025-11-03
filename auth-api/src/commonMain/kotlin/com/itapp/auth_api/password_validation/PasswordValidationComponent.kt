@@ -5,6 +5,8 @@ import com.itapp.core_navigation.BaseUiComponent
 
 interface PasswordValidationComponent : BaseUiComponent {
     fun onNextClicked()
+    fun onForgotPasswordClicked()
+    fun onBackClicked()
     interface Factory {
         operator fun invoke(
             componentContext: ComponentContext,

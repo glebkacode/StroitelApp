@@ -6,4 +6,8 @@
     <!--Phone Validation-->
     <string name="phone_validation_hint_text">Номер мобильного телефона</string>
     <string name="phone_validation_sign_up">Зарегистрироваться</string>
+
+    <!--Password validation-->
+    <string name="password_validation_hint_text">Введите пароль</string>
+    <string name="password_validation_forgot_password_text">Напонимать пароль</string>
 </resources>

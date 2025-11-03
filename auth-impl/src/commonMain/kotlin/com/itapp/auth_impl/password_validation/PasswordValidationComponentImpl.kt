@@ -19,6 +19,14 @@ class PasswordValidationComponentImpl(
         openSmsScreen()
     }
 
+    override fun onForgotPasswordClicked() {
+
+    }
+
+    override fun onBackClicked() {
+
+    }
+
     @Composable
     override fun render(modifier: Modifier) {
         PasswordValidationScreen(
