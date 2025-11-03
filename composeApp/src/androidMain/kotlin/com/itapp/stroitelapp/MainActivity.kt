@@ -17,10 +17,10 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        val graph = createGraph<AppGraph>()
+        val rootGraph = createGraph<AppGraph>()
         val root = RootComponentImpl(
             componentContext = defaultComponentContext(),
-            authComponentFactory = graph.authComponentFactory
+            authComponentFactory = rootGraph.authGraph.authComponentFactory
         )
         setContent {
             root.render(modifier = Modifier.fillMaxSize())
