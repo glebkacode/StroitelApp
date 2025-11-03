@@ -22,6 +22,10 @@ class SmsValidationComponentImpl(
         )
     }
 
+    override fun onContinueClicked() {
+
+    }
+
     @AssistedFactory
     interface Factory : SmsValidationComponent.Factory {
         override operator fun invoke(

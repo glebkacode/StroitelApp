@@ -10,4 +10,7 @@
     <!--Password validation-->
     <string name="password_validation_hint_text">Введите пароль</string>
     <string name="password_validation_forgot_password_text">Напонимать пароль</string>
+
+    <!--Sms validation-->
+    <string name="sms_validation_hint_text">Код из СМС</string>
 </resources>
