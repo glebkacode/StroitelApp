@@ -1,5 +1,6 @@
 package com.itapp.auth_api.root
 
+import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.value.Value
 import com.itapp.auth_api.password_validation.PasswordValidationComponent
@@ -13,5 +14,8 @@ interface AuthRootComponent : BaseUiComponent {
         class PasswordValidationChild(val component: PasswordValidationComponent) : Child
         class PhoneValidationChild(val component: PhoneValidationComponent) : Child
         class SmsValidationChild(val component: SmsValidationComponent) : Child
+    }
+    interface Factory {
+        operator fun invoke(componentContext: ComponentContext): AuthRootComponent
     }
 }

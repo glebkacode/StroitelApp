@@ -12,14 +12,18 @@ import com.itapp.auth_api.password_validation.PasswordValidationComponent
 import com.itapp.auth_api.phone_validation.PhoneValidationComponent
 import com.itapp.auth_api.root.AuthRootComponent
 import com.itapp.auth_api.sms_validation.SmsValidationComponent
-import com.itapp.auth_impl.password_validation.PasswordValidationComponentImpl
-import com.itapp.auth_impl.phone_validation.PhoneValidationComponentImpl
-import com.itapp.auth_impl.sms_validation.SmsValidationComponentImpl
 import com.itapp.core_navigation.BaseComponent
+import dev.zacsweers.metro.Assisted
+import dev.zacsweers.metro.AssistedFactory
+import dev.zacsweers.metro.AssistedInject
 import kotlinx.serialization.Serializable
 
+@AssistedInject
 class AuthRootComponentImpl(
-    componentContext: ComponentContext
+    @Assisted componentContext: ComponentContext,
+    private val passwordComponentFactory: Lazy<PasswordValidationComponent.Factory>,
+    private val phoneComponentFactory: Lazy<PhoneValidationComponent.Factory>,
+    private val smsComponentFactory: Lazy<SmsValidationComponent.Factory>
 ) : BaseComponent(componentContext), AuthRootComponent {
 
     private val navigation = StackNavigation<Config>()
@@ -55,7 +59,7 @@ class AuthRootComponentImpl(
     private fun passwordValidationComponent(
         componentContext: ComponentContext
     ): PasswordValidationComponent =
-        PasswordValidationComponentImpl(
+        passwordComponentFactory.value(
             componentContext = componentContext,
             openSmsScreen = { navigation.bringToFront(Config.SmsValidation) }
         )
@@ -63,7 +67,7 @@ class AuthRootComponentImpl(
     private fun phoneValidationComponent(
         componentContext: ComponentContext
     ): PhoneValidationComponent =
-        PhoneValidationComponentImpl(
+        phoneComponentFactory.value(
             componentContext = componentContext,
             openPasswordScreen = { navigation.bringToFront(Config.PasswordValidation) }
         )
@@ -71,7 +75,7 @@ class AuthRootComponentImpl(
     private fun smsValidationComponent(
         componentContext: ComponentContext
     ): SmsValidationComponent =
-        SmsValidationComponentImpl(componentContext = componentContext)
+        smsComponentFactory.value(componentContext = componentContext)
 
     @Serializable
     private sealed interface Config {
@@ -88,5 +92,10 @@ class AuthRootComponentImpl(
     @Composable
     override fun render(modifier: Modifier) {
         AuthScreen(modifier, this)
+    }
+
+    @AssistedFactory
+    interface Factory : AuthRootComponent.Factory {
+        override operator fun invoke(componentContext: ComponentContext): AuthRootComponentImpl
     }
 }

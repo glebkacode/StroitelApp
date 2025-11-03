@@ -9,15 +9,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.arkivanov.decompose.defaultComponentContext
+import com.itapp.stroitelapp.di.AppGraph
 import com.itapp.stroitelapp.root.RootComponentImpl
+import dev.zacsweers.metro.createGraph
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-
-        val root = RootComponentImpl(componentContext = defaultComponentContext())
-
+        val graph = createGraph<AppGraph>()
+        val root = RootComponentImpl(
+            componentContext = defaultComponentContext(),
+            authComponentFactory = graph.authComponentFactory
+        )
         setContent {
             root.render(modifier = Modifier.fillMaxSize())
         }

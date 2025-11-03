@@ -8,13 +8,13 @@ import com.arkivanov.decompose.router.stack.StackNavigation
 import com.arkivanov.decompose.router.stack.childStack
 import com.arkivanov.decompose.value.Value
 import com.itapp.auth_api.root.AuthRootComponent
-import com.itapp.auth_impl.root.AuthRootComponentImpl
 import com.itapp.core_navigation.BaseComponent
 import com.itapp.stroitelapp.App
 import kotlinx.serialization.Serializable
 
 internal class RootComponentImpl(
     componentContext: ComponentContext,
+    private val authComponentFactory: Lazy<AuthRootComponent.Factory>
 ) : BaseComponent(componentContext), RootComponent {
 
     private val navigation = StackNavigation<Config>()
@@ -35,7 +35,7 @@ internal class RootComponentImpl(
 
     private fun authComponent(
         componentContext: ComponentContext
-    ): AuthRootComponent = AuthRootComponentImpl(componentContext)
+    ): AuthRootComponent = authComponentFactory.value(componentContext)
 
     @Composable
     override fun render(modifier: Modifier) {
