@@ -63,6 +63,7 @@ kotlin {
 
                 implementation(libs.kotlin.stdlib)
                 implementation(libs.decompose)
+                implementation(libs.kotlin.coroutines.core)
                 // Add KMP dependencies here
             }
         }

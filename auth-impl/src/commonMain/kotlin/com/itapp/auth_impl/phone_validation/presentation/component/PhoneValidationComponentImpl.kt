@@ -7,7 +7,9 @@ import com.arkivanov.essenty.lifecycle.doOnCreate
 import com.arkivanov.mvikotlin.core.instancekeeper.getStore
 import com.arkivanov.mvikotlin.core.store.StoreFactory
 import com.arkivanov.mvikotlin.extensions.coroutines.labels
+import com.arkivanov.mvikotlin.extensions.coroutines.stateFlow
 import com.itapp.auth_api.phone_validation.PhoneValidationComponent
+import com.itapp.auth_impl.phone_validation.presentation.model.toUi
 import com.itapp.auth_impl.phone_validation.presentation.mvi.PhoneValidationStore
 import com.itapp.auth_impl.phone_validation.presentation.mvi.phoneValidationStore
 import com.itapp.core_navigation.BaseComponent
@@ -17,6 +19,7 @@ import dev.zacsweers.metro.AssistedInject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 
 @AssistedInject
@@ -33,6 +36,8 @@ class PhoneValidationComponentImpl(
         )
     }
 
+    override val state = store.stateFlow.map { it.toUi() }
+
     init {
         lifecycle.doOnCreate {
             store.labels.onEach { label ->
@@ -43,6 +48,10 @@ class PhoneValidationComponentImpl(
                 }
             }.launchIn(componentScope)
         }
+    }
+
+    override fun onPhoneChanged(text: String) {
+        store.accept(PhoneValidationStore.Intent.PhoneChanged(text))
     }
 
     override fun onNextClicked() {

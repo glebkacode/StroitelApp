@@ -15,10 +15,8 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -26,7 +24,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.itapp.auth_api.phone_validation.PhoneValidationComponent
+import com.itapp.auth_api.phone_validation.PhoneValidationUi
 import com.itapp.uikit.theme.StroitelTheme
+import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import stroitelapp.auth_impl.generated.resources.Res
@@ -40,7 +40,7 @@ fun PhoneValidationScreen(
     modifier: Modifier,
     component: PhoneValidationComponent
 ) {
-    var phone by remember { mutableStateOf("") }
+    val uiState by component.state.collectAsState(PhoneValidationUi())
 
     Column(
         modifier = modifier
@@ -60,7 +60,7 @@ fun PhoneValidationScreen(
 
         TextField(
             modifier = Modifier.fillMaxWidth(),
-            value = phone,
+            value = uiState.phone,
             placeholder = {
                 Text(
                     text = stringResource(Res.string.phone_validation_hint_text),
@@ -78,7 +78,7 @@ fun PhoneValidationScreen(
                 disabledIndicatorColor = StroitelTheme.colorScheme.text.transparent,
                 errorIndicatorColor = StroitelTheme.colorScheme.text.transparent,
             ),
-            onValueChange = { text -> phone = text }
+            onValueChange = { text -> component.onPhoneChanged(text) }
         )
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -123,6 +123,11 @@ fun PhoneValidationScreen() {
         PhoneValidationScreen(
             modifier = Modifier,
             component = object : PhoneValidationComponent {
+                override val state: Flow<PhoneValidationUi>
+                    get() = TODO("Not yet implemented")
+
+                override fun onPhoneChanged(text: String) {}
+
                 override fun onNextClicked() {}
 
                 @Composable
