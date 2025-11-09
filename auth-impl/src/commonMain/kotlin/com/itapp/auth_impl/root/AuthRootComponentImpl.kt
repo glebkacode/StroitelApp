@@ -39,16 +39,19 @@ class AuthRootComponentImpl(
 
     private fun child(config: Config, componentContext: ComponentContext): AuthRootComponent.Child =
         when (config) {
-            Config.PasswordValidation -> AuthRootComponent.Child.PasswordValidationChild(
+            is Config.PasswordValidation -> AuthRootComponent.Child.PasswordValidationChild(
                 passwordValidationComponent(
-                    componentContext
+                    componentContext = componentContext,
+                    phone = config.phone
                 )
             )
+
             Config.PhoneValidation -> AuthRootComponent.Child.PhoneValidationChild(
                 phoneValidationComponent(
                     componentContext
                 )
             )
+
             Config.SmsValidation -> AuthRootComponent.Child.SmsValidationChild(
                 smsValidationComponent(
                     componentContext
@@ -57,10 +60,12 @@ class AuthRootComponentImpl(
         }
 
     private fun passwordValidationComponent(
-        componentContext: ComponentContext
+        componentContext: ComponentContext,
+        phone: String
     ): PasswordValidationComponent =
         passwordComponentFactory.value(
             componentContext = componentContext,
+            phone = phone,
             openSmsScreen = { navigation.bringToFront(Config.SmsValidation) }
         )
 
@@ -69,7 +74,9 @@ class AuthRootComponentImpl(
     ): PhoneValidationComponent =
         phoneComponentFactory.value(
             componentContext = componentContext,
-            openPasswordScreen = { navigation.bringToFront(Config.PasswordValidation) }
+            openPasswordScreen = { phone ->
+                navigation.bringToFront(Config.PasswordValidation(phone))
+            }
         )
 
     private fun smsValidationComponent(
@@ -80,13 +87,13 @@ class AuthRootComponentImpl(
     @Serializable
     private sealed interface Config {
         @Serializable
-        object PhoneValidation : Config
+        data object PhoneValidation : Config
 
         @Serializable
-        object PasswordValidation : Config
+        data class PasswordValidation(val phone: String) : Config
 
         @Serializable
-        object SmsValidation : Config
+        data object SmsValidation : Config
     }
 
     @Composable

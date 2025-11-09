@@ -8,7 +8,7 @@ interface PhoneValidationComponent : BaseUiComponent {
     interface Factory {
         operator fun invoke(
             componentContext: ComponentContext,
-            openPasswordScreen: () -> Unit
+            openPasswordScreen: (String) -> Unit
         ) : PhoneValidationComponent
     }
 }

@@ -10,6 +10,7 @@ interface PasswordValidationComponent : BaseUiComponent {
     interface Factory {
         operator fun invoke(
             componentContext: ComponentContext,
+            phone: String,
             openSmsScreen: () -> Unit
         ): PasswordValidationComponent
     }

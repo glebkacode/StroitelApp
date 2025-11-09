@@ -1,5 +1,7 @@
 package com.itapp.stroitelapp.di
 
+import com.arkivanov.mvikotlin.core.store.StoreFactory
+import com.arkivanov.mvikotlin.main.store.DefaultStoreFactory
 import com.itapp.auth_impl.di.AuthGraph
 import dev.zacsweers.metro.DependencyGraph
 import dev.zacsweers.metro.Provides
@@ -11,4 +13,7 @@ interface AppGraph {
 
     @Provides
     fun provideMessage(): String = "Hello, Metro!"
+
+    @Provides
+    private fun provideStoreFactory(): StoreFactory = DefaultStoreFactory()
 }

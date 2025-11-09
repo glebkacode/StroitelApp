@@ -33,6 +33,7 @@ kotlin {
             implementation(libs.androidx.activity.compose)
         }
         commonMain.dependencies {
+            implementation(projects.uikit)
             implementation(projects.coreNavigation)
             implementation(projects.shared)
             implementation(projects.authApi)
@@ -54,6 +55,13 @@ kotlin {
             implementation(libs.decompose)
             implementation(libs.decompose.compose)
             implementation(libs.decompose.compose.experimental)
+
+            // mvikotlin
+            implementation(libs.mvikotlin)
+            implementation(libs.mvikotlin.main)
+            implementation(libs.mvikotlin.timetravel)
+            implementation(libs.mvikotlin.logging)
+            implementation(libs.mvikotlin.extensions.coroutines)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

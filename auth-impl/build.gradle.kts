@@ -64,7 +64,9 @@ kotlin {
         commonMain {
             dependencies {
                 // projects
+                implementation(projects.uikit)
                 implementation(projects.coreNavigation)
+                implementation(projects.coreArchitecture)
                 implementation(projects.authApi)
 
                 implementation(libs.kotlin.stdlib)
@@ -83,6 +85,17 @@ kotlin {
                 implementation(libs.decompose)
                 implementation(libs.decompose.compose)
                 implementation(libs.decompose.compose.experimental)
+
+                // mvikotlin
+                implementation(libs.mvikotlin)
+                implementation(libs.mvikotlin.main)
+                implementation(libs.mvikotlin.timetravel)
+                implementation(libs.mvikotlin.logging)
+                implementation(libs.mvikotlin.extensions.coroutines)
+
+                implementation(libs.ktor.client.core)
+                implementation(libs.kotlin.coroutines.core)
+                implementation(libs.kotlin.serialization.json)
             }
         }
 
@@ -97,6 +110,7 @@ kotlin {
                 // Add Android-specific dependencies here. Note that this source set depends on
                 // commonMain by default and will correctly pull the Android artifacts of any KMP
                 // dependencies declared in commonMain.
+                implementation(libs.ktor.client.okhttp)
             }
         }
 
@@ -115,6 +129,7 @@ kotlin {
                 // part of KMP’s default source set hierarchy. Note that this source set depends
                 // on common by default and will correctly pull the iOS artifacts of any
                 // KMP dependencies declared in commonMain.
+                implementation(libs.ktor.client.darwin)
             }
         }
     }

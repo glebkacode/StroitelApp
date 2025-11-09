@@ -12,6 +12,7 @@ import dev.zacsweers.metro.AssistedInject
 @AssistedInject
 class PasswordValidationComponentImpl(
     @Assisted componentContext: ComponentContext,
+    @Assisted private val phone: String,
     @Assisted private val openSmsScreen: () -> Unit
 ) : BaseComponent(componentContext), PasswordValidationComponent {
 
@@ -39,6 +40,7 @@ class PasswordValidationComponentImpl(
     interface Factory : PasswordValidationComponent.Factory {
         override operator fun invoke(
             componentContext: ComponentContext,
+            phone: String,
             openSmsScreen: () -> Unit
         ): PasswordValidationComponentImpl
     }

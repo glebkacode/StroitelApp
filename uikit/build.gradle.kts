@@ -11,7 +11,7 @@ kotlin {
     // which platforms this KMP module supports.
     // See: https://kotlinlang.org/docs/multiplatform-discover-project.html#targets
     androidLibrary {
-        namespace = "com.itapp.core_navigation"
+        namespace = "com.itapp.uikit"
         compileSdk = 36
         minSdk = 24
 
@@ -32,7 +32,7 @@ kotlin {
     // A step-by-step guide on how to include this library in an XCode
     // project can be found here:
     // https://developer.android.com/kotlin/multiplatform/migrate
-    val xcfName = "core-navigationKit"
+    val xcfName = "uikitKit"
 
     iosX64 {
         binaries.framework {
@@ -61,11 +61,13 @@ kotlin {
         commonMain {
             dependencies {
                 implementation(libs.kotlin.stdlib)
-                implementation(libs.kotlin.coroutines.core)
                 implementation(compose.runtime)
                 implementation(compose.foundation)
-                implementation(libs.decompose)
-                // Add KMP dependencies here
+                implementation(compose.material3)
+                implementation(compose.ui)
+                implementation(compose.components.resources)
+                implementation(compose.components.uiToolingPreview)
+                implementation(libs.androidx.lifecycle.runtimeCompose)
             }
         }
 
@@ -101,4 +103,5 @@ kotlin {
             }
         }
     }
+
 }
