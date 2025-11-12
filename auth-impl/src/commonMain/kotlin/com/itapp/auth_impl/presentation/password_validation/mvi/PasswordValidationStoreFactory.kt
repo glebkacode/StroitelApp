@@ -5,7 +5,7 @@ import com.arkivanov.mvikotlin.core.store.Store
 import com.arkivanov.mvikotlin.core.store.StoreFactory
 import com.arkivanov.mvikotlin.core.utils.JvmSerializable
 import com.arkivanov.mvikotlin.extensions.coroutines.CoroutineExecutor
-import com.itapp.auth_impl.domain.model.LoginDTO
+import com.itapp.auth_impl.domain.model.ValidationPhoneDto
 import com.itapp.auth_impl.domain.usecase.ValidatePhoneNumberUseCase
 import com.itapp.auth_impl.presentation.password_validation.mvi.PasswordValidationStore.Intent
 import com.itapp.auth_impl.presentation.password_validation.mvi.PasswordValidationStore.Label
@@ -58,7 +58,7 @@ private class ExecutorImpl(
         scope.launch(defaultContext) {
             validatePhoneNumberUseCase(
                 ValidatePhoneNumberUseCase.Params(
-                    loginDTO = LoginDTO(phone, password)
+                    validationPhoneDto = ValidationPhoneDto(phone, password)
                 )
             ).fold(
                 onSuccess = { publish(Label.OpenSmsValidation(phone = state().data.phone)) },

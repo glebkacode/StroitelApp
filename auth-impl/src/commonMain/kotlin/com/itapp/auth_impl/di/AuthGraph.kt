@@ -8,6 +8,8 @@ import com.itapp.auth_impl.data.api.AuthDataSource
 import com.itapp.auth_impl.data.api.AuthDataSourceImpl
 import com.itapp.auth_impl.data.repository.AuthRepositoryImpl
 import com.itapp.auth_impl.domain.repository.AuthRepository
+import com.itapp.auth_impl.domain.usecase.AuthUseCase
+import com.itapp.auth_impl.domain.usecase.AuthUseCaseImpl
 import com.itapp.auth_impl.domain.usecase.ValidatePhoneNumberUseCase
 import com.itapp.auth_impl.domain.usecase.ValidatePhoneNumberUseCaseImpl
 import com.itapp.auth_impl.presentation.password_validation.component.PasswordValidationComponentImpl
@@ -25,6 +27,9 @@ interface AuthGraph {
 
     @Binds
     val ValidatePhoneNumberUseCaseImpl.bind : ValidatePhoneNumberUseCase
+
+    @Binds
+    val AuthUseCaseImpl.bind : AuthUseCase
 
     @Binds
     val AuthRepositoryImpl.bind : AuthRepository

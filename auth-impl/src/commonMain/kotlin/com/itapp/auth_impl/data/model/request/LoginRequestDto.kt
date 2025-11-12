@@ -4,9 +4,11 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class LoginRequestDTO(
-    @SerialName("phoneNumber")
-    val phoneNumber: String,
+data class LoginRequestDto(
+    @SerialName("phone")
+    val phone: String,
     @SerialName("password")
-    val password: String
+    val password: String,
+    @SerialName("smsCode")
+    val smsCode: String
 )

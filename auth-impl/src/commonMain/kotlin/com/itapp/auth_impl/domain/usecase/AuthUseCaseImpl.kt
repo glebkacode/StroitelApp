@@ -4,11 +4,11 @@ import com.itapp.auth_impl.domain.repository.AuthRepository
 import dev.zacsweers.metro.Inject
 
 @Inject
-class ValidatePhoneNumberUseCaseImpl(
+class AuthUseCaseImpl(
     private val authRepository: AuthRepository
-) : ValidatePhoneNumberUseCase() {
+) : AuthUseCase() {
 
     override suspend fun run(input: Params) {
-        authRepository.validatePhone(input.validationPhoneDto)
+        authRepository.login(dto = input.dto)
     }
 }
