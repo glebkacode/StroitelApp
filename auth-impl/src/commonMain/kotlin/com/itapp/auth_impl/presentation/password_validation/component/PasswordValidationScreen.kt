@@ -15,10 +15,8 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -35,8 +33,7 @@ fun PasswordValidationScreen(
     modifier: Modifier = Modifier,
     component: PasswordValidationComponent
 ) {
-    var password by remember { mutableStateOf("") }
-
+    val uiState by component.uiState.collectAsState()
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -50,26 +47,21 @@ fun PasswordValidationScreen(
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
-        TextField(
-            modifier = Modifier.fillMaxWidth(),
-            value = password,
-            placeholder = {
-                Text(
-                    text = stringResource(Res.string.password_validation_hint_text),
-                    color = Color(0xFFADADAD)
+        when (uiState) {
+            is PasswordValidationComponent.UiState.Loading -> {
+                PasswordText(
+                    text = (uiState as PasswordValidationComponent.UiState.Loading).password,
+                    onTextChanged = { text -> component.onPasswordChanged(text) }
                 )
-            },
-            colors = TextFieldDefaults.colors(
-                focusedContainerColor = Color.Transparent,
-                unfocusedContainerColor = Color.Transparent,
-                disabledContainerColor = Color.Transparent,
-                focusedIndicatorColor = Color(0xFFEE7100),
-                unfocusedIndicatorColor = Color(0xFFEE7100),
-                disabledIndicatorColor = Color.Transparent,
-                errorIndicatorColor = Color.Transparent,
-            ),
-            onValueChange = { text -> password = text }
-        )
+            }
+            is PasswordValidationComponent.UiState.Content -> {
+                PasswordText(
+                    text = (uiState as PasswordValidationComponent.UiState.Content).password,
+                    onTextChanged = { text -> component.onPasswordChanged(text) }
+                )
+            }
+            is PasswordValidationComponent.UiState.Error -> {}
+        }
 
         TextButton(
             onClick = { component.onForgotPasswordClicked() },
@@ -100,4 +92,31 @@ fun PasswordValidationScreen(
             )
         }
     }
+}
+
+@Composable
+private fun PasswordText(
+    text: String,
+    onTextChanged: (String) -> Unit
+) {
+    TextField(
+        modifier = Modifier.fillMaxWidth(),
+        value = text,
+        placeholder = {
+            Text(
+                text = stringResource(Res.string.password_validation_hint_text),
+                color = Color(0xFFADADAD)
+            )
+        },
+        colors = TextFieldDefaults.colors(
+            focusedContainerColor = Color.Transparent,
+            unfocusedContainerColor = Color.Transparent,
+            disabledContainerColor = Color.Transparent,
+            focusedIndicatorColor = Color(0xFFEE7100),
+            unfocusedIndicatorColor = Color(0xFFEE7100),
+            disabledIndicatorColor = Color.Transparent,
+            errorIndicatorColor = Color.Transparent,
+        ),
+        onValueChange = { text -> onTextChanged(text) }
+    )
 }
