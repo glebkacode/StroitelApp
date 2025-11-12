@@ -14,4 +14,8 @@ interface PasswordValidationComponent : BaseUiComponent {
             openSmsScreen: () -> Unit
         ): PasswordValidationComponent
     }
+    data class UiState(
+        val phone: String,
+        val password: String
+    )
 }
