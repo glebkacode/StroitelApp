@@ -35,7 +35,10 @@ internal class RootComponentImpl(
 
     private fun authComponent(
         componentContext: ComponentContext
-    ): AuthRootComponent = authComponentFactory.value(componentContext)
+    ): AuthRootComponent = authComponentFactory.value(
+        componentContext = componentContext,
+        openProducts = lazy { {} }
+    )
 
     @Composable
     override fun render(modifier: Modifier) {

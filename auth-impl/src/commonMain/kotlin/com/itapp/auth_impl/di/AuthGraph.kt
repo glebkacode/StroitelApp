@@ -15,7 +15,7 @@ import com.itapp.auth_impl.domain.usecase.ValidatePhoneNumberUseCaseImpl
 import com.itapp.auth_impl.presentation.password_validation.component.PasswordValidationComponentImpl
 import com.itapp.auth_impl.presentation.phone_validation.component.PhoneValidationComponentImpl
 import com.itapp.auth_impl.presentation.root.AuthRootComponentImpl
-import com.itapp.auth_impl.presentation.sms_validation.SmsValidationComponentImpl
+import com.itapp.auth_impl.presentation.sms_validation.component.SmsValidationComponentImpl
 import dev.zacsweers.metro.Binds
 import dev.zacsweers.metro.GraphExtension
 import dev.zacsweers.metro.Provides

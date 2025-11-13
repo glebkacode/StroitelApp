@@ -15,14 +15,14 @@ class AuthDataSourceImpl(
 ) : AuthDataSource {
 
     override suspend fun validatePhone(request: ValidatePhoneRequestDTO) {
-        httpClient.post(AUTH_BASE_URL) {
+        /*httpClient.post(AUTH_BASE_URL) {
             setBody(request)
-        }
+        }*/
     }
 
     override suspend fun login(request: LoginRequestDto) {
-        httpClient.post(AUTH_BASE_URL) {
+/*        httpClient.post(AUTH_BASE_URL) {
             setBody(request)
-        }
+        }*/
     }
 }

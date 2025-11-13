@@ -23,7 +23,8 @@ class AuthRootComponentImpl(
     @Assisted componentContext: ComponentContext,
     private val passwordComponentFactory: Lazy<PasswordValidationComponent.Factory>,
     private val phoneComponentFactory: Lazy<PhoneValidationComponent.Factory>,
-    private val smsComponentFactory: Lazy<SmsValidationComponent.Factory>
+    private val smsComponentFactory: Lazy<SmsValidationComponent.Factory>,
+    private val openProducts: Lazy<() -> Unit>
 ) : BaseComponent(componentContext), AuthRootComponent {
 
     private val navigation = StackNavigation<Config>()
@@ -52,9 +53,11 @@ class AuthRootComponentImpl(
                 )
             )
 
-            Config.SmsValidation -> AuthRootComponent.Child.SmsValidationChild(
+            is Config.SmsValidation -> AuthRootComponent.Child.SmsValidationChild(
                 smsValidationComponent(
-                    componentContext
+                    componentContext,
+                    phone = config.phone,
+                    password = config.password
                 )
             )
         }
@@ -66,7 +69,14 @@ class AuthRootComponentImpl(
         passwordComponentFactory.value(
             componentContext = componentContext,
             phone = phone,
-            openSmsScreen = { navigation.bringToFront(Config.SmsValidation) }
+            openSmsScreen = { phone, password ->
+                navigation.bringToFront(
+                    Config.SmsValidation(
+                        phone = phone,
+                        password = password
+                    )
+                )
+            }
         )
 
     private fun phoneValidationComponent(
@@ -80,9 +90,16 @@ class AuthRootComponentImpl(
         )
 
     private fun smsValidationComponent(
-        componentContext: ComponentContext
+        componentContext: ComponentContext,
+        phone: String,
+        password: String
     ): SmsValidationComponent =
-        smsComponentFactory.value(componentContext = componentContext)
+        smsComponentFactory.value(
+            componentContext = componentContext,
+            phone = phone,
+            password = password,
+            openProducts = { openProducts.value() }
+        )
 
     @Serializable
     private sealed interface Config {
@@ -93,7 +110,10 @@ class AuthRootComponentImpl(
         data class PasswordValidation(val phone: String) : Config
 
         @Serializable
-        data object SmsValidation : Config
+        data class SmsValidation(
+            val phone: String,
+            val password: String
+        ) : Config
     }
 
     @Composable
@@ -103,6 +123,9 @@ class AuthRootComponentImpl(
 
     @AssistedFactory
     interface Factory : AuthRootComponent.Factory {
-        override operator fun invoke(componentContext: ComponentContext): AuthRootComponentImpl
+        override operator fun invoke(
+            componentContext: ComponentContext,
+            openProducts: Lazy<() -> Unit>
+        ): AuthRootComponentImpl
     }
 }

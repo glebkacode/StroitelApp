@@ -10,11 +10,14 @@ interface PasswordValidationStore : Store<Intent, State, Label> {
 
     sealed interface Intent : JvmSerializable {
         data class PasswordChanged(val text: String) : Intent
-        data object LoginClicked : Intent
+        data object ValidatePasswordClicked : Intent
     }
 
     sealed interface Label : JvmSerializable {
-        data class OpenSmsValidation(val phone: String) : Label
+        data class OpenSmsValidation(
+            val phone: String,
+            val password: String
+        ) : Label
     }
 
     sealed class State(

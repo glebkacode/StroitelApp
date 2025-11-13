@@ -14,12 +14,17 @@ interface PasswordValidationComponent : BaseUiComponent {
         operator fun invoke(
             componentContext: ComponentContext,
             phone: String,
-            openSmsScreen: () -> Unit
+            openSmsScreen: (String, String) -> Unit
         ): PasswordValidationComponent
     }
-    sealed interface UiState {
-        data class Loading(val password: String = "") : UiState
-        data class Content(val password: String = "") : UiState
-        data class Error(val throwable: Throwable) : UiState
+    sealed class UiState(
+        open val password: String
+    ) {
+        data class Loading(override val password: String = "") : UiState(password)
+        data class Content(override val password: String = "") : UiState(password)
+        data class Error(
+            override val password: String = "",
+            val throwable: Throwable
+        ) : UiState(password)
     }
 }

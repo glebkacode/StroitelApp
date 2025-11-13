@@ -16,6 +16,9 @@ interface AuthRootComponent : BaseUiComponent {
         class SmsValidationChild(val component: SmsValidationComponent) : Child
     }
     interface Factory {
-        operator fun invoke(componentContext: ComponentContext): AuthRootComponent
+        operator fun invoke(
+            componentContext: ComponentContext,
+            openProducts: Lazy<() -> Unit>
+        ): AuthRootComponent
     }
 }

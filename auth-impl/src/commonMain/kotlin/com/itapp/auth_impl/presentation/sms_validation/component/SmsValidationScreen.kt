@@ -1,4 +1,4 @@
-package com.itapp.auth_impl.presentation.sms_validation
+package com.itapp.auth_impl.presentation.sms_validation.component
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -13,10 +13,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -31,7 +29,7 @@ fun SmsValidationScreen(
     modifier: Modifier = Modifier,
     component: SmsValidationComponent
 ) {
-    var smsCode by remember { mutableStateOf("") }
+    val uiState by component.uiState.collectAsState()
 
     Column(
         modifier = modifier
@@ -48,7 +46,7 @@ fun SmsValidationScreen(
 
         TextField(
             modifier = Modifier.fillMaxWidth(),
-            value = smsCode,
+            value = uiState.smsCode,
             placeholder = {
                 Text(
                     text = stringResource(Res.string.sms_validation_hint_text),
@@ -64,7 +62,7 @@ fun SmsValidationScreen(
                 disabledIndicatorColor = Color.Transparent,
                 errorIndicatorColor = Color.Transparent,
             ),
-            onValueChange = { text -> smsCode = text }
+            onValueChange = { text -> component.onSmsChanged(text) }
         )
 
         Spacer(modifier = Modifier.height(8.dp))

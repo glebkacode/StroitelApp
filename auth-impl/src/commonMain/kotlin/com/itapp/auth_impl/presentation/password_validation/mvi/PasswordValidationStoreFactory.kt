@@ -12,6 +12,7 @@ import com.itapp.auth_impl.presentation.password_validation.mvi.PasswordValidati
 import com.itapp.auth_impl.presentation.password_validation.mvi.PasswordValidationStore.PasswordValidationData
 import com.itapp.auth_impl.presentation.password_validation.mvi.PasswordValidationStore.State
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 
 internal fun StoreFactory.passwordValidationStore(
@@ -41,7 +42,7 @@ private sealed interface Msg : JvmSerializable {
 }
 
 private class ExecutorImpl(
-    mainContext: CoroutineContext,
+    private val mainContext: CoroutineContext,
     private val ioContext: CoroutineContext,
     private val defaultContext: CoroutineContext,
     private val validatePhoneNumberUseCase: ValidatePhoneNumberUseCase
@@ -49,7 +50,11 @@ private class ExecutorImpl(
 
     override fun executeIntent(intent: Intent) {
         when (intent) {
-            Intent.LoginClicked -> onLoginClicked(state().data.phone, state().data.password)
+            Intent.ValidatePasswordClicked -> onLoginClicked(
+                state().data.phone,
+                state().data.password
+            )
+
             is Intent.PasswordChanged -> onPasswordChanged(intent.text)
         }
     }
@@ -61,8 +66,21 @@ private class ExecutorImpl(
                     validationPhoneDto = ValidationPhoneDto(phone, password)
                 )
             ).fold(
-                onSuccess = { publish(Label.OpenSmsValidation(phone = state().data.phone)) },
-                onFailure = { throwable -> dispatch(Msg.LoginFailed(throwable)) }
+                onSuccess = {
+                    withContext(mainContext) {
+                        publish(
+                            Label.OpenSmsValidation(
+                                phone = state().data.phone,
+                                password = state().data.password
+                            )
+                        )
+                    }
+                },
+                onFailure = { throwable ->
+                    withContext(mainContext) {
+                        dispatch(Msg.LoginFailed(throwable))
+                    }
+                }
             )
         }
     }
@@ -84,6 +102,7 @@ private object PasswordValidationReducer : Reducer<State, Msg> {
                     password = msg.text
                 )
             )
+
             is Msg.LoginFailed -> State.AuthFailed(
                 data = PasswordValidationData(
                     phone = data.phone,
