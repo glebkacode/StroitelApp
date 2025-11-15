@@ -6,9 +6,9 @@ import com.arkivanov.decompose.value.Value
 import com.itapp.auth_api.password_validation.PasswordValidationComponent
 import com.itapp.auth_api.phone_validation.PhoneValidationComponent
 import com.itapp.auth_api.sms_validation.SmsValidationComponent
-import com.itapp.core_navigation.BaseUiComponent
+import com.itapp.core_navigation.UiComponent
 
-interface AuthRootComponent : BaseUiComponent {
+interface RootAuthComponent : UiComponent {
     val stack: Value<ChildStack<*, Child>>
     sealed interface Child {
         class PasswordValidationChild(val component: PasswordValidationComponent) : Child
@@ -19,6 +19,6 @@ interface AuthRootComponent : BaseUiComponent {
         operator fun invoke(
             componentContext: ComponentContext,
             openProducts: Lazy<() -> Unit>
-        ): AuthRootComponent
+        ): RootAuthComponent
     }
 }

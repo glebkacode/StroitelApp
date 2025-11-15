@@ -5,16 +5,20 @@ import androidx.compose.ui.Modifier
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.router.stack.StackNavigation
+import com.arkivanov.decompose.router.stack.bringToFront
 import com.arkivanov.decompose.router.stack.childStack
 import com.arkivanov.decompose.value.Value
-import com.itapp.auth_api.root.AuthRootComponent
+import com.itapp.auth_api.root.RootAuthComponent
 import com.itapp.core_navigation.BaseComponent
+import com.itapp.products_api.RootProductsComponent
 import com.itapp.stroitelapp.App
+import com.itapp.stroitelapp.root.RootComponent.Child.*
 import kotlinx.serialization.Serializable
 
 internal class RootComponentImpl(
     componentContext: ComponentContext,
-    private val authComponentFactory: Lazy<AuthRootComponent.Factory>
+    private val authComponentFactory: Lazy<RootAuthComponent.Factory>,
+    private val productsComponentFactory: Lazy<RootProductsComponent.Factory>
 ) : BaseComponent(componentContext), RootComponent {
 
     private val navigation = StackNavigation<Config>()
@@ -30,14 +34,21 @@ internal class RootComponentImpl(
 
     private fun child(config: Config, componentContext: ComponentContext): RootComponent.Child =
         when (config) {
-            Config.Auth -> RootComponent.Child.Auth(authComponent(componentContext))
+            Config.Auth -> Auth(authComponent(componentContext))
+            Config.Products -> Products(productsComponent(componentContext))
         }
 
     private fun authComponent(
         componentContext: ComponentContext
-    ): AuthRootComponent = authComponentFactory.value(
+    ): RootAuthComponent = authComponentFactory.value(
         componentContext = componentContext,
-        openProducts = lazy { {} }
+        openProducts = lazy { { navigation.bringToFront(Config.Products) } }
+    )
+
+    private fun productsComponent(
+        componentContext: ComponentContext
+    ): RootProductsComponent = productsComponentFactory.value(
+        componentContext = componentContext
     )
 
     @Composable
@@ -51,6 +62,8 @@ internal class RootComponentImpl(
     @Serializable
     private sealed interface Config {
         @Serializable
-        object Auth : Config
+        data object Auth : Config
+        @Serializable
+        data object Products : Config
     }
 }

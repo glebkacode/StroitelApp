@@ -10,7 +10,7 @@ import com.arkivanov.decompose.router.stack.childStack
 import com.arkivanov.decompose.value.Value
 import com.itapp.auth_api.password_validation.PasswordValidationComponent
 import com.itapp.auth_api.phone_validation.PhoneValidationComponent
-import com.itapp.auth_api.root.AuthRootComponent
+import com.itapp.auth_api.root.RootAuthComponent
 import com.itapp.auth_api.sms_validation.SmsValidationComponent
 import com.itapp.core_navigation.BaseComponent
 import dev.zacsweers.metro.Assisted
@@ -19,17 +19,17 @@ import dev.zacsweers.metro.AssistedInject
 import kotlinx.serialization.Serializable
 
 @AssistedInject
-class AuthRootComponentImpl(
+class RootAuthComponentImpl(
     @Assisted componentContext: ComponentContext,
     private val passwordComponentFactory: Lazy<PasswordValidationComponent.Factory>,
     private val phoneComponentFactory: Lazy<PhoneValidationComponent.Factory>,
     private val smsComponentFactory: Lazy<SmsValidationComponent.Factory>,
-    private val openProducts: Lazy<() -> Unit>
-) : BaseComponent(componentContext), AuthRootComponent {
+    @Assisted private val openProducts: Lazy<() -> Unit>
+) : BaseComponent(componentContext), RootAuthComponent {
 
     private val navigation = StackNavigation<Config>()
 
-    override val stack: Value<ChildStack<*, AuthRootComponent.Child>> =
+    override val stack: Value<ChildStack<*, RootAuthComponent.Child>> =
         childStack(
             source = navigation,
             serializer = Config.serializer(),
@@ -38,22 +38,22 @@ class AuthRootComponentImpl(
             childFactory = ::child,
         )
 
-    private fun child(config: Config, componentContext: ComponentContext): AuthRootComponent.Child =
+    private fun child(config: Config, componentContext: ComponentContext): RootAuthComponent.Child =
         when (config) {
-            is Config.PasswordValidation -> AuthRootComponent.Child.PasswordValidationChild(
+            is Config.PasswordValidation -> RootAuthComponent.Child.PasswordValidationChild(
                 passwordValidationComponent(
                     componentContext = componentContext,
                     phone = config.phone
                 )
             )
 
-            Config.PhoneValidation -> AuthRootComponent.Child.PhoneValidationChild(
+            Config.PhoneValidation -> RootAuthComponent.Child.PhoneValidationChild(
                 phoneValidationComponent(
                     componentContext
                 )
             )
 
-            is Config.SmsValidation -> AuthRootComponent.Child.SmsValidationChild(
+            is Config.SmsValidation -> RootAuthComponent.Child.SmsValidationChild(
                 smsValidationComponent(
                     componentContext,
                     phone = config.phone,
@@ -122,10 +122,10 @@ class AuthRootComponentImpl(
     }
 
     @AssistedFactory
-    interface Factory : AuthRootComponent.Factory {
+    interface Factory : RootAuthComponent.Factory {
         override operator fun invoke(
             componentContext: ComponentContext,
             openProducts: Lazy<() -> Unit>
-        ): AuthRootComponentImpl
+        ): RootAuthComponentImpl
     }
 }

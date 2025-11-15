@@ -2,7 +2,7 @@ package com.itapp.auth_impl.di
 
 import com.itapp.auth_api.password_validation.PasswordValidationComponent
 import com.itapp.auth_api.phone_validation.PhoneValidationComponent
-import com.itapp.auth_api.root.AuthRootComponent
+import com.itapp.auth_api.root.RootAuthComponent
 import com.itapp.auth_api.sms_validation.SmsValidationComponent
 import com.itapp.auth_impl.data.api.AuthDataSource
 import com.itapp.auth_impl.data.api.AuthDataSourceImpl
@@ -14,7 +14,7 @@ import com.itapp.auth_impl.domain.usecase.ValidatePhoneNumberUseCase
 import com.itapp.auth_impl.domain.usecase.ValidatePhoneNumberUseCaseImpl
 import com.itapp.auth_impl.presentation.password_validation.component.PasswordValidationComponentImpl
 import com.itapp.auth_impl.presentation.phone_validation.component.PhoneValidationComponentImpl
-import com.itapp.auth_impl.presentation.root.AuthRootComponentImpl
+import com.itapp.auth_impl.presentation.root.RootAuthComponentImpl
 import com.itapp.auth_impl.presentation.sms_validation.component.SmsValidationComponentImpl
 import dev.zacsweers.metro.Binds
 import dev.zacsweers.metro.GraphExtension
@@ -23,7 +23,7 @@ import io.ktor.client.HttpClient
 
 @GraphExtension
 interface AuthGraph {
-    val authComponentFactory: Lazy<AuthRootComponent.Factory>
+    val authComponentFactory: Lazy<RootAuthComponent.Factory>
 
     @Binds
     val ValidatePhoneNumberUseCaseImpl.bind : ValidatePhoneNumberUseCase
@@ -38,7 +38,7 @@ interface AuthGraph {
     val AuthDataSourceImpl.bind : AuthDataSource
 
     @Binds
-    val AuthRootComponentImpl.Factory.bind: AuthRootComponent.Factory
+    val RootAuthComponentImpl.Factory.bind: RootAuthComponent.Factory
 
     @Binds
     val PasswordValidationComponentImpl.Factory.bind : PasswordValidationComponent.Factory

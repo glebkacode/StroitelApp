@@ -1,9 +1,7 @@
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidKotlinMultiplatformLibrary)
-    alias(libs.plugins.composeMultiplatform)
-    alias(libs.plugins.composeCompiler)
-    alias(libs.plugins.kotlinSerialization)
+    alias(libs.plugins.metro)
 }
 
 kotlin {
@@ -12,7 +10,7 @@ kotlin {
     // which platforms this KMP module supports.
     // See: https://kotlinlang.org/docs/multiplatform-discover-project.html#targets
     androidLibrary {
-        namespace = "com.itapp.core_navigation"
+        namespace = "com.itapp.products_api"
         compileSdk = 36
         minSdk = 24
 
@@ -33,7 +31,7 @@ kotlin {
     // A step-by-step guide on how to include this library in an XCode
     // project can be found here:
     // https://developer.android.com/kotlin/multiplatform/migrate
-    val xcfName = "core-navigationKit"
+    val xcfName = "products-apiKit"
 
     iosX64 {
         binaries.framework {
@@ -61,13 +59,11 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
+                implementation(projects.coreNavigation)
+
                 implementation(libs.kotlin.stdlib)
-                implementation(libs.kotlin.coroutines.core)
-                implementation(compose.runtime)
-                implementation(compose.foundation)
                 implementation(libs.decompose)
-                implementation(libs.decompose.compose)
-                // Add KMP dependencies here
+                implementation(libs.kotlin.coroutines.core)
             }
         }
 
@@ -103,4 +99,5 @@ kotlin {
             }
         }
     }
+
 }

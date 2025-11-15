@@ -1,10 +1,10 @@
 package com.itapp.auth_api.sms_validation
 
 import com.arkivanov.decompose.ComponentContext
-import com.itapp.core_navigation.BaseUiComponent
+import com.itapp.core_navigation.UiComponent
 import kotlinx.coroutines.flow.StateFlow
 
-interface SmsValidationComponent : BaseUiComponent {
+interface SmsValidationComponent : UiComponent {
     val uiState: StateFlow<UiState>
     fun onSmsChanged(text: String)
     fun onContinueClicked()

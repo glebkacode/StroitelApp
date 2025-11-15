@@ -1,10 +1,10 @@
 package com.itapp.auth_api.phone_validation
 
 import com.arkivanov.decompose.ComponentContext
-import com.itapp.core_navigation.BaseUiComponent
+import com.itapp.core_navigation.UiComponent
 import kotlinx.coroutines.flow.StateFlow
 
-interface PhoneValidationComponent : BaseUiComponent {
+interface PhoneValidationComponent : UiComponent {
     val uiState: StateFlow<UiState>
     fun onPhoneChanged(text: String)
     fun onNextClicked()

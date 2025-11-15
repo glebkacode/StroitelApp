@@ -11,7 +11,6 @@ import com.arkivanov.mvikotlin.extensions.coroutines.stateFlow
 import com.itapp.auth_api.sms_validation.SmsValidationComponent
 import com.itapp.auth_impl.domain.usecase.AuthUseCase
 import com.itapp.auth_impl.presentation.sms_validation.mapping.toUiState
-import com.itapp.auth_impl.presentation.sms_validation.mvi.SmsCodeValidationStore
 import com.itapp.auth_impl.presentation.sms_validation.mvi.SmsCodeValidationStore.Intent
 import com.itapp.auth_impl.presentation.sms_validation.mvi.SmsCodeValidationStore.Label
 import com.itapp.auth_impl.presentation.sms_validation.mvi.smsValidationStore
@@ -34,7 +33,7 @@ class SmsValidationComponentImpl(
     private val authUseCase: AuthUseCase,
     @Assisted("phone") private val phone: String,
     @Assisted("password") private val password: String,
-    private val openProducts: () -> Unit
+    @Assisted private val openProducts: () -> Unit
 ) : BaseComponent(componentContext), SmsValidationComponent {
 
     private val store = instanceKeeper.getStore {

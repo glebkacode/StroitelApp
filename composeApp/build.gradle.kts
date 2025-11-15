@@ -38,6 +38,8 @@ kotlin {
             implementation(projects.shared)
             implementation(projects.authApi)
             implementation(projects.authImpl)
+            implementation(projects.productsApi)
+            implementation(projects.productsImpl)
 
             implementation(libs.kotlin.stdlib)
             implementation(libs.kotlin.serialization.json)

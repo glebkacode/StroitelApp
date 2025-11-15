@@ -1,10 +1,10 @@
 package com.itapp.auth_api.password_validation
 
 import com.arkivanov.decompose.ComponentContext
-import com.itapp.core_navigation.BaseUiComponent
+import com.itapp.core_navigation.UiComponent
 import kotlinx.coroutines.flow.StateFlow
 
-interface PasswordValidationComponent : BaseUiComponent {
+interface PasswordValidationComponent : UiComponent {
     val uiState: StateFlow<UiState>
     fun onPasswordChanged(text: String)
     fun onNextClicked()

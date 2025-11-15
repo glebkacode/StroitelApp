@@ -20,7 +20,8 @@ class MainActivity : ComponentActivity() {
         val rootGraph = createGraph<AppGraph>()
         val root = RootComponentImpl(
             componentContext = defaultComponentContext(),
-            authComponentFactory = rootGraph.authGraph.authComponentFactory
+            authComponentFactory = rootGraph.authGraph.authComponentFactory,
+            productsComponentFactory = rootGraph.productsGraph.productsComponentFactory
         )
         setContent {
             root.render(modifier = Modifier.fillMaxSize())
