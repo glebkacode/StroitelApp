@@ -13,7 +13,7 @@ kotlin {
     // which platforms this KMP module supports.
     // See: https://kotlinlang.org/docs/multiplatform-discover-project.html#targets
     androidLibrary {
-        namespace = "com.itapp.products_impl"
+        namespace = "com.itapp.shelves_render_impl"
         compileSdk = 36
         minSdk = 24
 
@@ -34,7 +34,7 @@ kotlin {
     // A step-by-step guide on how to include this library in an XCode
     // project can be found here:
     // https://developer.android.com/kotlin/multiplatform/migrate
-    val xcfName = "products-implKit"
+    val xcfName = "shelves-render-implKit"
 
     iosX64 {
         binaries.framework {
@@ -66,7 +66,6 @@ kotlin {
                 implementation(projects.uikit)
                 implementation(projects.coreNavigation)
                 implementation(projects.coreArchitecture)
-                implementation(projects.productsApi)
                 implementation(projects.shelvesRenderApi)
 
                 implementation(libs.kotlin.stdlib)
@@ -92,10 +91,6 @@ kotlin {
                 implementation(libs.mvikotlin.timetravel)
                 implementation(libs.mvikotlin.logging)
                 implementation(libs.mvikotlin.extensions.coroutines)
-
-                implementation(libs.ktor.client.core)
-                implementation(libs.kotlin.coroutines.core)
-                implementation(libs.kotlin.serialization.json)
             }
         }
 

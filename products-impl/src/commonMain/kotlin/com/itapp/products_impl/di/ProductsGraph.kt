@@ -1,21 +1,18 @@
 package com.itapp.products_impl.di
 
+import com.arkivanov.mvikotlin.core.store.StoreFactory
 import com.itapp.products_api.ProductDetailsComponent
 import com.itapp.products_api.ProductListComponent
 import com.itapp.products_api.RootProductsComponent
-import com.itapp.products_api.shelf.grid.GridShelfComponent
-import com.itapp.products_api.shelf.horizontal.HorizontalShelfComponent
-import com.itapp.products_api.shelf.video.VideoShelfComponent
 import com.itapp.products_impl.presentation.details.ProductDetailsComponentImpl
 import com.itapp.products_impl.presentation.list.ProductListComponentImpl
-import com.itapp.products_impl.presentation.list.shelf.grid.GridShelfComponentImpl
-import com.itapp.products_impl.presentation.list.shelf.horizontal.HorizontalShelfComponentImpl
-import com.itapp.products_impl.presentation.list.shelf.video.VideoShelfComponentImpl
 import com.itapp.products_impl.presentation.root.RootProductsComponentImpl
+import com.itapp.shelves_render_api.shelf.root.ShelvesRenderComponent
 import dev.zacsweers.metro.Binds
-import dev.zacsweers.metro.GraphExtension
+import dev.zacsweers.metro.DependencyGraph
+import dev.zacsweers.metro.Provides
 
-@GraphExtension
+@DependencyGraph
 interface ProductsGraph {
 
     val productsComponentFactory: Lazy<RootProductsComponent.Factory>
@@ -29,12 +26,11 @@ interface ProductsGraph {
     @Binds
     val ProductDetailsComponentImpl.Factory.bind: ProductDetailsComponent.Factory
 
-    @Binds
-    val HorizontalShelfComponentImpl.Factory.bind: HorizontalShelfComponent.Factory
-
-    @Binds
-    val VideoShelfComponentImpl.Factory.bind: VideoShelfComponent.Factory
-
-    @Binds
-    val GridShelfComponentImpl.Factory.bind: GridShelfComponent.Factory
+    @DependencyGraph.Factory
+    fun interface Factory {
+        fun create(
+            @Provides storeFactory: StoreFactory,
+            @Provides shelvesRenderComponentFactory: ShelvesRenderComponent.Factory,
+        ): ProductsGraph
+    }
 }

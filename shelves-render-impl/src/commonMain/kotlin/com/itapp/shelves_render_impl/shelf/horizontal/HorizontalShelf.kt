@@ -1,4 +1,4 @@
-package com.itapp.products_impl.presentation.list.shelf.video
+package com.itapp.shelves_render_impl.shelf.horizontal
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -9,20 +9,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.itapp.products_api.shelf.video.VideoShelfComponent
+import com.itapp.shelves_render_api.shelf.horizontal.HorizontalShelfComponent
 
 @Composable
-fun VideoShelf(
+fun HorizontalShelf(
     modifier: Modifier,
-    component: VideoShelfComponent
+    component: HorizontalShelfComponent
 ) {
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .height(300.dp),
+            .height(200.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
     ) {
-        Text(text = "Video Полка - ${component.index}")
+        Text(text = "Horizontal Полка - ${component.index}")
     }
 }

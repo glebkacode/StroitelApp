@@ -40,6 +40,8 @@ kotlin {
             implementation(projects.authImpl)
             implementation(projects.productsApi)
             implementation(projects.productsImpl)
+            implementation(projects.shelvesRenderApi)
+            implementation(projects.shelvesRenderImpl)
 
             implementation(libs.kotlin.stdlib)
             implementation(libs.kotlin.serialization.json)

@@ -1,4 +1,4 @@
-package com.itapp.products_impl.presentation.list.shelf.grid
+package com.itapp.shelves_render_impl.shelf.grid
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -9,7 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.itapp.products_api.shelf.grid.GridShelfComponent
+import com.itapp.shelves_render_api.shelf.grid.GridShelfComponent
 
 @Composable
 fun GridShelf(

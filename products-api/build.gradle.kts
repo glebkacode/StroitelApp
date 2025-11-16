@@ -60,6 +60,7 @@ kotlin {
         commonMain {
             dependencies {
                 implementation(projects.coreNavigation)
+                implementation(projects.shelvesRenderApi)
 
                 implementation(libs.kotlin.stdlib)
                 implementation(libs.decompose)

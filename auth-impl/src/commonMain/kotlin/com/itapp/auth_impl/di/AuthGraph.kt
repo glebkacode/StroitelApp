@@ -1,5 +1,6 @@
 package com.itapp.auth_impl.di
 
+import com.arkivanov.mvikotlin.core.store.StoreFactory
 import com.itapp.auth_api.password_validation.PasswordValidationComponent
 import com.itapp.auth_api.phone_validation.PhoneValidationComponent
 import com.itapp.auth_api.root.RootAuthComponent
@@ -17,11 +18,11 @@ import com.itapp.auth_impl.presentation.phone_validation.component.PhoneValidati
 import com.itapp.auth_impl.presentation.root.RootAuthComponentImpl
 import com.itapp.auth_impl.presentation.sms_validation.component.SmsValidationComponentImpl
 import dev.zacsweers.metro.Binds
-import dev.zacsweers.metro.GraphExtension
+import dev.zacsweers.metro.DependencyGraph
 import dev.zacsweers.metro.Provides
 import io.ktor.client.HttpClient
 
-@GraphExtension
+@DependencyGraph
 interface AuthGraph {
     val authComponentFactory: Lazy<RootAuthComponent.Factory>
 
@@ -52,5 +53,12 @@ interface AuthGraph {
     @Provides
     fun provideHttpClient(): HttpClient {
         return HttpClient()
+    }
+
+    @DependencyGraph.Factory
+    fun interface Factory {
+        fun create(
+            @Provides storeFactory: StoreFactory
+        ): AuthGraph
     }
 }

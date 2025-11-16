@@ -9,19 +9,29 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.arkivanov.decompose.defaultComponentContext
+import com.itapp.auth_impl.di.AuthGraph
+import com.itapp.products_impl.di.ProductsGraph
+import com.itapp.shelves_render_impl.di.ShelvesRenderGraph
 import com.itapp.stroitelapp.di.AppGraph
 import com.itapp.stroitelapp.root.RootComponentImpl
 import dev.zacsweers.metro.createGraph
+import dev.zacsweers.metro.createGraphFactory
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        val rootGraph = createGraph<AppGraph>()
+        val appGraph = createGraph<AppGraph>()
+        val authGraph = createGraphFactory<AuthGraph.Factory>().create(appGraph.storeFactory)
+        val shelvesRenderGraph = createGraphFactory<ShelvesRenderGraph.Factory>().create(appGraph.storeFactory)
+        val productsGraph = createGraphFactory<ProductsGraph.Factory>().create(
+            storeFactory = appGraph.storeFactory,
+            shelvesRenderComponentFactory = shelvesRenderGraph.shelvesRenderComponentFactory
+        )
         val root = RootComponentImpl(
             componentContext = defaultComponentContext(),
-            authComponentFactory = rootGraph.authGraph.authComponentFactory,
-            productsComponentFactory = rootGraph.productsGraph.productsComponentFactory
+            authComponentFactory = authGraph.authComponentFactory,
+            productsComponentFactory = productsGraph.productsComponentFactory
         )
         setContent {
             root.render(modifier = Modifier.fillMaxSize())
