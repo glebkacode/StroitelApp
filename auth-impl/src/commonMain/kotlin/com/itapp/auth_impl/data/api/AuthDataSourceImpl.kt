@@ -1,11 +1,9 @@
 package com.itapp.auth_impl.data.api
 
 import com.itapp.auth_impl.data.model.request.LoginRequestDto
-import com.itapp.auth_impl.data.model.request.ValidatePhoneRequestDTO
+import com.itapp.auth_impl.data.model.request.ValidatePhoneRequestDto
 import dev.zacsweers.metro.Inject
 import io.ktor.client.HttpClient
-import io.ktor.client.request.post
-import io.ktor.client.request.setBody
 
 private const val AUTH_BASE_URL = "https://api.yourservice.com"
 
@@ -14,7 +12,7 @@ class AuthDataSourceImpl(
     private val httpClient: HttpClient
 ) : AuthDataSource {
 
-    override suspend fun validatePhone(request: ValidatePhoneRequestDTO) {
+    override suspend fun validatePhone(request: ValidatePhoneRequestDto) {
         /*httpClient.post(AUTH_BASE_URL) {
             setBody(request)
         }*/

@@ -1,4 +1,4 @@
-package com.itapp.products_impl.presentation.list
+package com.itapp.products_impl.presentation.list.component
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize

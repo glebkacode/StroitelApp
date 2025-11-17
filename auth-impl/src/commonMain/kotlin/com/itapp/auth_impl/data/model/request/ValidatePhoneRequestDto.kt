@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class ValidatePhoneRequestDTO(
+data class ValidatePhoneRequestDto(
     @SerialName("phoneNumber")
     val phoneNumber: String,
     @SerialName("password")
