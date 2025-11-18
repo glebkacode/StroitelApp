@@ -9,20 +9,52 @@ import com.itapp.shelves_render_api.shelf.horizontal.HorizontalShelfComponent
 import com.itapp.shelves_render_api.shelf.video.VideoShelfComponent
 
 interface ShelvesRenderComponent : UiComponent {
-    val shelves: Value<ChildLazyLists<*, ChildShelf>>
-    fun apply(shelves: List<ShelfModel>)
+    val model: Value<ChildLazyLists<*, Child>>
+    fun apply(models: List<Model>)
     fun onFirstVisibleElementChange(index: Int)
     fun onLastVisibleElementChange(index: Int)
-    sealed interface ChildShelf {
-        class Horizontal(val component: HorizontalShelfComponent) : ChildShelf
-        class Grid(val component: GridShelfComponent) : ChildShelf
-        class Video(val component: VideoShelfComponent) : ChildShelf
+    sealed interface Child {
+        class Horizontal(val component: HorizontalShelfComponent) : Child
+        class Grid(val component: GridShelfComponent) : Child
+        class Video(val component: VideoShelfComponent) : Child
     }
-    sealed interface ShelfModel {
-        data class Horizontal(val index: Int) : ShelfModel
-        data class Grid(val index: Int) : ShelfModel
-        data class Video(val index: Int) : ShelfModel
+    sealed interface Model {
+        val id: Long
+        val header: String
+        val items: List<ModelItem>
+
+        data class Default(
+            override val id: Long,
+            override val header: String,
+            override val items: List<ModelItem>
+        ) : Model
+
+        data class Catalog(
+            override val id: Long,
+            override val header: String,
+            override val items: List<ModelItem>,
+            val filterOptions: List<FilterOption>
+        ) : Model
     }
+
+    data class FilterOption(
+        val id: Long,
+        val option: String
+    )
+
+    sealed interface ModelItem {
+        val id: Long
+
+        data class Default(
+            override val id: Long,
+            val title: String,
+            val description: String,
+            val url: String,
+            val labelInfo: String,
+            val price: Double
+        ) : ModelItem
+    }
+
     interface Factory {
         operator fun invoke(
             componentContext: ComponentContext

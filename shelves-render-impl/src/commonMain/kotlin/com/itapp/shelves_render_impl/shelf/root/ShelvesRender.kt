@@ -25,9 +25,9 @@ fun ShelvesRender(
         ) { childItems ->
             childLazyItems(childItems) { item ->
                 when (item) {
-                    is ChildShelf.Grid -> item.component.render(Modifier)
-                    is ChildShelf.Horizontal -> item.component.render(Modifier)
-                    is ChildShelf.Video -> item.component.render(Modifier)
+                    is Child.Grid -> item.component.render(Modifier)
+                    is Child.Horizontal -> item.component.render(Modifier)
+                    is Child.Video -> item.component.render(Modifier)
                 }
             }
         }

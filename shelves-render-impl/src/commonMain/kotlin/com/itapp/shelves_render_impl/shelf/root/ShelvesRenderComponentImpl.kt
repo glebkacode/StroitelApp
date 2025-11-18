@@ -13,7 +13,7 @@ import com.itapp.core_navigation.childLists.changeLastVisibleElementIndex
 import com.itapp.core_navigation.childLists.childLazyLists
 import com.itapp.core_navigation.childLists.navigate
 import com.itapp.shelves_render_api.shelf.root.ShelvesRenderComponent
-import com.itapp.shelves_render_api.shelf.root.ShelvesRenderComponent.ChildShelf
+import com.itapp.shelves_render_api.shelf.root.ShelvesRenderComponent.Child
 import com.itapp.shelves_render_api.shelf.grid.GridShelfComponent
 import com.itapp.shelves_render_api.shelf.horizontal.HorizontalShelfComponent
 import com.itapp.shelves_render_api.shelf.video.VideoShelfComponent
@@ -32,7 +32,7 @@ class ShelvesRenderComponentImpl(
 
     private val shelvesNavigation = LazyListNavigation<Config>()
 
-    override val shelves: Value<ChildLazyLists<*, ChildShelf>> =
+    override val shelves: Value<ChildLazyLists<*, Child>> =
         childLazyLists(
             source = shelvesNavigation,
             serializer = Config.serializer(),
@@ -41,9 +41,9 @@ class ShelvesRenderComponentImpl(
             }
         ) { config, componentContext ->
             when (config) {
-                is Config.Grid -> ChildShelf.Grid(gridShelfComponent(componentContext, config.index))
-                is Config.Horizontal -> ChildShelf.Horizontal(horizontalShelfComponent(componentContext, config.index))
-                is Config.Video -> ChildShelf.Video(videoShelfComponent(componentContext, config.index))
+                is Config.Grid -> Child.Grid(gridShelfComponent(componentContext, config.index))
+                is Config.Horizontal -> Child.Horizontal(horizontalShelfComponent(componentContext, config.index))
+                is Config.Video -> Child.Video(videoShelfComponent(componentContext, config.index))
             }
         }
 
