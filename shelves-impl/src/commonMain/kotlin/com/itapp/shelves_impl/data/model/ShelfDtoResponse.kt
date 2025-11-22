@@ -13,7 +13,7 @@ data class ShelfDtoResponse(
     @SerialName("header")
     val header: String,
     @SerialName("filtersOptions")
-    val filterOptions: List<FilterDtoResponse>,
+    val filterOptions: List<FilterDtoResponse>?,
     @SerialName("items")
     val items: List<SelfItemDtoResponse>
 )

@@ -91,6 +91,12 @@ kotlin {
                 implementation(libs.mvikotlin.timetravel)
                 implementation(libs.mvikotlin.logging)
                 implementation(libs.mvikotlin.extensions.coroutines)
+
+                // coil
+                implementation(libs.coil.compose.core)
+                implementation(libs.coil.compose)
+                implementation(libs.coil.mp)
+                implementation(libs.coil.network.ktor)
             }
         }
 

@@ -14,6 +14,8 @@ import io.ktor.client.HttpClient
 @DependencyGraph
 interface ShelvesGraph {
 
+    val getShelvesUseCase: GetShelvesUseCase
+
     @Binds
     val ShelvesDataSourceImpl.bind: ShelvesDataSource
 
@@ -26,5 +28,10 @@ interface ShelvesGraph {
     @Provides
     fun provideHttpClient(): HttpClient {
         return HttpClient()
+    }
+
+    @DependencyGraph.Factory
+    interface Factory {
+        fun create(): ShelvesGraph
     }
 }

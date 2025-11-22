@@ -15,7 +15,10 @@ import com.itapp.core_navigation.childLists.navigate
 import com.itapp.shelves_render_api.shelf.root.ShelvesRenderComponent
 import com.itapp.shelves_render_api.shelf.root.ShelvesRenderComponent.Child
 import com.itapp.shelves_render_api.shelf.grid.GridShelfComponent
+import com.itapp.shelves_render_api.shelf.grid.GridShelfModel
 import com.itapp.shelves_render_api.shelf.horizontal.HorizontalShelfComponent
+import com.itapp.shelves_render_api.shelf.horizontal.HorizontalShelfModel
+import com.itapp.shelves_render_api.shelf.root.model.shelf.ShelfModel
 import com.itapp.shelves_render_api.shelf.video.VideoShelfComponent
 import dev.zacsweers.metro.Assisted
 import dev.zacsweers.metro.AssistedFactory
@@ -41,18 +44,17 @@ class ShelvesRenderComponentImpl(
             }
         ) { config, componentContext ->
             when (config) {
-                is Config.Grid -> Child.Grid(gridShelfComponent(componentContext, config.index))
-                is Config.Horizontal -> Child.Horizontal(horizontalShelfComponent(componentContext, config.index))
-                is Config.Video -> Child.Video(videoShelfComponent(componentContext, config.index))
+                is Config.Grid -> Child.Grid(gridShelfComponent(componentContext, config))
+                is Config.Horizontal -> Child.Horizontal(horizontalShelfComponent(componentContext, config))
             }
         }
 
-    override fun apply(shelves: List<ShelvesRenderComponent.ShelfModel>) {
-        val configs = shelves.map { shelf ->
-            when (shelf) {
-                is ShelvesRenderComponent.ShelfModel.Grid -> Config.Grid(shelf.index)
-                is ShelvesRenderComponent.ShelfModel.Horizontal -> Config.Horizontal(shelf.index)
-                is ShelvesRenderComponent.ShelfModel.Video -> Config.Video(shelf.index)
+    override fun apply(models: List<ShelfModel>) {
+        val configs = models.map { shelve ->
+            when(shelve) {
+                is GridShelfModel -> Config.Grid(model = shelve)
+                is HorizontalShelfModel -> Config.Horizontal(model = shelve)
+                else -> throw IllegalArgumentException("Unknown shelf model type")
             }
         }
         shelvesNavigation.navigate { LazyLists(configs) }
@@ -60,18 +62,13 @@ class ShelvesRenderComponentImpl(
 
     private fun horizontalShelfComponent(
         componentContext: ComponentContext,
-        index: Int
-    ): HorizontalShelfComponent = horizontalShelfComponentFactory(componentContext, index)
+        config: Config.Horizontal
+    ): HorizontalShelfComponent = horizontalShelfComponentFactory(componentContext, config.model)
 
     private fun gridShelfComponent(
         componentContext: ComponentContext,
-        index: Int
-    ): GridShelfComponent = gridShelfComponentFactory(componentContext, index)
-
-    private fun videoShelfComponent(
-        componentContext: ComponentContext,
-        index: Int
-    ): VideoShelfComponent = videoShelfComponentFactory(componentContext, index)
+        config: Config.Grid
+    ): GridShelfComponent = gridShelfComponentFactory(componentContext, config.model)
 
     override fun onFirstVisibleElementChange(index: Int) {
         shelvesNavigation.changeFirstVisibleElementIndex(index)
@@ -83,9 +80,12 @@ class ShelvesRenderComponentImpl(
 
     @Serializable
     private sealed interface Config {
-        data class Horizontal(val index: Int) : Config
-        data class Grid(val index: Int) : Config
-        data class Video(val index: Int) : Config
+        data class Horizontal(
+            val model: HorizontalShelfModel
+        ) : Config
+        data class Grid(
+            val model: GridShelfModel
+        ) : Config
     }
 
     @Composable

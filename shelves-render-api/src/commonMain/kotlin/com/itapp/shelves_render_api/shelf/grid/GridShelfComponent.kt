@@ -4,11 +4,11 @@ import com.arkivanov.decompose.ComponentContext
 import com.itapp.core_navigation.UiComponent
 
 interface GridShelfComponent : UiComponent {
-    val index: Int
+    val model: GridShelfModel
     interface Factory {
         operator fun invoke(
             componentContext: ComponentContext,
-            index: Int
+            model: GridShelfModel
         ): GridShelfComponent
     }
 }

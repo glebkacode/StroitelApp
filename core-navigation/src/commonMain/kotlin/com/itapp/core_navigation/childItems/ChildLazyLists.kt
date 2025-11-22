@@ -1,5 +1,6 @@
 package com.itapp.core_navigation.childItems
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListScope
@@ -27,6 +28,7 @@ fun <C : Any, T : Any> ChildLazyLists(
     modifier: Modifier = Modifier,
     lazyListState: LazyListState = rememberLazyListState(),
     lazyList: LazyList = defaultLazyColumn(),
+    verticalArrangement: Arrangement.Vertical,
     onFirstIndexVisibleChanged: (index: Int) -> Unit,
     onLastIndexVisibleChanged: (index: Int) -> Unit,
     lazyListContent: LazyListScope.(items: List<Child<C, T>>) -> Unit,
@@ -37,6 +39,7 @@ fun <C : Any, T : Any> ChildLazyLists(
         modifier = modifier,
         listItems = state,
         lazyList = lazyList,
+        verticalArrangement = verticalArrangement,
         onFirstIndexVisibleChanged = onFirstIndexVisibleChanged,
         onLastIndexVisibleChanged = onLastIndexVisibleChanged,
         lazyListState = lazyListState,
@@ -54,6 +57,7 @@ fun <C : Any, T : Any> ChildLazyLists(
     onLastIndexVisibleChanged: (index: Int) -> Unit,
     modifier: Modifier = Modifier,
     lazyList: LazyList = defaultLazyColumn(),
+    verticalArrangement: Arrangement.Vertical,
     lazyListState: LazyListState = rememberLazyListState(),
     lazyListContent: LazyListScope.(items: List<Child<C, T>>) -> Unit,
 ) {
@@ -79,12 +83,13 @@ fun <C : Any, T : Any> ChildLazyLists(
     lazyList(
         modifier,
         lazyListState,
+        verticalArrangement
     ) {
         lazyListContent(listItems.items)
     }
 }
 
-fun defaultLazyRow(): LazyList =
+/*fun defaultLazyRow(): LazyList =
     {
             modifier,
             state,
@@ -95,17 +100,19 @@ fun defaultLazyRow(): LazyList =
             state = state,
             content = content,
         )
-    }
+    }*/
 
 fun defaultLazyColumn(): LazyList =
     {
             modifier,
             state,
+            verticalArrangement,
             content,
         ->
         LazyColumn(
             modifier = modifier,
             state = state,
+            verticalArrangement = verticalArrangement,
             content = content,
         )
     }
@@ -114,6 +121,7 @@ internal typealias LazyList =
     @Composable (
         modifier: Modifier,
         state: LazyListState,
+        verticalArrangement: Arrangement.Vertical,
         content: LazyListScope.() -> Unit,
     ) -> Unit
 

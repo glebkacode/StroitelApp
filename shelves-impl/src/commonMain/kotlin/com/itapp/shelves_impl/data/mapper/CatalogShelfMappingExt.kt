@@ -10,7 +10,7 @@ fun ShelfDtoResponse.toCatalogShelf(): CatalogShelfDto {
         id = id,
         header = header,
         items = items.map { it.toDefaultShelfItem() },
-        filterOptions = filterOptions.map { it.toCatalogFilterOption() }
+        filterOptions = filterOptions?.map { it.toCatalogFilterOption() }.orEmpty()
     )
 }
 

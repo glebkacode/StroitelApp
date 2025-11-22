@@ -7,6 +7,7 @@ import com.itapp.products_api.RootProductsComponent
 import com.itapp.products_impl.presentation.details.ProductDetailsComponentImpl
 import com.itapp.products_impl.presentation.list.component.ProductListComponentImpl
 import com.itapp.products_impl.presentation.root.RootProductsComponentImpl
+import com.itapp.shelves_api.domain.usecase.GetShelvesUseCase
 import com.itapp.shelves_render_api.shelf.root.ShelvesRenderComponent
 import dev.zacsweers.metro.Binds
 import dev.zacsweers.metro.DependencyGraph
@@ -31,6 +32,7 @@ interface ProductsGraph {
         fun create(
             @Provides storeFactory: StoreFactory,
             @Provides shelvesRenderComponentFactory: ShelvesRenderComponent.Factory,
+            @Provides getShelvesUseCase: GetShelvesUseCase
         ): ProductsGraph
     }
 }

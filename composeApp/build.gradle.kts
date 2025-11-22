@@ -42,6 +42,8 @@ kotlin {
             implementation(projects.productsImpl)
             implementation(projects.shelvesRenderApi)
             implementation(projects.shelvesRenderImpl)
+            implementation(projects.shelvesApi)
+            implementation(projects.shelvesImpl)
 
             implementation(libs.kotlin.stdlib)
             implementation(libs.kotlin.serialization.json)

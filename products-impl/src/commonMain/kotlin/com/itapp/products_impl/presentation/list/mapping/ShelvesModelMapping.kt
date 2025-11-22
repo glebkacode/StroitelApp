@@ -1,14 +1,13 @@
 package com.itapp.products_impl.presentation.list.mapping
 
 import com.itapp.shelves_api.domain.model.shelf.CatalogShelfDto
-import com.itapp.shelves_api.domain.model.shelf.CatalogShelfFilterDto
 import com.itapp.shelves_api.domain.model.shelf.DefaultShelfDto
 import com.itapp.shelves_api.domain.model.shelf.ShelfDto
-import com.itapp.shelves_render_api.shelf.root.ShelvesRenderComponent
-import com.itapp.shelves_render_api.shelf.root.ShelvesRenderComponent.FilterOption
-import com.itapp.shelves_render_api.shelf.root.ShelvesRenderComponent.Model
+import com.itapp.shelves_render_api.shelf.grid.GridShelfModel
+import com.itapp.shelves_render_api.shelf.horizontal.HorizontalShelfModel
+import com.itapp.shelves_render_api.shelf.root.model.shelf.ShelfModel
 
-fun ShelfDto.toModel(): Model {
+fun ShelfDto.toModel(): ShelfModel {
     return when (this) {
         is DefaultShelfDto -> toModel()
         is CatalogShelfDto -> toModel()
@@ -16,26 +15,18 @@ fun ShelfDto.toModel(): Model {
     }
 }
 
-fun DefaultShelfDto.toModel(): Model.Default {
-    return Model.Default(
+fun DefaultShelfDto.toModel(): HorizontalShelfModel {
+    return HorizontalShelfModel(
         id = id,
         header = header,
         items = items.map { it.toModel() }
     )
 }
 
-fun CatalogShelfDto.toModel(): Model.Catalog {
-    return Model.Catalog(
+fun CatalogShelfDto.toModel(): GridShelfModel {
+    return GridShelfModel(
         id = id,
         header = header,
-        items = items.map { it.toModel() },
-        filterOptions = filterOptions.map { it.toModel() }
-    )
-}
-
-fun CatalogShelfFilterDto.toModel(): FilterOption {
-    return FilterOption(
-        id = id,
-        option = option
+        items = items.map { it.toModel() }
     )
 }

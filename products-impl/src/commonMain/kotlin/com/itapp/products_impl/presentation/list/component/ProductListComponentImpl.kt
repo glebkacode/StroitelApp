@@ -11,6 +11,7 @@ import com.arkivanov.mvikotlin.extensions.coroutines.labels
 import com.arkivanov.mvikotlin.extensions.coroutines.stateFlow
 import com.itapp.core_navigation.BaseComponent
 import com.itapp.products_api.ProductListComponent
+import com.itapp.products_api.ProductListComponent.Model
 import com.itapp.products_impl.presentation.list.mapping.toModel
 import com.itapp.products_impl.presentation.list.mvi.ProductsStore
 import com.itapp.products_impl.presentation.list.mvi.productsStore
@@ -21,8 +22,11 @@ import dev.zacsweers.metro.AssistedFactory
 import dev.zacsweers.metro.AssistedInject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 
 @AssistedInject
 class ProductListComponentImpl(
@@ -32,6 +36,9 @@ class ProductListComponentImpl(
     private val getShelvesUseCase: GetShelvesUseCase,
     @Assisted private val openProductDetails: (Long) -> Unit,
 ) : BaseComponent(componentContext), ProductListComponent {
+
+    private val _model: MutableStateFlow<Model> = MutableStateFlow(Model.Loading)
+    override val model: StateFlow<Model> = _model
 
     private val store = instanceKeeper.getStore {
         storeFactory.productsStore(
@@ -55,12 +62,23 @@ class ProductListComponentImpl(
     private fun handleState(state: ProductsStore.State) {
         when (state) {
             is ProductsStore.State.Data -> {
-                shelvesRenderComponent.apply(
-                    models = state.shelves.map { it.toModel() }
-                )
+                componentScope.launch {
+                    shelvesRenderComponent.apply(
+                        models = state.shelves.map { it.toModel() }
+                    )
+                    _model.emit(Model.Content)
+                }
             }
-            is ProductsStore.State.Error -> TODO()
-            ProductsStore.State.Loading -> TODO()
+            is ProductsStore.State.Error -> {
+                componentScope.launch {
+                    _model.emit(Model.Error(state.throwable))
+                }
+            }
+            ProductsStore.State.Loading -> {
+                componentScope.launch {
+                    _model.emit(Model.Loading)
+                }
+            }
         }
     }
 

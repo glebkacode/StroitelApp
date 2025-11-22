@@ -63,10 +63,20 @@ kotlin {
         commonMain {
             dependencies {
                 // projects
+                implementation(projects.coreArchitecture)
                 implementation(projects.shelvesApi)
 
                 implementation(libs.kotlin.stdlib)
                 implementation(libs.kotlin.serialization.json)
+
+                // compose
+                implementation(compose.runtime)
+                implementation(compose.foundation)
+                implementation(compose.material3)
+                implementation(compose.ui)
+                implementation(compose.components.resources)
+                implementation(compose.components.uiToolingPreview)
+                implementation(libs.androidx.lifecycle.runtimeCompose)
 
                 implementation(libs.ktor.client.core)
                 implementation(libs.kotlin.coroutines.core)
