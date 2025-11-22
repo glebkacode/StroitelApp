@@ -6,10 +6,13 @@ import com.itapp.core_navigation.UiComponent
 interface HorizontalShelfComponent : UiComponent {
     val model: HorizontalShelfModel
 
+    fun onItemCardClicked(id: Long)
+
     interface Factory {
         operator fun invoke(
             componentContext: ComponentContext,
-            model: HorizontalShelfModel
+            model: HorizontalShelfModel,
+            onItemClicked: (Long, Long) -> Unit
         ): HorizontalShelfComponent
     }
 }

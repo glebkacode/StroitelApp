@@ -18,7 +18,7 @@ interface ProductListComponent : UiComponent {
     interface Factory {
         operator fun invoke(
             componentContext: ComponentContext,
-            openProductDetails: (Long) -> Unit
+            openProductDetails: (Long, Long) -> Unit
         ): ProductListComponent
     }
 }

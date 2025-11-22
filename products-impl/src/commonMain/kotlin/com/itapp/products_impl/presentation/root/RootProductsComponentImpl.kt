@@ -41,7 +41,9 @@ class RootProductsComponentImpl(
             is Config.ProductList -> Child.ProductsList(productListComponent(componentContext))
             is Config.ProductDetails -> Child.ProductDetails(
                 productDetailsComponent(
-                    componentContext
+                    componentContext,
+                    config.shelfId,
+                    config.shelfItemId
                 )
             )
         }
@@ -51,14 +53,25 @@ class RootProductsComponentImpl(
     ): ProductListComponent =
         productListFactory.value.invoke(
             componentContext = componentContext,
-            openProductDetails = { id ->
-                navigation.bringToFront(Config.ProductDetails(id))
+            openProductDetails = { shelfId, shelfItemId ->
+                navigation.bringToFront(
+                    Config.ProductDetails(
+                        shelfId = shelfId,
+                        shelfItemId = shelfItemId
+                    )
+                )
             }
         )
 
     private fun productDetailsComponent(
-        componentContext: ComponentContext
-    ): ProductDetailsComponent = productDetailsFactory.value.invoke(componentContext)
+        componentContext: ComponentContext,
+        shelfId: Long,
+        shelfItemId: Long
+    ): ProductDetailsComponent = productDetailsFactory.value.invoke(
+        componentContext = componentContext,
+        shelfId = shelfId,
+        shelfItemId = shelfItemId
+    )
 
     @Serializable
     private sealed interface Config {
@@ -66,7 +79,10 @@ class RootProductsComponentImpl(
         data object ProductList : Config
 
         @Serializable
-        data class ProductDetails(val id: Long) : Config
+        data class ProductDetails(
+            val shelfId: Long,
+            val shelfItemId: Long
+        ) : Config
     }
 
     @Composable

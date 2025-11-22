@@ -46,6 +46,7 @@ private class ExecutorImpl(
     override fun executeIntent(intent: Intent) {
         when (intent) {
             Intent.Refresh -> getShelves()
+            is Intent.ShelfItemClicked -> onShelfItemClicked(intent.shelfId, intent.shelfItemId)
         }
     }
 
@@ -68,6 +69,10 @@ private class ExecutorImpl(
                 }
             )
         }
+    }
+
+    private fun onShelfItemClicked(shelfId: Long, shelfItemId: Long) {
+        publish(Label.OpenProductDetails(shelfId, shelfItemId))
     }
 }
 

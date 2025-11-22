@@ -50,8 +50,7 @@ fun HorizontalShelf(
             items(component.model.items) { posterModel ->
                 Poster(
                     model = posterModel,
-                    onClick = {},
-                    onMoreInfoClick = {}
+                    onClick = component::onItemCardClicked
                 )
             }
         }

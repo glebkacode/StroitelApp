@@ -31,6 +31,7 @@ class ShelvesRenderComponentImpl(
     private val horizontalShelfComponentFactory: HorizontalShelfComponent.Factory,
     private val gridShelfComponentFactory: GridShelfComponent.Factory,
     private val videoShelfComponentFactory: VideoShelfComponent.Factory,
+    @Assisted private val onItemClicked: (Long, Long) -> Unit
 ) : BaseComponent(componentContext), ShelvesRenderComponent {
 
     private val shelvesNavigation = LazyListNavigation<Config>()
@@ -63,7 +64,11 @@ class ShelvesRenderComponentImpl(
     private fun horizontalShelfComponent(
         componentContext: ComponentContext,
         config: Config.Horizontal
-    ): HorizontalShelfComponent = horizontalShelfComponentFactory(componentContext, config.model)
+    ): HorizontalShelfComponent = horizontalShelfComponentFactory(
+        componentContext = componentContext,
+        model = config.model,
+        onItemClicked = { shelfId, shelfItemId -> onItemClicked(shelfId, shelfItemId) }
+    )
 
     private fun gridShelfComponent(
         componentContext: ComponentContext,
@@ -99,7 +104,8 @@ class ShelvesRenderComponentImpl(
     @AssistedFactory
     interface Factory : ShelvesRenderComponent.Factory {
         override operator fun invoke(
-            componentContext: ComponentContext
+            componentContext: ComponentContext,
+            onItemClicked: (Long, Long) -> Unit
         ): ShelvesRenderComponentImpl
     }
 }

@@ -7,6 +7,8 @@ interface ProductDetailsComponent : UiComponent {
     interface Factory {
         operator fun invoke(
             componentContext: ComponentContext,
+            shelfId: Long,
+            shelfItemId: Long
         ): ProductDetailsComponent
     }
 }

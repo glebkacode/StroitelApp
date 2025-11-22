@@ -11,7 +11,9 @@ import dev.zacsweers.metro.AssistedInject
 
 @AssistedInject
 class ProductDetailsComponentImpl(
-    @Assisted componentContext: ComponentContext
+    @Assisted componentContext: ComponentContext,
+    @Assisted("shelfIf") private val shelfId: Long,
+    @Assisted("shelfItemId") private val shelfItemId: Long
 ) : BaseComponent(componentContext), ProductDetailsComponent {
 
     @Composable
@@ -25,7 +27,9 @@ class ProductDetailsComponentImpl(
     @AssistedFactory
     interface Factory : ProductDetailsComponent.Factory {
         override operator fun invoke(
-            componentContext: ComponentContext
+            componentContext: ComponentContext,
+            @Assisted("shelfIf") shelfId: Long,
+            @Assisted("shelfItemId") shelfItemId: Long
         ): ProductDetailsComponentImpl
     }
 }

@@ -24,8 +24,7 @@ import com.itapp.uikit.theme.StroitelTheme
 @Composable
 fun Poster(
     model: PosterModel,
-    onClick: () -> Unit,
-    onMoreInfoClick: () -> Unit
+    onClick: (Long) -> Unit
 ) {
     Card(
         shape = RoundedCornerShape(16.dp),
@@ -61,7 +60,7 @@ fun Poster(
 
                 Spacer(modifier = Modifier.width(8.dp))
 
-                Button(onClick = { onMoreInfoClick() }) {
+                Button(onClick = { onClick(model.id) }) {
                     Text(
                         text = "ПОДРОБНЕЕ О МОДЕЛИ",
                         color = StroitelTheme.colorScheme.text.piter,

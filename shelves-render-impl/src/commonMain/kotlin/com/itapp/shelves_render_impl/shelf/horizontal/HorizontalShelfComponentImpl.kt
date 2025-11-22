@@ -14,7 +14,8 @@ import dev.zacsweers.metro.AssistedInject
 @AssistedInject
 class HorizontalShelfComponentImpl(
     @Assisted componentContext: ComponentContext,
-    @Assisted override val model: HorizontalShelfModel
+    @Assisted override val model: HorizontalShelfModel,
+    @Assisted private val onItemClicked: (Long, Long) -> Unit
 ) : BaseComponent(componentContext), HorizontalShelfComponent {
 
     init {
@@ -23,6 +24,10 @@ class HorizontalShelfComponentImpl(
             onStart = { println("HorizontalShelfComponent index = ${model.id} Start ${hashCode()}") },
             onStop = { println("HorizontalShelfComponent index = ${model.id} Stop ${hashCode()}") }
         )
+    }
+
+    override fun onItemCardClicked(id: Long) {
+        onItemClicked(model.id, id)
     }
 
     @Composable
@@ -37,7 +42,8 @@ class HorizontalShelfComponentImpl(
     interface Factory : HorizontalShelfComponent.Factory {
         override operator fun invoke(
             componentContext: ComponentContext,
-            model: HorizontalShelfModel
+            model: HorizontalShelfModel,
+            onItemClicked: (Long, Long) -> Unit
         ): HorizontalShelfComponentImpl
     }
 }

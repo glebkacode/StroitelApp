@@ -11,10 +11,17 @@ interface ProductsStore : Store<Intent, State, Label> {
 
     sealed interface Intent : JvmSerializable {
         data object Refresh : Intent
+        data class ShelfItemClicked(
+            val shelfId: Long,
+            val shelfItemId: Long
+        ) : Intent
     }
 
     sealed interface Label : JvmSerializable {
-        data class OpenProductDetails(val id: Long) : Label
+        data class OpenProductDetails(
+            val shelfId: Long,
+            val shelfItemId: Long
+        ) : Label
     }
 
     sealed interface State : JvmSerializable {

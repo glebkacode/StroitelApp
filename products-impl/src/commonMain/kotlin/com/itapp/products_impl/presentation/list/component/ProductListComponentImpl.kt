@@ -14,6 +14,7 @@ import com.itapp.products_api.ProductListComponent
 import com.itapp.products_api.ProductListComponent.Model
 import com.itapp.products_impl.presentation.list.mapping.toModel
 import com.itapp.products_impl.presentation.list.mvi.ProductsStore
+import com.itapp.products_impl.presentation.list.mvi.ProductsStore.Intent
 import com.itapp.products_impl.presentation.list.mvi.productsStore
 import com.itapp.shelves_api.domain.usecase.GetShelvesUseCase
 import com.itapp.shelves_render_api.shelf.root.ShelvesRenderComponent
@@ -34,7 +35,7 @@ class ProductListComponentImpl(
     private val shelvesRenderComponentFactory: ShelvesRenderComponent.Factory,
     private val storeFactory: StoreFactory,
     private val getShelvesUseCase: GetShelvesUseCase,
-    @Assisted private val openProductDetails: (Long) -> Unit,
+    @Assisted private val openProductDetails: (Long, Long) -> Unit,
 ) : BaseComponent(componentContext), ProductListComponent {
 
     private val _model: MutableStateFlow<Model> = MutableStateFlow(Model.Loading)
@@ -49,7 +50,17 @@ class ProductListComponentImpl(
     }
 
     override val shelvesRenderComponent: ShelvesRenderComponent by lazy {
-        shelvesRenderComponentFactory(childContext("shelves_render"))
+        shelvesRenderComponentFactory(
+            componentContext = childContext("shelves_render"),
+            onItemClicked = { shelfId, shelfItemId ->
+                store.accept(
+                    Intent.ShelfItemClicked(
+                        shelfId = shelfId,
+                        shelfItemId = shelfItemId
+                    )
+                )
+            }
+        )
     }
 
     init {
@@ -69,11 +80,13 @@ class ProductListComponentImpl(
                     _model.emit(Model.Content)
                 }
             }
+
             is ProductsStore.State.Error -> {
                 componentScope.launch {
                     _model.emit(Model.Error(state.throwable))
                 }
             }
+
             ProductsStore.State.Loading -> {
                 componentScope.launch {
                     _model.emit(Model.Loading)
@@ -84,7 +97,10 @@ class ProductListComponentImpl(
 
     private fun handleLabels(label: ProductsStore.Label) {
         when (label) {
-            is ProductsStore.Label.OpenProductDetails -> openProductDetails(label.id)
+            is ProductsStore.Label.OpenProductDetails -> openProductDetails(
+                label.shelfId,
+                label.shelfItemId
+            )
         }
     }
 
@@ -100,7 +116,7 @@ class ProductListComponentImpl(
     interface Factory : ProductListComponent.Factory {
         override operator fun invoke(
             componentContext: ComponentContext,
-            openProductDetails: (Long) -> Unit
+            openProductDetails: (Long, Long) -> Unit
         ): ProductListComponentImpl
     }
 }

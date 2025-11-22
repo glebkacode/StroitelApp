@@ -22,7 +22,8 @@ interface ShelvesRenderComponent : UiComponent {
 
     interface Factory {
         operator fun invoke(
-            componentContext: ComponentContext
+            componentContext: ComponentContext,
+            onItemClicked: (Long, Long) -> Unit
         ): ShelvesRenderComponent
     }
 }
