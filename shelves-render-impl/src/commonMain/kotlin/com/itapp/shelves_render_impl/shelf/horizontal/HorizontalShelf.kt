@@ -14,6 +14,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onVisibilityChanged
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.itapp.shelves_render_api.shelf.horizontal.HorizontalShelfComponent
@@ -26,8 +27,14 @@ fun HorizontalShelf(
     component: HorizontalShelfComponent
 ) {
     Column(
-        modifier = modifier
-            .fillMaxWidth(),
+        modifier = modifier.onVisibilityChanged(
+            minDurationMs = 300,
+            minFractionVisible = 1f,
+        ) { visible ->
+            if (visible) {
+                component.onVisible(component.model.id)
+            }
+        }.fillMaxWidth(),
     ) {
         Box(
             modifier = Modifier.height(80.dp)
@@ -47,9 +54,17 @@ fun HorizontalShelf(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             contentPadding = PaddingValues(horizontal = 16.dp)
         ) {
-            items(component.model.items) { posterModel ->
+            items(component.model.items) { model ->
                 Poster(
-                    model = posterModel,
+                    modifier = Modifier.onVisibilityChanged(
+                        minDurationMs = 300,
+                        minFractionVisible = 1f,
+                    ) { visible ->
+                        if (visible) {
+                            component.onItemVisible(id = model.id)
+                        }
+                    },
+                    model = model,
                     onClick = component::onItemCardClicked
                 )
             }

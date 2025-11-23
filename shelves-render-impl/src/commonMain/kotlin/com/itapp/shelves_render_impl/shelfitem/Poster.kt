@@ -23,10 +23,12 @@ import com.itapp.uikit.theme.StroitelTheme
 
 @Composable
 fun Poster(
+    modifier: Modifier,
     model: PosterModel,
     onClick: (Long) -> Unit
 ) {
     Card(
+        modifier = modifier,
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = Color.White

@@ -14,7 +14,8 @@ import dev.zacsweers.metro.AssistedInject
 @AssistedInject
 class GridShelfComponentImpl(
     @Assisted componentContext: ComponentContext,
-    @Assisted override val model: GridShelfModel
+    @Assisted override val model: GridShelfModel,
+    @Assisted private val onShelfItemVisible: (Long) -> Unit
 ) : BaseComponent(componentContext), GridShelfComponent {
 
     init {
@@ -33,11 +34,16 @@ class GridShelfComponentImpl(
         )
     }
 
+    override fun onItemVisible(id: Long) {
+        onShelfItemVisible(id)
+    }
+
     @AssistedFactory
     interface Factory : GridShelfComponent.Factory {
         override operator fun invoke(
             componentContext: ComponentContext,
-            model: GridShelfModel
+            model: GridShelfModel,
+            onShelfItemVisible: (Long) -> Unit
         ): GridShelfComponentImpl
     }
 }

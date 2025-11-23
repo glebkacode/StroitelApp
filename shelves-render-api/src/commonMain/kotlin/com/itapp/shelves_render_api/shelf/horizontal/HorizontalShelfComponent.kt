@@ -8,11 +8,17 @@ interface HorizontalShelfComponent : UiComponent {
 
     fun onItemCardClicked(id: Long)
 
+    fun onVisible(id: Long)
+
+    fun onItemVisible(id: Long)
+
     interface Factory {
         operator fun invoke(
             componentContext: ComponentContext,
             model: HorizontalShelfModel,
-            onItemClicked: (Long, Long) -> Unit
+            onItemClicked: (Long, Long) -> Unit,
+            onShelfVisible: (Long) -> Unit,
+            onShelfItemVisible: (Long) -> Unit
         ): HorizontalShelfComponent
     }
 }

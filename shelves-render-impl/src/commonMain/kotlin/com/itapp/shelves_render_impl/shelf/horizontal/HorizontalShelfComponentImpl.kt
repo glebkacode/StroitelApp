@@ -15,7 +15,9 @@ import dev.zacsweers.metro.AssistedInject
 class HorizontalShelfComponentImpl(
     @Assisted componentContext: ComponentContext,
     @Assisted override val model: HorizontalShelfModel,
-    @Assisted private val onItemClicked: (Long, Long) -> Unit
+    @Assisted private val onItemClicked: (Long, Long) -> Unit,
+    @Assisted("shelfVisible") private val onShelfVisible: (Long) -> Unit,
+    @Assisted("shelfItemVisible") private val onShelfItemVisible: (Long) -> Unit
 ) : BaseComponent(componentContext), HorizontalShelfComponent {
 
     init {
@@ -28,6 +30,14 @@ class HorizontalShelfComponentImpl(
 
     override fun onItemCardClicked(id: Long) {
         onItemClicked(model.id, id)
+    }
+
+    override fun onVisible(id: Long) {
+        onShelfVisible(id)
+    }
+
+    override fun onItemVisible(id: Long) {
+        onShelfItemVisible(id)
     }
 
     @Composable
@@ -43,7 +53,9 @@ class HorizontalShelfComponentImpl(
         override operator fun invoke(
             componentContext: ComponentContext,
             model: HorizontalShelfModel,
-            onItemClicked: (Long, Long) -> Unit
+            onItemClicked: (Long, Long) -> Unit,
+            @Assisted("shelfVisible") onShelfVisible: (Long) -> Unit,
+            @Assisted("shelfItemVisible") onShelfItemVisible: (Long) -> Unit
         ): HorizontalShelfComponentImpl
     }
 }

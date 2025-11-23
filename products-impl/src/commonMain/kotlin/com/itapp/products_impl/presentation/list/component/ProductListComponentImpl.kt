@@ -59,6 +59,12 @@ class ProductListComponentImpl(
                         shelfItemId = shelfItemId
                     )
                 )
+            },
+            onShelfVisible = { shelfItemId ->
+                println("Shelf visible with id = $shelfItemId")
+            },
+            onShelfItemVisible = { shelfItemId ->
+                println("ShelfItem visible with id = $shelfItemId")
             }
         )
     }

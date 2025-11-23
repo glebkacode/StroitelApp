@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onVisibilityChanged
 import androidx.compose.ui.unit.dp
 import com.itapp.shelves_render_api.shelf.grid.GridShelfComponent
 import com.itapp.shelves_render_impl.shelfitem.Poster
@@ -34,9 +35,17 @@ fun GridShelf(
             verticalArrangement = Arrangement.spacedBy(8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            items(component.model.items) { posterModel ->
+            items(component.model.items) { model ->
                 Poster(
-                    model = posterModel,
+                    modifier = Modifier.onVisibilityChanged(
+                        minDurationMs = 300,
+                        minFractionVisible = 1f,
+                    ) { visible ->
+                        if (visible) {
+                            component.onItemVisible(id = model.id)
+                        }
+                    },
+                    model = model,
                     onClick = {}
                 )
             }

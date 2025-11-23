@@ -31,7 +31,9 @@ class ShelvesRenderComponentImpl(
     private val horizontalShelfComponentFactory: HorizontalShelfComponent.Factory,
     private val gridShelfComponentFactory: GridShelfComponent.Factory,
     private val videoShelfComponentFactory: VideoShelfComponent.Factory,
-    @Assisted private val onItemClicked: (Long, Long) -> Unit
+    @Assisted private val onItemClicked: (Long, Long) -> Unit,
+    @Assisted("shelfVisible") private val onShelfVisible: (Long) -> Unit,
+    @Assisted("shelfItemVisible") private val onShelfItemVisible: (Long) -> Unit
 ) : BaseComponent(componentContext), ShelvesRenderComponent {
 
     private val shelvesNavigation = LazyListNavigation<Config>()
@@ -67,13 +69,19 @@ class ShelvesRenderComponentImpl(
     ): HorizontalShelfComponent = horizontalShelfComponentFactory(
         componentContext = componentContext,
         model = config.model,
-        onItemClicked = { shelfId, shelfItemId -> onItemClicked(shelfId, shelfItemId) }
+        onItemClicked = { shelfId, shelfItemId -> onItemClicked(shelfId, shelfItemId) },
+        onShelfVisible = onShelfVisible,
+        onShelfItemVisible = onShelfItemVisible
     )
 
     private fun gridShelfComponent(
         componentContext: ComponentContext,
         config: Config.Grid
-    ): GridShelfComponent = gridShelfComponentFactory(componentContext, config.model)
+    ): GridShelfComponent = gridShelfComponentFactory(
+        componentContext = componentContext,
+        model = config.model,
+        onShelfItemVisible = onShelfItemVisible
+    )
 
     override fun onFirstVisibleElementChange(index: Int) {
         shelvesNavigation.changeFirstVisibleElementIndex(index)
@@ -105,7 +113,9 @@ class ShelvesRenderComponentImpl(
     interface Factory : ShelvesRenderComponent.Factory {
         override operator fun invoke(
             componentContext: ComponentContext,
-            onItemClicked: (Long, Long) -> Unit
+            onItemClicked: (Long, Long) -> Unit,
+            @Assisted("shelfVisible") onShelfVisible: (Long) -> Unit,
+            @Assisted("shelfItemVisible") onShelfItemVisible: (Long) -> Unit
         ): ShelvesRenderComponentImpl
     }
 }
