@@ -86,6 +86,10 @@ private class ProductsReducer : DslReducer<State, Intent, Effect>() {
                     )
                 )
             }
+
+            Intent.UiIntent.InitShelves -> {
+                effects(Effect.GetShelves)
+            }
         }
     }
 

@@ -11,7 +11,7 @@ import com.itapp.core_navigation.BaseComponent
 import com.itapp.products_api.ProductListComponent
 import com.itapp.products_api.ProductListComponent.Model
 import com.itapp.products_impl.presentation.list.mapping.toModel
-import com.itapp.products_impl.presentation.list.mvi.ProductsTea
+import com.itapp.products_impl.presentation.list.mvi.ProductsTea.*
 import com.itapp.products_impl.presentation.list.mvi.ProductsTea.Intent.UiIntent
 import com.itapp.products_impl.presentation.list.mvi.productsTea
 import com.itapp.shelves_api.domain.usecase.GetShelvesUseCase
@@ -72,11 +72,12 @@ class ProductListComponentImpl(
             tea.state.onEach(::handleState).launchIn(componentScope)
             tea.events.onEach(::handleEvents).launchIn(componentScope)
         }
+        tea.accept(UiIntent.InitShelves)
     }
 
-    private fun handleState(state: ProductsTea.State) {
+    private fun handleState(state: State) {
         when (state) {
-            is ProductsTea.State.Data -> {
+            is State.Data -> {
                 componentScope.launch {
                     shelvesRenderComponent.apply(
                         models = state.shelves.map { it.toModel() }
@@ -85,13 +86,13 @@ class ProductListComponentImpl(
                 }
             }
 
-            is ProductsTea.State.Error -> {
+            is State.Error -> {
                 componentScope.launch {
                     _model.emit(Model.Error(state.throwable))
                 }
             }
 
-            ProductsTea.State.Loading -> {
+            State.Loading -> {
                 componentScope.launch {
                     _model.emit(Model.Loading)
                 }
@@ -99,9 +100,9 @@ class ProductListComponentImpl(
         }
     }
 
-    private fun handleEvents(label: ProductsTea.Event) {
+    private fun handleEvents(label: Event) {
         when (label) {
-            is ProductsTea.Event.OpenProductDetails -> openProductDetails(
+            is Event.OpenProductDetails -> openProductDetails(
                 label.shelfId,
                 label.shelfItemId
             )

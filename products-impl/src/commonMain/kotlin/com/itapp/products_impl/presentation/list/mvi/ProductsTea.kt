@@ -10,6 +10,7 @@ interface ProductsTea : Tea<State, Intent, Event> {
 
     sealed interface Intent {
         sealed interface UiIntent : Intent {
+            data object InitShelves : UiIntent
             data class ShelfItemClicked(
                 val shelfId: Long,
                 val shelfItemId: Long
