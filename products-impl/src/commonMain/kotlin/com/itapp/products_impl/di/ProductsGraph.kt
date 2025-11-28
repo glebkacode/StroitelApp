@@ -1,6 +1,6 @@
 package com.itapp.products_impl.di
 
-import com.arkivanov.mvikotlin.core.store.StoreFactory
+import com.itapp.core_architecture.tea.TeaFactory
 import com.itapp.products_api.ProductDetailsComponent
 import com.itapp.products_api.ProductListComponent
 import com.itapp.products_api.RootProductsComponent
@@ -30,7 +30,7 @@ interface ProductsGraph {
     @DependencyGraph.Factory
     fun interface Factory {
         fun create(
-            @Provides storeFactory: StoreFactory,
+            @Provides teaFactory: TeaFactory,
             @Provides shelvesRenderComponentFactory: ShelvesRenderComponent.Factory,
             @Provides getShelvesUseCase: GetShelvesUseCase
         ): ProductsGraph

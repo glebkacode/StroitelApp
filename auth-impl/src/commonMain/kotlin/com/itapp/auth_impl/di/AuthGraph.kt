@@ -1,6 +1,5 @@
 package com.itapp.auth_impl.di
 
-import com.arkivanov.mvikotlin.core.store.StoreFactory
 import com.itapp.auth_api.password_validation.PasswordValidationComponent
 import com.itapp.auth_api.phone_validation.PhoneValidationComponent
 import com.itapp.auth_api.root.RootAuthComponent
@@ -17,6 +16,7 @@ import com.itapp.auth_impl.presentation.password_validation.component.PasswordVa
 import com.itapp.auth_impl.presentation.phone_validation.component.PhoneValidationComponentImpl
 import com.itapp.auth_impl.presentation.root.RootAuthComponentImpl
 import com.itapp.auth_impl.presentation.sms_validation.component.SmsValidationComponentImpl
+import com.itapp.core_architecture.tea.TeaFactory
 import dev.zacsweers.metro.Binds
 import dev.zacsweers.metro.DependencyGraph
 import dev.zacsweers.metro.Provides
@@ -58,7 +58,7 @@ interface AuthGraph {
     @DependencyGraph.Factory
     fun interface Factory {
         fun create(
-            @Provides storeFactory: StoreFactory
+            @Provides teaFactory: TeaFactory
         ): AuthGraph
     }
 }

@@ -1,61 +1,46 @@
 package com.itapp.auth_impl.presentation.password_validation.mvi
 
-import com.arkivanov.mvikotlin.core.store.Reducer
-import com.arkivanov.mvikotlin.core.store.Store
-import com.arkivanov.mvikotlin.core.store.StoreFactory
-import com.arkivanov.mvikotlin.core.utils.JvmSerializable
-import com.arkivanov.mvikotlin.extensions.coroutines.CoroutineExecutor
 import com.itapp.auth_impl.domain.model.ValidationPhoneDto
 import com.itapp.auth_impl.domain.usecase.ValidatePhoneNumberUseCase
-import com.itapp.auth_impl.presentation.password_validation.mvi.PasswordValidationStore.Intent
-import com.itapp.auth_impl.presentation.password_validation.mvi.PasswordValidationStore.Label
-import com.itapp.auth_impl.presentation.password_validation.mvi.PasswordValidationStore.PasswordValidationData
-import com.itapp.auth_impl.presentation.password_validation.mvi.PasswordValidationStore.State
+import com.itapp.auth_impl.presentation.password_validation.mvi.PasswordValidationTea.*
+import com.itapp.core_architecture.tea.CoroutineEffector
+import com.itapp.core_architecture.tea.DslReducer
+import com.itapp.core_architecture.tea.ReducerContext
+import com.itapp.core_architecture.tea.Tea
+import com.itapp.core_architecture.tea.TeaFactory
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 
-internal fun StoreFactory.passwordValidationStore(
+internal fun TeaFactory.passwordValidationTea(
     phone: String,
     mainContext: CoroutineContext,
     ioContext: CoroutineContext,
     defaultContext: CoroutineContext,
     validatePhoneNumberUseCase: ValidatePhoneNumberUseCase
-): PasswordValidationStore =
-    object : PasswordValidationStore, Store<Intent, State, Label> by create(
-        name = "password_validation_store",
+): PasswordValidationTea =
+    object : PasswordValidationTea, Tea<State, Intent, Event> by create(
         initialState = State.Init(data = PasswordValidationData(phone = phone)),
-        executorFactory = {
-            ExecutorImpl(
-                mainContext,
-                ioContext,
-                defaultContext,
-                validatePhoneNumberUseCase
-            )
-        },
-        reducer = PasswordValidationReducer
+        dispatcher = mainContext,
+        effector = PasswordValidationEffector(
+            mainContext, ioContext, defaultContext, validatePhoneNumberUseCase
+        ),
+        reducer = PasswordValidationReducer()
     ) {}
 
-private sealed interface Msg : JvmSerializable {
-    data class PasswordChanged(val text: String) : Msg
-    data class LoginFailed(val throwable: Throwable) : Msg
-}
-
-private class ExecutorImpl(
+private class PasswordValidationEffector(
     private val mainContext: CoroutineContext,
     private val ioContext: CoroutineContext,
     private val defaultContext: CoroutineContext,
     private val validatePhoneNumberUseCase: ValidatePhoneNumberUseCase
-) : CoroutineExecutor<Intent, Nothing, State, Msg, Label>(mainContext) {
+) : CoroutineEffector<Effect, Intent, Event>(mainContext) {
 
-    override fun executeIntent(intent: Intent) {
-        when (intent) {
-            Intent.ValidatePasswordClicked -> onLoginClicked(
-                state().data.phone,
-                state().data.password
+    override fun onEffect(effect: Effect) {
+        when (effect) {
+            is Effect.ValidatePassword -> onLoginClicked(
+                phone = effect.phone,
+                password = effect.password
             )
-
-            is Intent.PasswordChanged -> onPasswordChanged(intent.text)
         }
     }
 
@@ -69,47 +54,60 @@ private class ExecutorImpl(
                 onSuccess = {
                     withContext(mainContext) {
                         publish(
-                            Label.OpenSmsValidation(
-                                phone = state().data.phone,
-                                password = state().data.password
+                            Event.OpenSmsValidation(
+                                phone = phone,
+                                password = password
                             )
                         )
                     }
                 },
                 onFailure = { throwable ->
                     withContext(mainContext) {
-                        dispatch(Msg.LoginFailed(throwable))
+                        dispatch(Intent.LoginFailed(throwable))
                     }
                 }
             )
         }
     }
-
-    private fun onPasswordChanged(password: String) {
-        dispatch(Msg.PasswordChanged(password))
-    }
 }
 
-private object PasswordValidationReducer : Reducer<State, Msg> {
+private class PasswordValidationReducer : DslReducer<State, Intent, Effect>() {
 
-    override fun State.reduce(
-        msg: Msg
-    ): State {
-        return when (msg) {
-            is Msg.PasswordChanged -> State.PasswordChanged(
-                data = PasswordValidationData(
-                    phone = data.phone,
-                    password = msg.text
+    override fun ReducerContext<State, Effect>.reduce(
+        intent: Intent
+    ) {
+        when (intent) {
+            is Intent.LoginFailed -> {
+                state {
+                    State.AuthFailed(
+                        data = PasswordValidationData(
+                            phone = data.phone,
+                            password = data.password
+                        ),
+                        throwable = intent.throwable
+                    )
+                }
+            }
+
+            is Intent.PasswordChanged -> {
+                state {
+                    State.PasswordChanged(
+                        data = PasswordValidationData(
+                            phone = data.phone,
+                            password = intent.text
+                        )
+                    )
+                }
+            }
+
+            Intent.ValidatePasswordClicked -> {
+                effects(
+                    Effect.ValidatePassword(
+                        phone = state.data.phone,
+                        password = state.data.password
+                    )
                 )
-            )
-
-            is Msg.LoginFailed -> State.AuthFailed(
-                data = PasswordValidationData(
-                    phone = data.phone,
-                    password = data.password
-                ),
-                throwable = msg.throwable
-            )
+            }
         }
     }
 }

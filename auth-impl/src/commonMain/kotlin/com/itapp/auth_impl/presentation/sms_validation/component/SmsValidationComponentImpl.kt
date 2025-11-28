@@ -4,16 +4,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.essenty.lifecycle.doOnCreate
-import com.arkivanov.mvikotlin.core.instancekeeper.getStore
-import com.arkivanov.mvikotlin.core.store.StoreFactory
-import com.arkivanov.mvikotlin.extensions.coroutines.labels
-import com.arkivanov.mvikotlin.extensions.coroutines.stateFlow
 import com.itapp.auth_api.sms_validation.SmsValidationComponent
 import com.itapp.auth_impl.domain.usecase.AuthUseCase
 import com.itapp.auth_impl.presentation.sms_validation.mapping.toUiState
-import com.itapp.auth_impl.presentation.sms_validation.mvi.SmsCodeValidationStore.Intent
-import com.itapp.auth_impl.presentation.sms_validation.mvi.SmsCodeValidationStore.Label
-import com.itapp.auth_impl.presentation.sms_validation.mvi.smsValidationStore
+import com.itapp.auth_impl.presentation.sms_validation.mvi.SmsCodeValidationTea.Event
+import com.itapp.auth_impl.presentation.sms_validation.mvi.SmsCodeValidationTea.Intent
+import com.itapp.auth_impl.presentation.sms_validation.mvi.smsValidationTea
+import com.itapp.core_architecture.getTea
+import com.itapp.core_architecture.tea.TeaFactory
 import com.itapp.core_navigation.BaseComponent
 import dev.zacsweers.metro.Assisted
 import dev.zacsweers.metro.AssistedFactory
@@ -29,15 +27,15 @@ import kotlinx.coroutines.flow.stateIn
 @AssistedInject
 class SmsValidationComponentImpl(
     @Assisted componentContext: ComponentContext,
-    private val storeFactory: StoreFactory,
+    private val teaFactory: TeaFactory,
     private val authUseCase: AuthUseCase,
     @Assisted("phone") private val phone: String,
     @Assisted("password") private val password: String,
     @Assisted private val openProducts: () -> Unit
 ) : BaseComponent(componentContext), SmsValidationComponent {
 
-    private val store = instanceKeeper.getStore {
-        storeFactory.smsValidationStore(
+    private val store = instanceKeeper.getTea {
+        teaFactory.smsValidationTea(
             mainContext = Dispatchers.Main,
             defaultContext = Dispatchers.Default,
             ioContext = Dispatchers.IO,
@@ -47,7 +45,7 @@ class SmsValidationComponentImpl(
         )
     }
 
-    override val uiState = store.stateFlow.map { state -> state.toUiState() }.stateIn(
+    override val uiState = store.state.map { state -> state.toUiState() }.stateIn(
         scope = componentScope,
         started = SharingStarted.Lazily,
         initialValue = SmsValidationComponent.UiState()
@@ -55,9 +53,9 @@ class SmsValidationComponentImpl(
 
     init {
         lifecycle.doOnCreate {
-            store.labels.onEach { label ->
-                when (label) {
-                    is Label.OpenProducts -> openProducts()
+            store.events.onEach { event ->
+                when (event) {
+                    is Event.OpenProducts -> openProducts()
                 }
             }.launchIn(componentScope)
         }

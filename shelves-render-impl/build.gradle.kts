@@ -85,13 +85,6 @@ kotlin {
                 implementation(libs.decompose.compose)
                 implementation(libs.decompose.compose.experimental)
 
-                // mvikotlin
-                implementation(libs.mvikotlin)
-                implementation(libs.mvikotlin.main)
-                implementation(libs.mvikotlin.timetravel)
-                implementation(libs.mvikotlin.logging)
-                implementation(libs.mvikotlin.extensions.coroutines)
-
                 // coil
                 implementation(libs.coil.compose.core)
                 implementation(libs.coil.compose)

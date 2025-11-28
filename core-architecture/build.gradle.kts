@@ -61,6 +61,14 @@ kotlin {
                 implementation(libs.kotlin.stdlib)
 
                 implementation(libs.kotlin.coroutines.core)
+
+
+                // mvikotlin
+                implementation(libs.mvikotlin)
+                implementation(libs.mvikotlin.main)
+                implementation(libs.mvikotlin.timetravel)
+                implementation(libs.mvikotlin.logging)
+                implementation(libs.mvikotlin.extensions.coroutines)
             }
         }
 

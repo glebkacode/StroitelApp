@@ -4,14 +4,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.essenty.lifecycle.doOnCreate
-import com.arkivanov.mvikotlin.core.instancekeeper.getStore
-import com.arkivanov.mvikotlin.core.store.StoreFactory
-import com.arkivanov.mvikotlin.extensions.coroutines.labels
-import com.arkivanov.mvikotlin.extensions.coroutines.stateFlow
 import com.itapp.auth_api.phone_validation.PhoneValidationComponent
 import com.itapp.auth_impl.presentation.phone_validation.mapping.toUi
-import com.itapp.auth_impl.presentation.phone_validation.mvi.PhoneValidationStore
-import com.itapp.auth_impl.presentation.phone_validation.mvi.phoneValidationStore
+import com.itapp.auth_impl.presentation.phone_validation.mvi.PhoneValidationTea
+import com.itapp.auth_impl.presentation.phone_validation.mvi.phoneValidationTea
+import com.itapp.core_architecture.getTea
+import com.itapp.core_architecture.tea.TeaFactory
 import com.itapp.core_navigation.BaseComponent
 import dev.zacsweers.metro.Assisted
 import dev.zacsweers.metro.AssistedFactory
@@ -27,18 +25,18 @@ import kotlinx.coroutines.flow.stateIn
 @AssistedInject
 class PhoneValidationComponentImpl(
     @Assisted componentContext: ComponentContext,
-    private val storeFactory: StoreFactory,
+    private val teaFactory: TeaFactory,
     @Assisted private val openPasswordScreen: (String) -> Unit,
 ) : BaseComponent(componentContext), PhoneValidationComponent {
 
-    private val store = instanceKeeper.getStore {
-        storeFactory.phoneValidationStore(
+    private val store = instanceKeeper.getTea {
+        teaFactory.phoneValidationTea(
             mainContext = Dispatchers.Main,
             ioContext = Dispatchers.IO
         )
     }
 
-    override val uiState = store.stateFlow.map { it.toUi() }.stateIn(
+    override val uiState = store.state.map { it.toUi() }.stateIn(
         scope = componentScope,
         started = SharingStarted.Lazily,
         initialValue = PhoneValidationComponent.UiState()
@@ -46,10 +44,10 @@ class PhoneValidationComponentImpl(
 
     init {
         lifecycle.doOnCreate {
-            store.labels.onEach { label ->
-                when (label) {
-                    is PhoneValidationStore.Label.OpenPasswordValidation -> openPasswordScreen(
-                        label.phone
+            store.events.onEach { event ->
+                when (event) {
+                    is PhoneValidationTea.Event.OpenPasswordValidation -> openPasswordScreen(
+                        event.phone
                     )
                 }
             }.launchIn(componentScope)
@@ -57,11 +55,11 @@ class PhoneValidationComponentImpl(
     }
 
     override fun onPhoneChanged(text: String) {
-        store.accept(PhoneValidationStore.Intent.PhoneChanged(text))
+        store.accept(PhoneValidationTea.Intent.PhoneChanged(text))
     }
 
     override fun onNextClicked() {
-        store.accept(PhoneValidationStore.Intent.PhoneApply)
+        store.accept(PhoneValidationTea.Intent.PhoneApply)
     }
 
     @Composable

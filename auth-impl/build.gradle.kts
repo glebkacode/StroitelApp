@@ -86,13 +86,6 @@ kotlin {
                 implementation(libs.decompose.compose)
                 implementation(libs.decompose.compose.experimental)
 
-                // mvikotlin
-                implementation(libs.mvikotlin)
-                implementation(libs.mvikotlin.main)
-                implementation(libs.mvikotlin.timetravel)
-                implementation(libs.mvikotlin.logging)
-                implementation(libs.mvikotlin.extensions.coroutines)
-
                 implementation(libs.ktor.client.core)
                 implementation(libs.kotlin.coroutines.core)
                 implementation(libs.kotlin.serialization.json)

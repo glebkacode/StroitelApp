@@ -1,6 +1,6 @@
 package com.itapp.shelves_render_impl.di
 
-import com.arkivanov.mvikotlin.core.store.StoreFactory
+import com.itapp.core_architecture.tea.TeaFactory
 import com.itapp.shelves_render_api.shelf.grid.GridShelfComponent
 import com.itapp.shelves_render_api.shelf.horizontal.HorizontalShelfComponent
 import com.itapp.shelves_render_api.shelf.root.ShelvesRenderComponent
@@ -33,7 +33,7 @@ interface ShelvesRenderGraph {
     @DependencyGraph.Factory
     interface Factory {
         fun create(
-            @Provides storeFactory: StoreFactory
+            @Provides teaFactory: TeaFactory
         ): ShelvesRenderGraph
     }
 }

@@ -23,11 +23,11 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         val appGraph = createGraph<AppGraph>()
-        val authGraph = createGraphFactory<AuthGraph.Factory>().create(appGraph.storeFactory)
-        val shelvesRenderGraph = createGraphFactory<ShelvesRenderGraph.Factory>().create(appGraph.storeFactory)
+        val authGraph = createGraphFactory<AuthGraph.Factory>().create(appGraph.teaFactory)
+        val shelvesRenderGraph = createGraphFactory<ShelvesRenderGraph.Factory>().create(appGraph.teaFactory)
         val shelvesDomainGraph = createGraphFactory<ShelvesGraph.Factory>().create()
         val productsGraph = createGraphFactory<ProductsGraph.Factory>().create(
-            storeFactory = appGraph.storeFactory,
+            teaFactory = appGraph.teaFactory,
             shelvesRenderComponentFactory = shelvesRenderGraph.shelvesRenderComponentFactory,
             getShelvesUseCase = shelvesDomainGraph.getShelvesUseCase
         )

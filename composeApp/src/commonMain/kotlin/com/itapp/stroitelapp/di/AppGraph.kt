@@ -1,7 +1,7 @@
 package com.itapp.stroitelapp.di
 
-import com.arkivanov.mvikotlin.core.store.StoreFactory
-import com.arkivanov.mvikotlin.main.store.DefaultStoreFactory
+import com.itapp.core_architecture.tea.DefaultTeaFactory
+import com.itapp.core_architecture.tea.TeaFactory
 import dev.zacsweers.metro.DependencyGraph
 import dev.zacsweers.metro.Provides
 
@@ -9,11 +9,11 @@ import dev.zacsweers.metro.Provides
 interface AppGraph {
     val message: String
 
-    val storeFactory: StoreFactory
+    val teaFactory: TeaFactory
 
     @Provides
     fun provideMessage(): String = "Hello, Metro!"
 
     @Provides
-    private fun provideStoreFactory(): StoreFactory = DefaultStoreFactory()
+    private fun provideTeaFactory(): TeaFactory = DefaultTeaFactory()
 }

@@ -5,17 +5,15 @@ import androidx.compose.ui.Modifier
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.childContext
 import com.arkivanov.essenty.lifecycle.doOnStart
-import com.arkivanov.mvikotlin.core.instancekeeper.getStore
-import com.arkivanov.mvikotlin.core.store.StoreFactory
-import com.arkivanov.mvikotlin.extensions.coroutines.labels
-import com.arkivanov.mvikotlin.extensions.coroutines.stateFlow
+import com.itapp.core_architecture.getTea
+import com.itapp.core_architecture.tea.TeaFactory
 import com.itapp.core_navigation.BaseComponent
 import com.itapp.products_api.ProductListComponent
 import com.itapp.products_api.ProductListComponent.Model
 import com.itapp.products_impl.presentation.list.mapping.toModel
-import com.itapp.products_impl.presentation.list.mvi.ProductsStore
-import com.itapp.products_impl.presentation.list.mvi.ProductsStore.Intent
-import com.itapp.products_impl.presentation.list.mvi.productsStore
+import com.itapp.products_impl.presentation.list.mvi.ProductsTea
+import com.itapp.products_impl.presentation.list.mvi.ProductsTea.Intent.UiIntent
+import com.itapp.products_impl.presentation.list.mvi.productsTea
 import com.itapp.shelves_api.domain.usecase.GetShelvesUseCase
 import com.itapp.shelves_render_api.shelf.root.ShelvesRenderComponent
 import dev.zacsweers.metro.Assisted
@@ -33,7 +31,7 @@ import kotlinx.coroutines.launch
 class ProductListComponentImpl(
     @Assisted componentContext: ComponentContext,
     private val shelvesRenderComponentFactory: ShelvesRenderComponent.Factory,
-    private val storeFactory: StoreFactory,
+    private val teaFactory: TeaFactory,
     private val getShelvesUseCase: GetShelvesUseCase,
     @Assisted private val openProductDetails: (Long, Long) -> Unit,
 ) : BaseComponent(componentContext), ProductListComponent {
@@ -41,8 +39,8 @@ class ProductListComponentImpl(
     private val _model: MutableStateFlow<Model> = MutableStateFlow(Model.Loading)
     override val model: StateFlow<Model> = _model
 
-    private val store = instanceKeeper.getStore {
-        storeFactory.productsStore(
+    private val tea = instanceKeeper.getTea {
+        teaFactory.productsTea(
             getShelvesUseCase = getShelvesUseCase,
             mainContext = Dispatchers.Main,
             ioContext = Dispatchers.IO
@@ -53,8 +51,8 @@ class ProductListComponentImpl(
         shelvesRenderComponentFactory(
             componentContext = childContext("shelves_render"),
             onItemClicked = { shelfId, shelfItemId ->
-                store.accept(
-                    Intent.ShelfItemClicked(
+                tea.accept(
+                    UiIntent.ShelfItemClicked(
                         shelfId = shelfId,
                         shelfItemId = shelfItemId
                     )
@@ -71,14 +69,14 @@ class ProductListComponentImpl(
 
     init {
         lifecycle.doOnStart {
-            store.stateFlow.onEach(::handleState).launchIn(componentScope)
-            store.labels.onEach(::handleLabels).launchIn(componentScope)
+            tea.state.onEach(::handleState).launchIn(componentScope)
+            tea.events.onEach(::handleEvents).launchIn(componentScope)
         }
     }
 
-    private fun handleState(state: ProductsStore.State) {
+    private fun handleState(state: ProductsTea.State) {
         when (state) {
-            is ProductsStore.State.Data -> {
+            is ProductsTea.State.Data -> {
                 componentScope.launch {
                     shelvesRenderComponent.apply(
                         models = state.shelves.map { it.toModel() }
@@ -87,13 +85,13 @@ class ProductListComponentImpl(
                 }
             }
 
-            is ProductsStore.State.Error -> {
+            is ProductsTea.State.Error -> {
                 componentScope.launch {
                     _model.emit(Model.Error(state.throwable))
                 }
             }
 
-            ProductsStore.State.Loading -> {
+            ProductsTea.State.Loading -> {
                 componentScope.launch {
                     _model.emit(Model.Loading)
                 }
@@ -101,9 +99,9 @@ class ProductListComponentImpl(
         }
     }
 
-    private fun handleLabels(label: ProductsStore.Label) {
+    private fun handleEvents(label: ProductsTea.Event) {
         when (label) {
-            is ProductsStore.Label.OpenProductDetails -> openProductDetails(
+            is ProductsTea.Event.OpenProductDetails -> openProductDetails(
                 label.shelfId,
                 label.shelfItemId
             )
