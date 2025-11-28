@@ -9,8 +9,8 @@ import com.arkivanov.decompose.router.stack.bringToFront
 import com.arkivanov.decompose.router.stack.childStack
 import com.arkivanov.decompose.value.Value
 import com.itapp.core_navigation.BaseComponent
-import com.itapp.products_api.ProductDetailsComponent
-import com.itapp.products_api.ProductListComponent
+import com.itapp.products_api.details.ProductDetailsComponent
+import com.itapp.products_api.list.ProductListComponent
 import com.itapp.products_api.RootProductsComponent
 import com.itapp.products_api.RootProductsComponent.Child
 import dev.zacsweers.metro.Assisted

@@ -8,8 +8,8 @@ import com.arkivanov.essenty.lifecycle.doOnStart
 import com.itapp.core_architecture.getTea
 import com.itapp.core_architecture.tea.TeaFactory
 import com.itapp.core_navigation.BaseComponent
-import com.itapp.products_api.ProductListComponent
-import com.itapp.products_api.ProductListComponent.Model
+import com.itapp.products_api.list.ProductListComponent
+import com.itapp.products_api.list.ProductListComponent.Model
 import com.itapp.products_impl.presentation.list.mapping.toModel
 import com.itapp.products_impl.presentation.list.mvi.ProductsTea.*
 import com.itapp.products_impl.presentation.list.mvi.ProductsTea.Intent.UiIntent

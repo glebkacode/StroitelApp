@@ -4,6 +4,8 @@ import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.value.Value
 import com.itapp.core_navigation.UiComponent
+import com.itapp.products_api.details.ProductDetailsComponent
+import com.itapp.products_api.list.ProductListComponent
 
 interface RootProductsComponent : UiComponent {
     val stack: Value<ChildStack<*, Child>>

@@ -1,10 +1,14 @@
 package com.itapp.products_impl.di
 
 import com.itapp.core_architecture.tea.TeaFactory
-import com.itapp.products_api.ProductDetailsComponent
-import com.itapp.products_api.ProductListComponent
+import com.itapp.products_api.details.ProductDetailsComponent
+import com.itapp.products_api.list.ProductListComponent
 import com.itapp.products_api.RootProductsComponent
+import com.itapp.products_api.details.ProductCharacteristicsComponent
+import com.itapp.products_api.details.ProductDescriptionComponent
 import com.itapp.products_impl.presentation.details.ProductDetailsComponentImpl
+import com.itapp.products_impl.presentation.details.characteristics.ProductCharacteristicsComponentImpl
+import com.itapp.products_impl.presentation.details.description.ProductDescriptionComponentImpl
 import com.itapp.products_impl.presentation.list.component.ProductListComponentImpl
 import com.itapp.products_impl.presentation.root.RootProductsComponentImpl
 import com.itapp.shelves_api.domain.usecase.GetShelvesUseCase
@@ -26,6 +30,12 @@ interface ProductsGraph {
 
     @Binds
     val ProductDetailsComponentImpl.Factory.bind: ProductDetailsComponent.Factory
+
+    @Binds
+    val ProductDescriptionComponentImpl.Factory.bind: ProductDescriptionComponent.Factory
+
+    @Binds
+    val ProductCharacteristicsComponentImpl.Factory.bind:ProductCharacteristicsComponent.Factory
 
     @DependencyGraph.Factory
     fun interface Factory {

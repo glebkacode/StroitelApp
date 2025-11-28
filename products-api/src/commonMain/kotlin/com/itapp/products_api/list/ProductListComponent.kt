@@ -1,4 +1,4 @@
-package com.itapp.products_api
+package com.itapp.products_api.list
 
 import com.arkivanov.decompose.ComponentContext
 import com.itapp.core_navigation.UiComponent
