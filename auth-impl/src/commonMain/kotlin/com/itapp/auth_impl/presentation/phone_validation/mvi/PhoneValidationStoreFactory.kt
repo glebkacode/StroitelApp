@@ -18,7 +18,7 @@ internal fun TeaFactory.phoneValidationTea(
     object : PhoneValidationTea, Tea<State, Intent, Event> by create(
         initialState = State(),
         dispatcher = mainContext,
-        effector = PhoneValidationEffectorImpl(mainContext),
+        effectors = listOf(PhoneValidationEffectorImpl(mainContext)),
         reducer = PhoneValidationReducer(),
     ) {}
 

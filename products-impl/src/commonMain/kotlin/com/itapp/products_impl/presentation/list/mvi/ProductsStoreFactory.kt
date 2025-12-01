@@ -23,7 +23,9 @@ internal fun TeaFactory.productsTea(
         initialState = State.Loading,
         initialEffects = listOf(Effect.GetShelves),
         dispatcher = mainContext,
-        effector = ProductsEffector(getShelvesUseCase, mainContext, ioContext),
+        effectors = listOf(
+            ProductsEffector(getShelvesUseCase, mainContext, ioContext)
+        ),
         reducer = ProductsReducer()
     ) {}
 

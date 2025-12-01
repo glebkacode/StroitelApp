@@ -8,7 +8,7 @@ interface TeaFactory {
         initialState: State,
         initialEffects: List<Effect> = emptyList(),
         dispatcher: CoroutineContext,
-        effector: Effector<Effect, Intent, Event>,
+        effectors: List<Effector<Effect, Intent, Event>>,
         reducer: Reducer<State, Intent, Effect>
     ): Tea<State, Intent, Event>
 }

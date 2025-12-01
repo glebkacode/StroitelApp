@@ -17,7 +17,7 @@ fun TeaFactory.productDetailsTea(
 ): ProductDetailsTea =
     object : ProductDetailsTea, Tea<State, Intent, Unit> by create(
         initialState = State(),
-        effector = ProductDetailsEffector(),
+        effectors = listOf(ProductDetailsEffector()),
         dispatcher = mainCoroutineContext,
         reducer = ProductDetailReducer()
     ) {}

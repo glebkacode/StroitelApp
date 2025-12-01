@@ -22,8 +22,10 @@ internal fun TeaFactory.passwordValidationTea(
     object : PasswordValidationTea, Tea<State, Intent, Event> by create(
         initialState = State.Init(data = PasswordValidationData(phone = phone)),
         dispatcher = mainContext,
-        effector = PasswordValidationEffector(
-            mainContext, ioContext, defaultContext, validatePhoneNumberUseCase
+        effectors = listOf(
+            PasswordValidationEffector(
+                mainContext, ioContext, defaultContext, validatePhoneNumberUseCase
+            )
         ),
         reducer = PasswordValidationReducer()
     ) {}

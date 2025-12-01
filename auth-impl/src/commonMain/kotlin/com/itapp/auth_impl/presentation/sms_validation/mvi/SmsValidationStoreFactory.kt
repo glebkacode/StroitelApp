@@ -28,11 +28,13 @@ internal fun TeaFactory.smsValidationTea(
         password = password
     ),
     dispatcher = mainContext,
-    effector = SmsValidationEffectorImpl(
-        mainContext,
-        defaultContext,
-        ioContext,
-        authUseCase
+    effectors = listOf(
+        SmsValidationEffectorImpl(
+            mainContext,
+            defaultContext,
+            ioContext,
+            authUseCase
+        )
     ),
     reducer = SmsValidationReducer()
 ) {}

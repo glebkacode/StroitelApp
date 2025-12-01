@@ -18,7 +18,7 @@ class DefaultTea<out State, in Intent, in Effect, Event>(
     initialState: State,
     private val initialEffects: List<Effect> = emptyList(),
     dispatcher: CoroutineContext,
-    private val effector: Effector<Effect, Intent, Event>,
+    private val effectors: List<Effector<Effect, Intent, Event>>,
     private val reducer: Reducer<State, Intent, Effect>,
 ) : Tea<State, Intent, Event> {
 
@@ -32,17 +32,22 @@ class DefaultTea<out State, in Intent, in Effect, Event>(
     private val intents = Channel<Intent>(capacity = 64)
 
     override fun init() {
-        effector.init(object : Effector.Callback<Intent, Event> {
-            override fun onIntent(intent: Intent) {
-                intents.trySend(intent)
-            }
+        effectors.forEach { effector ->
+            effector.init(object : Effector.Callback<Intent, Event> {
+                override fun onIntent(intent: Intent) {
+                    intents.trySend(intent)
+                }
 
-            override fun onEvent(event: Event) {
-                _events.tryEmit(event)
-            }
-        })
+                override fun onEvent(event: Event) {
+                    _events.tryEmit(event)
+                }
+            })
+        }
+
         initialEffects.forEach { effect ->
-            effector.onEffect(effect)
+            effectors.forEach { effector ->
+                effector.onEffect(effect)
+            }
         }
         scope.launch {
             while (isActive) {
@@ -52,7 +57,9 @@ class DefaultTea<out State, in Intent, in Effect, Event>(
                         val next = curState.reduce(intent)
                         _states.update { next.state }
                         next.effects.forEach { effect ->
-                            effector.onEffect(effect)
+                            effectors.forEach { effector ->
+                                effector.onEffect(effect)
+                            }
                         }
                     }
                 }
@@ -65,7 +72,9 @@ class DefaultTea<out State, in Intent, in Effect, Event>(
     }
 
     override fun dispose() {
-        effector.dispose()
+        effectors.forEach { effector ->
+            effector.dispose()
+        }
         scope.cancel()
     }
 }
