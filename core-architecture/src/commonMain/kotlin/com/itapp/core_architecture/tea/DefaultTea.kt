@@ -16,6 +16,7 @@ import kotlin.coroutines.CoroutineContext
 
 class DefaultTea<out State, in Intent, in Effect, Event>(
     initialState: State,
+    private val initialEffects: List<Effect> = emptyList(),
     dispatcher: CoroutineContext,
     private val effector: Effector<Effect, Intent, Event>,
     private val reducer: Reducer<State, Intent, Effect>,
@@ -40,6 +41,9 @@ class DefaultTea<out State, in Intent, in Effect, Event>(
                 _events.tryEmit(event)
             }
         })
+        initialEffects.forEach { effect ->
+            effector.onEffect(effect)
+        }
         scope.launch {
             while (isActive) {
                 for (intent in intents) {

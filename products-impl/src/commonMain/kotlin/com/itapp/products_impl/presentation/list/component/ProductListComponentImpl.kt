@@ -72,7 +72,6 @@ class ProductListComponentImpl(
             tea.state.onEach(::handleState).launchIn(componentScope)
             tea.events.onEach(::handleEvents).launchIn(componentScope)
         }
-        tea.accept(UiIntent.InitShelves)
     }
 
     private fun handleState(state: State) {

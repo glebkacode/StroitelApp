@@ -6,12 +6,14 @@ class DefaultTeaFactory : TeaFactory {
 
     override fun <State, Intent, Event, Effect> create(
         initialState: State,
+        initialEffects: List<Effect>,
         dispatcher: CoroutineContext,
         effector: Effector<Effect, Intent, Event>,
         reducer: Reducer<State, Intent, Effect>,
     ): Tea<State, Intent, Event> {
         return DefaultTea(
             initialState = initialState,
+            initialEffects = initialEffects,
             dispatcher = dispatcher,
             effector = effector,
             reducer = reducer

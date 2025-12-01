@@ -21,6 +21,7 @@ internal fun TeaFactory.productsTea(
 ): ProductsTea =
     object : ProductsTea, Tea<State, Intent, Event> by create(
         initialState = State.Loading,
+        initialEffects = listOf(Effect.GetShelves),
         dispatcher = mainContext,
         effector = ProductsEffector(getShelvesUseCase, mainContext, ioContext),
         reducer = ProductsReducer()
@@ -85,10 +86,6 @@ private class ProductsReducer : DslReducer<State, Intent, Effect>() {
                         shelfItemId = intent.shelfItemId
                     )
                 )
-            }
-
-            Intent.UiIntent.InitShelves -> {
-                effects(Effect.GetShelves)
             }
         }
     }

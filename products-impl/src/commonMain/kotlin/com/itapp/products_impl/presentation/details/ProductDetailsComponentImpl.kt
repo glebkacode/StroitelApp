@@ -8,7 +8,6 @@ import com.arkivanov.decompose.router.stack.StackNavigation
 import com.arkivanov.decompose.router.stack.bringToFront
 import com.arkivanov.decompose.router.stack.childStack
 import com.arkivanov.decompose.value.Value
-import com.itapp.core_architecture.tea.TeaFactory
 import com.itapp.core_navigation.BaseComponent
 import com.itapp.products_api.details.ProductCharacteristicsComponent
 import com.itapp.products_api.details.ProductDescriptionComponent
@@ -26,7 +25,6 @@ class ProductDetailsComponentImpl(
     @Assisted("shelfItemId") private val shelfItemId: Long,
     private val productDescriptionComponentFactory: Lazy<ProductDescriptionComponent.Factory>,
     private val productCharacteristicsComponentFactory: Lazy<ProductCharacteristicsComponent.Factory>,
-    private val teaFactory: TeaFactory,
 ) : BaseComponent(componentContext), ProductDetailsComponent {
 
     private val navigation = StackNavigation<Config>()
