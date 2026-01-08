@@ -12,8 +12,11 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlin.concurrent.atomics.AtomicBoolean
+import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.coroutines.CoroutineContext
 
+@OptIn(ExperimentalAtomicApi::class)
 class DefaultTea<out State, in Intent, in Effect, Event>(
     initialState: State,
     private val initialEffects: List<Effect> = emptyList(),
@@ -30,8 +33,10 @@ class DefaultTea<out State, in Intent, in Effect, Event>(
 
     private val scope = CoroutineScope(SupervisorJob() + dispatcher)
     private val intents = Channel<Intent>(capacity = 64)
+    private val isInitialized = AtomicBoolean(false)
 
     override fun init() {
+        if (!isInitialized.compareAndSet(expectedValue = false, newValue = true)) return
         effectors.forEach { effector ->
             effector.init(object : Effector.Callback<Intent, Event> {
                 override fun onIntent(intent: Intent) {
@@ -72,6 +77,7 @@ class DefaultTea<out State, in Intent, in Effect, Event>(
     }
 
     override fun dispose() {
+        intents.cancel()
         effectors.forEach { effector ->
             effector.dispose()
         }

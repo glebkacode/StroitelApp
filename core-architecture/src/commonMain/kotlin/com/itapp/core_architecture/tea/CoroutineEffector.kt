@@ -2,6 +2,7 @@ package com.itapp.core_architecture.tea
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlin.concurrent.atomics.AtomicReference
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
@@ -13,7 +14,7 @@ open class CoroutineEffector<E, I, M>(
 
     @OptIn(ExperimentalAtomicApi::class)
     private val atomic = AtomicReference<Effector.Callback<I, M>?>(null)
-    protected val scope = CoroutineScope(mainCoroutineContext)
+    protected val scope = CoroutineScope(mainCoroutineContext + SupervisorJob())
 
     @OptIn(ExperimentalAtomicApi::class)
     override fun init(callback: Effector.Callback<I, M>) {
