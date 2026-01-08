@@ -1,6 +1,9 @@
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidKotlinMultiplatformLibrary)
+    alias(libs.plugins.composeMultiplatform)
+    alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.metro)
 }
 
@@ -10,7 +13,7 @@ kotlin {
     // which platforms this KMP module supports.
     // See: https://kotlinlang.org/docs/multiplatform-discover-project.html#targets
     androidLibrary {
-        namespace = "com.itapp.shopping_cart_api"
+        namespace = "com.example.shopping_cart_impl"
         compileSdk = 36
         minSdk = 24
 
@@ -31,7 +34,7 @@ kotlin {
     // A step-by-step guide on how to include this library in an XCode
     // project can be found here:
     // https://developer.android.com/kotlin/multiplatform/migrate
-    val xcfName = "shopping-cart-apiKit"
+    val xcfName = "shopping-cart-implKit"
 
     iosX64 {
         binaries.framework {
@@ -59,11 +62,33 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
+                implementation(projects.uikit)
                 implementation(projects.coreNavigation)
+                implementation(projects.coreArchitecture)
+                implementation(projects.shoppingCartApi)
+
                 implementation(libs.kotlin.stdlib)
                 // Add KMP dependencies here
+                implementation(libs.kotlin.serialization.json)
+                
+                // compose
+                implementation(compose.runtime)
+                implementation(compose.foundation)
+                implementation(compose.material3)
+                implementation(compose.materialIconsExtended)
+                implementation(compose.ui)
+                implementation(compose.components.resources)
+                implementation(compose.components.uiToolingPreview)
+                implementation(libs.androidx.lifecycle.runtimeCompose)
+
+                // decompose
                 implementation(libs.decompose)
+                implementation(libs.decompose.compose)
+                implementation(libs.decompose.compose.experimental)
+
+                implementation(libs.ktor.client.core)
                 implementation(libs.kotlin.coroutines.core)
+                implementation(libs.kotlin.serialization.json)
             }
         }
 
