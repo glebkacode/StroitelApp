@@ -1,6 +1,8 @@
 rootProject.name = "StroitelApp"
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
+includeBuild("build-logic")
+
 pluginManagement {
     repositories {
         google {
