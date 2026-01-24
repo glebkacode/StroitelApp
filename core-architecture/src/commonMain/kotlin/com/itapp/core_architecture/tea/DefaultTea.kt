@@ -16,6 +16,30 @@ import kotlin.concurrent.atomics.AtomicBoolean
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.coroutines.CoroutineContext
 
+/**
+ * Реализация TEA store по умолчанию.
+ *
+ * Оркестрирует поток данных между reducer и effector-ами:
+ * 1. Intent отправляется через [accept]
+ * 2. Reducer обрабатывает intent и возвращает новое состояние + эффекты
+ * 3. Состояние эмитится через [state]
+ * 4. Эффекты передаются всем effector-ам
+ * 5. Effector-ы могут диспатчить новые intent или публиковать события
+ * 6. События эмитятся через [events]
+ *
+ * @param State неизменяемый тип состояния
+ * @param Intent тип действия
+ * @param Effect тип побочного эффекта
+ * @param Event тип одноразового события
+ * @param initialState начальное состояние
+ * @param initialEffects эффекты для выполнения при инициализации
+ * @param dispatcher контекст корутин для основного цикла
+ * @param effectors список effector-ов для обработки эффектов
+ * @param reducer reducer для преобразования состояния
+ *
+ * @see Tea интерфейс
+ * @see TeaFactory для создания экземпляров
+ */
 @OptIn(ExperimentalAtomicApi::class)
 class DefaultTea<out State, in Intent, in Effect, Event>(
     initialState: State,

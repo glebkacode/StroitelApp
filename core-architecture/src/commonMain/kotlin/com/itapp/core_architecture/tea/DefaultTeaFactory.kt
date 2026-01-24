@@ -2,6 +2,18 @@ package com.itapp.core_architecture.tea
 
 import kotlin.coroutines.CoroutineContext
 
+/**
+ * Реализация [TeaFactory] по умолчанию.
+ *
+ * Создаёт [DefaultTea] экземпляры и автоматически вызывает [Tea.init].
+ *
+ * ## Использование
+ * ```kotlin
+ * val teaFactory: TeaFactory = DefaultTeaFactory()
+ * val tea = teaFactory.create(...)
+ * // tea уже инициализирован, можно сразу использовать
+ * ```
+ */
 class DefaultTeaFactory : TeaFactory {
 
     override fun <State, Intent, Event, Effect> create(

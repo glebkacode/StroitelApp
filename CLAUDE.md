@@ -1,8 +1,8 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Этот файл предоставляет руководство для Claude Code (claude.ai/code) при работе с кодом в этом репозитории.
 
-## Build Commands
+## Команды сборки
 
 ```bash
 # Android
@@ -11,36 +11,36 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 # Desktop (JVM)
 ./gradlew :composeApp:run
 
-# Server (Ktor, port 8080)
+# Server (Ktor, порт 8080)
 ./gradlew :server:run
 
-# Web (Wasm - modern browsers)
+# Web (Wasm - современные браузеры)
 ./gradlew :composeApp:wasmJsBrowserDevelopmentRun
 
-# Web (JS - older browsers)
+# Web (JS - старые браузеры)
 ./gradlew :composeApp:jsBrowserDevelopmentRun
 
-# iOS - open iosApp/ in Xcode
+# iOS - открыть iosApp/ в Xcode
 ```
 
-## Architecture Overview
+## Обзор архитектуры
 
-**Kotlin Multiplatform** project (Android, iOS, Web/Wasm, Desktop/JVM, Server) using **Compose Multiplatform** for shared UI.
+**Kotlin Multiplatform** проект (Android, iOS, Web/Wasm, Desktop/JVM, Server) с использованием **Compose Multiplatform** для общего UI.
 
-### Module Structure
+### Структура модулей
 
-Modules follow an **API/Implementation split pattern**:
-- `feature-api`: Public interfaces (e.g., `PhoneValidationComponent`)
-- `feature-impl`: Concrete implementations with layered architecture (presentation → domain → data)
+Модули следуют паттерну **API/Implementation split**:
+- `feature-api`: Публичные интерфейсы (например, `PhoneValidationComponent`)
+- `feature-impl`: Конкретные реализации с послойной архитектурой (presentation → domain → data)
 
-Core modules:
-- `core-architecture`: Custom TEA state management
-- `core-navigation`: Component system built on Decompose
-- `uikit`: Shared UI components and theming
+Основные модули:
+- `core-architecture`: Кастомный TEA для управления состоянием
+- `core-navigation`: Система компонентов на основе Decompose
+- `uikit`: Общие UI-компоненты и темизация
 
 ### TEA (The Elm Architecture)
 
-Custom state management in `core-architecture/src/commonMain/kotlin/com/itapp/core_architecture/tea/`:
+Кастомное управление состоянием в `core-architecture/src/commonMain/kotlin/com/itapp/core_architecture/tea/`:
 
 ```
 Intent → Reducer → State + Effects
@@ -48,17 +48,17 @@ Intent → Reducer → State + Effects
               Effector → Intent/Event
 ```
 
-Key classes:
-- `Tea<State, Intent, Event>`: Main interface with `state: StateFlow`, `events: Flow`, `accept(intent)`, `init()`, `dispose()`
-- `Reducer<State, Intent, Effect>`: Pure function `State.reduce(intent) → Next<State, Effect>`
-- `DslReducer`: DSL helper using `ReducerContext` for cleaner syntax (`state {}`, `effects()`)
-- `Effector<Effect, Intent, Event>`: Handles side effects, dispatches intents or publishes events
-- `CoroutineEffector`: Base class for async side effects with `dispatch(intent)` and `publish(event)`
-- `DefaultTea`: Orchestrates the flow, supports multiple effectors
+Ключевые классы:
+- `Tea<State, Intent, Event>`: Главный интерфейс с `state: StateFlow`, `events: Flow`, `accept(intent)`, `init()`, `dispose()`
+- `Reducer<State, Intent, Effect>`: Чистая функция `State.reduce(intent) → Next<State, Effect>`
+- `DslReducer`: DSL-хелпер с `ReducerContext` для чистого синтаксиса (`state {}`, `effects()`)
+- `Effector<Effect, Intent, Event>`: Обрабатывает побочные эффекты, диспатчит интенты или публикует события
+- `CoroutineEffector`: Базовый класс для асинхронных эффектов с `dispatch(intent)` и `publish(event)`
+- `DefaultTea`: Оркестрирует поток, поддерживает множество эффекторов
 
-### Component Pattern
+### Паттерн компонентов
 
-Components extend `BaseComponent` (Decompose `ComponentContext`) and implement `UiComponent`:
+Компоненты наследуют `BaseComponent` (Decompose `ComponentContext`) и реализуют `UiComponent`:
 
 ```kotlin
 @AssistedInject
@@ -81,37 +81,37 @@ class FeatureComponentImpl(
 
 ### Dependency Injection
 
-Uses **Metro** (`dev.zacsweeny.metro`):
-- `@DependencyGraph` for module graphs
-- `@Provides` / `@Binds` for bindings
-- `@AssistedInject` / `@AssistedFactory` for components with runtime parameters
+Используется **Metro** (`dev.zacsweeny.metro`):
+- `@DependencyGraph` для графов модулей
+- `@Provides` / `@Binds` для биндингов
+- `@AssistedInject` / `@AssistedFactory` для компонентов с runtime-параметрами
 
-Example in `auth-impl/src/commonMain/kotlin/com/itapp/auth_impl/di/AuthGraph.kt`.
+Пример в `auth-impl/src/commonMain/kotlin/com/itapp/auth_impl/di/AuthGraph.kt`.
 
-### Feature Module Layers
+### Слои feature-модулей
 
 ```
 presentation/
   └── feature_name/
       ├── component/     # ComponentImpl, Screen
-      ├── mapping/       # State → UiState mapping
-      └── mvi/           # Tea interface, StoreFactory, Reducer, Effector
+      ├── mapping/       # State → UiState маппинг
+      └── mvi/           # Tea интерфейс, StoreFactory, Reducer, Effector
 domain/
-  ├── model/            # Domain DTOs
-  ├── repository/       # Repository interfaces
-  └── usecase/          # Use case interfaces and implementations
+  ├── model/            # Domain DTO
+  ├── repository/       # Интерфейсы репозиториев
+  └── usecase/          # Интерфейсы и реализации use cases
 data/
-  ├── api/              # DataSource interfaces and implementations
-  ├── model/            # Request/Response DTOs, mappings
-  └── repository/       # Repository implementations
+  ├── api/              # Интерфейсы и реализации DataSource
+  ├── model/            # Request/Response DTO, маппинги
+  └── repository/       # Реализации репозиториев
 ```
 
-## Key Dependencies
+## Ключевые зависимости
 
 - Kotlin 2.2.20, Compose Multiplatform 1.9.1
-- Decompose 3.4.0 (navigation/lifecycle)
+- Decompose 3.4.0 (навигация/жизненный цикл)
 - Metro 0.7.3 (DI)
-- Ktor 3.3.1 (HTTP client/server)
+- Ktor 3.3.1 (HTTP клиент/сервер)
 - kotlinx-serialization, kotlinx-coroutines
-- MVIKotlin 4.3.0 (some modules)
-- Coil 3.0.0-alpha08 (image loading)
+- MVIKotlin 4.3.0 (некоторые модули)
+- Coil 3.0.0-alpha08 (загрузка изображений)

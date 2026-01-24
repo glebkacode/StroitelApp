@@ -1,22 +1,31 @@
 package com.itapp.core_navigation.childLists
 
+/**
+ * Интерфейс для навигации по ленивому списку компонентов.
+ *
+ * Позволяет трансформировать состояние списка [LazyLists] с автоматическим
+ * управлением жизненным циклом дочерних компонентов.
+ *
+ * @param C тип конфигурации элементов списка
+ *
+ * @see LazyListsNavigation полная реализация с подпиской
+ */
 interface LazyListsNavigator<C : Any> {
 
     /**
-     * Transforms the current [LazyLists] state to a new one.
+     * Преобразует текущее состояние [LazyLists] в новое.
      *
-     * During the navigation process, the Child Lazy Lists navigation model compares the new [LazyLists] state
-     * with the previous one. The navigation model ensures that all removed components are destroyed,
-     * and updates lifecycles of the existing components to match the new state.
+     * В процессе навигации модель сравнивает новое состояние с предыдущим.
+     * Модель обеспечивает уничтожение удалённых компонентов и обновление
+     * жизненных циклов существующих компонентов.
      *
-     * The navigation is usually performed synchronously, which means that by the time
-     * the `navigate` method returns, the navigation is finished and all component lifecycles are
-     * moved into required states.
+     * Навигация обычно выполняется синхронно - к моменту возврата из метода
+     * навигация завершена и все жизненные циклы обновлены.
      *
-     * Should be called on the main thread.
+     * **Должен вызываться на главном потоке.**
      *
-     * @param transformer transforms the current [LazyLists] state to a new one.
-     * @param onComplete called when the navigation is finished (either synchronously or asynchronously).
+     * @param transformer функция преобразования текущего состояния в новое
+     * @param onComplete callback, вызываемый по завершении навигации
      */
     fun navigate(
         transformer: (LazyLists<C>) -> LazyLists<C>,

@@ -3,11 +3,24 @@ package com.itapp.core_navigation.childLists
 import kotlinx.serialization.Serializable
 
 /**
- * Represents a state of Child Lazy Lists navigation model.
+ * Состояние модели навигации Child Lazy Lists.
  *
- * @param items a list of child configurations, must be unique, can be empty.
- * @param firstVisibleIndex an index of the first visible item in the list. -1 if there is no first visible element
- * @param lastVisibleIndex an index of the last visible item in the list. -1 if there is no last visible element
+ * Хранит список конфигураций дочерних компонентов и индексы видимых элементов.
+ * Используется для управления жизненным циклом компонентов в зависимости от видимости.
+ *
+ * ## Использование
+ * ```kotlin
+ * // Создание с элементами
+ * val lists = LazyLists(listOf(Config(1), Config(2), Config(3)))
+ *
+ * // Обновление видимости
+ * val updated = lists.copy(firstVisibleIndex = 0, lastVisibleIndex = 2)
+ * ```
+ *
+ * @param C тип конфигурации, должен быть уникальным в списке
+ * @property items список конфигураций дочерних компонентов (может быть пустым)
+ * @property firstVisibleIndex индекс первого видимого элемента (-1 если нет видимых)
+ * @property lastVisibleIndex индекс последнего видимого элемента (-1 если нет видимых)
  */
 @Serializable
 data class LazyLists<out C : Any> internal constructor(
@@ -16,10 +29,15 @@ data class LazyLists<out C : Any> internal constructor(
     val lastVisibleIndex: Int,
 ) {
 
+    /**
+     * Создаёт [LazyLists] с указанными элементами без информации о видимости.
+     *
+     * @param items список конфигураций
+     */
     constructor(items: List<C>) : this(items = items, firstVisibleIndex = -1, lastVisibleIndex = -1)
 
     /**
-     * Creates empty [ChildLazyLists].
+     * Создаёт пустой [LazyLists].
      */
     constructor() : this(items = emptyList(), firstVisibleIndex = -1, lastVisibleIndex = -1)
 }
