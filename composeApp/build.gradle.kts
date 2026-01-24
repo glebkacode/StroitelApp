@@ -1,5 +1,3 @@
-import org.jetbrains.compose.desktop.application.dsl.TargetFormat
-import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -8,6 +6,8 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.composeHotReload)
+    alias(libs.plugins.kotlinSerialization)
+    alias(libs.plugins.metro)
 }
 
 kotlin {
@@ -27,25 +27,28 @@ kotlin {
         }
     }
     
-    jvm()
-    
-    js {
-        browser()
-        binaries.executable()
-    }
-    
-    @OptIn(ExperimentalWasmDsl::class)
-    wasmJs {
-        browser()
-        binaries.executable()
-    }
-    
     sourceSets {
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
         }
         commonMain.dependencies {
+            implementation(projects.uikit)
+            implementation(projects.coreNavigation)
+            implementation(projects.coreArchitecture)
+            implementation(projects.shared)
+            implementation(projects.authApi)
+            implementation(projects.authImpl)
+            implementation(projects.productsApi)
+            implementation(projects.productsImpl)
+            implementation(projects.shelvesRenderApi)
+            implementation(projects.shelvesRenderImpl)
+            implementation(projects.shelvesApi)
+            implementation(projects.shelvesImpl)
+
+            implementation(libs.kotlin.stdlib)
+            implementation(libs.kotlin.serialization.json)
+
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.material3)
@@ -54,14 +57,14 @@ kotlin {
             implementation(compose.components.uiToolingPreview)
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
-            implementation(projects.shared)
+
+            // decompose
+            implementation(libs.decompose)
+            implementation(libs.decompose.compose)
+            implementation(libs.decompose.compose.experimental)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
-        }
-        jvmMain.dependencies {
-            implementation(compose.desktop.currentOs)
-            implementation(libs.kotlinx.coroutinesSwing)
         }
     }
 }
@@ -95,16 +98,4 @@ android {
 
 dependencies {
     debugImplementation(compose.uiTooling)
-}
-
-compose.desktop {
-    application {
-        mainClass = "com.itapp.stroitelapp.MainKt"
-
-        nativeDistributions {
-            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "com.itapp.stroitelapp"
-            packageVersion = "1.0.0"
-        }
-    }
 }

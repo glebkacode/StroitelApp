@@ -1,0 +1,61 @@
+package com.itapp.shelves_render_impl.shelf.horizontal
+
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import com.arkivanov.decompose.ComponentContext
+import com.arkivanov.essenty.lifecycle.subscribe
+import com.itapp.core_navigation.BaseComponent
+import com.itapp.shelves_render_api.shelf.horizontal.HorizontalShelfComponent
+import com.itapp.shelves_render_api.shelf.horizontal.HorizontalShelfModel
+import dev.zacsweers.metro.Assisted
+import dev.zacsweers.metro.AssistedFactory
+import dev.zacsweers.metro.AssistedInject
+
+@AssistedInject
+class HorizontalShelfComponentImpl(
+    @Assisted componentContext: ComponentContext,
+    @Assisted override val model: HorizontalShelfModel,
+    @Assisted private val onItemClicked: (Long, Long) -> Unit,
+    @Assisted("shelfVisible") private val onShelfVisible: (Long) -> Unit,
+    @Assisted("shelfItemVisible") private val onShelfItemVisible: (Long) -> Unit
+) : BaseComponent(componentContext), HorizontalShelfComponent {
+
+    init {
+        println("HorizontalShelfComponent id = ${model.id} Created ${hashCode()}")
+        lifecycle.subscribe(
+            onStart = { println("HorizontalShelfComponent index = ${model.id} Start ${hashCode()}") },
+            onStop = { println("HorizontalShelfComponent index = ${model.id} Stop ${hashCode()}") }
+        )
+    }
+
+    override fun onItemCardClicked(id: Long) {
+        onItemClicked(model.id, id)
+    }
+
+    override fun onVisible(id: Long) {
+        onShelfVisible(id)
+    }
+
+    override fun onItemVisible(id: Long) {
+        onShelfItemVisible(id)
+    }
+
+    @Composable
+    override fun render(modifier: Modifier) {
+        HorizontalShelf(
+            modifier = modifier,
+            component = this
+        )
+    }
+
+    @AssistedFactory
+    interface Factory : HorizontalShelfComponent.Factory {
+        override operator fun invoke(
+            componentContext: ComponentContext,
+            model: HorizontalShelfModel,
+            onItemClicked: (Long, Long) -> Unit,
+            @Assisted("shelfVisible") onShelfVisible: (Long) -> Unit,
+            @Assisted("shelfItemVisible") onShelfItemVisible: (Long) -> Unit
+        ): HorizontalShelfComponentImpl
+    }
+}

@@ -1,6 +1,8 @@
 rootProject.name = "StroitelApp"
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
+includeBuild("build-logic")
+
 pluginManagement {
     repositories {
         google {
@@ -35,3 +37,16 @@ plugins {
 include(":composeApp")
 include(":server")
 include(":shared")
+include(":auth-api")
+include(":auth-impl")
+include(":core-navigation")
+include(":uikit")
+include(":core-architecture")
+include(":products-api")
+include(":products-impl")
+include(":shelves-render-api")
+include(":shelves-render-impl")
+include(":shelves-api")
+include(":shelves-impl")
+include(":shopping-cart-api")
+include(":shopping-cart-impl")

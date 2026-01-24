@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="auth_login_title">Вход в приложение Магазин Строитель</string>
+    <string name="auth_login_text">Войти</string>
+
+    <!--Phone Validation-->
+    <string name="phone_validation_hint_text">Номер мобильного телефона</string>
+    <string name="phone_validation_sign_up">Зарегистрироваться</string>
+
+    <!--Password validation-->
+    <string name="password_validation_hint_text">Введите пароль</string>
+    <string name="password_validation_forgot_password_text">Напонимать пароль</string>
+
+    <!--Sms validation-->
+    <string name="sms_validation_hint_text">Код из СМС</string>
+</resources>
