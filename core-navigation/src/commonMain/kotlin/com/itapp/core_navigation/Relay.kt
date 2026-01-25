@@ -59,7 +59,7 @@ internal class Relay<T> {
 internal class Lock {
 
     inline fun <T> synchronizedImpl(block: () -> T): T =
-        synchronized(block)
+        synchronized(this, block)
 }
 
 @Suppress("LEAKED_IN_PLACE_LAMBDA", "WRONG_INVOCATION_KIND")
@@ -69,4 +69,3 @@ internal inline fun <T> Lock.synchronized(block: () -> T): T {
 
     return synchronizedImpl(block)
 }
-
