@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(adb devices:*)",
+      "Bash(adb shell pm list packages:*)",
+      "Bash(adb shell monkey:*)",
+      "Bash(adb shell input:*)",
+      "Bash(adb shell:*)"
+    ]
+  }
+}
