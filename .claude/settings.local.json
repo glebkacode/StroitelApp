@@ -5,7 +5,10 @@
       "Bash(adb shell pm list packages:*)",
       "Bash(adb shell monkey:*)",
       "Bash(adb shell input:*)",
-      "Bash(adb shell:*)"
+      "Bash(adb shell:*)",
+      "Bash(gh pr create:*)",
+      "Bash(brew install:*)",
+      "Bash(gh auth:*)"
     ]
   }
 }
