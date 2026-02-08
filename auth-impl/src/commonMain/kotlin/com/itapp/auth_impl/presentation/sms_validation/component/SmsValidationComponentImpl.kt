@@ -3,12 +3,10 @@ package com.itapp.auth_impl.presentation.sms_validation.component
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.arkivanov.decompose.ComponentContext
-import com.arkivanov.essenty.lifecycle.doOnCreate
 import com.itapp.auth_api.sms_validation.SmsValidationComponent
-import com.itapp.auth_impl.domain.usecase.AuthUseCase
-import com.itapp.auth_impl.presentation.sms_validation.mapping.toUiState
-import com.itapp.auth_impl.presentation.sms_validation.mvi.SmsCodeValidationTea.Event
-import com.itapp.auth_impl.presentation.sms_validation.mvi.SmsCodeValidationTea.Intent
+import com.itapp.auth_impl.domain.usecase.ValidateSmsCodeUseCase
+import com.itapp.auth_impl.presentation.sms_validation.mapping.toUi
+import com.itapp.auth_impl.presentation.sms_validation.mvi.SmsValidationTea
 import com.itapp.auth_impl.presentation.sms_validation.mvi.smsValidationTea
 import com.itapp.core_architecture.getTea
 import com.itapp.core_architecture.tea.TeaFactory
@@ -27,46 +25,49 @@ import kotlinx.coroutines.flow.stateIn
 @AssistedInject
 class SmsValidationComponentImpl(
     @Assisted componentContext: ComponentContext,
+    @Assisted("phoneNumber") private val phoneNumber: String,
+    @Assisted("onSmsValidated") private val onSmsValidated: () -> Unit,
+    @Assisted("onBack") private val onBack: () -> Unit,
     private val teaFactory: TeaFactory,
-    private val authUseCase: AuthUseCase,
-    @Assisted("phone") private val phone: String,
-    @Assisted("password") private val password: String,
-    @Assisted private val openProducts: () -> Unit
+    private val validateSmsCodeUseCase: ValidateSmsCodeUseCase
 ) : BaseComponent(componentContext), SmsValidationComponent {
 
     private val store = instanceKeeper.getTea {
         teaFactory.smsValidationTea(
+            phoneNumber = phoneNumber,
+            validateSmsCodeUseCase = validateSmsCodeUseCase,
             mainContext = Dispatchers.Main,
-            defaultContext = Dispatchers.Default,
-            ioContext = Dispatchers.IO,
-            phone = phone,
-            password = password,
-            authUseCase = authUseCase
+            ioContext = Dispatchers.IO
         )
     }
 
-    override val uiState = store.state.map { state -> state.toUiState() }.stateIn(
+    init {
+        store.events
+            .onEach { event ->
+                when (event) {
+                    is SmsValidationTea.Effect.NavigateToPassword -> onSmsValidated()
+                    is SmsValidationTea.Effect.VerifySmsCode -> { /* handled by effector */ }
+                }
+            }
+            .launchIn(componentScope)
+    }
+
+    override val uiState = store.state.map { it.toUi() }.stateIn(
         scope = componentScope,
         started = SharingStarted.Lazily,
-        initialValue = SmsValidationComponent.UiState()
+        initialValue = SmsValidationComponent.UiState(phoneNumber = phoneNumber)
     )
 
-    init {
-        lifecycle.doOnCreate {
-            store.events.onEach { event ->
-                when (event) {
-                    is Event.OpenProducts -> openProducts()
-                }
-            }.launchIn(componentScope)
-        }
+    override fun onSmsCodeChanged(text: String) {
+        store.accept(SmsValidationTea.Intent.SmsCodeChanged(text))
     }
 
-    override fun onSmsChanged(text: String) {
-        store.accept(Intent.SmsCodeChanged(text))
+    override fun onConfirmClicked() {
+        store.accept(SmsValidationTea.Intent.ConfirmClicked)
     }
 
-    override fun onContinueClicked() {
-        store.accept(Intent.LoginClicked)
+    override fun onBackClicked() {
+        onBack()
     }
 
     @Composable
@@ -81,9 +82,9 @@ class SmsValidationComponentImpl(
     interface Factory : SmsValidationComponent.Factory {
         override operator fun invoke(
             componentContext: ComponentContext,
-            @Assisted("phone") phone: String,
-            @Assisted("password") password: String,
-            openProducts: () -> Unit
-        ) : SmsValidationComponentImpl
+            @Assisted("phoneNumber") phoneNumber: String,
+            @Assisted("onSmsValidated") onSmsValidated: () -> Unit,
+            @Assisted("onBack") onBack: () -> Unit
+        ): SmsValidationComponentImpl
     }
 }

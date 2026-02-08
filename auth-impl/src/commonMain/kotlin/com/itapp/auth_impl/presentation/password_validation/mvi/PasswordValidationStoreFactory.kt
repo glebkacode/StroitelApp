@@ -1,115 +1,84 @@
 package com.itapp.auth_impl.presentation.password_validation.mvi
 
-import com.itapp.auth_impl.domain.model.ValidationPhoneDto
-import com.itapp.auth_impl.domain.usecase.ValidatePhoneNumberUseCase
-import com.itapp.auth_impl.presentation.password_validation.mvi.PasswordValidationTea.*
+import com.itapp.auth_impl.domain.model.LoginDto
+import com.itapp.auth_impl.domain.usecase.LoginUseCase
+import com.itapp.auth_impl.presentation.password_validation.mvi.PasswordValidationTea.Effect
+import com.itapp.auth_impl.presentation.password_validation.mvi.PasswordValidationTea.Intent
+import com.itapp.auth_impl.presentation.password_validation.mvi.PasswordValidationTea.State
 import com.itapp.core_architecture.tea.CoroutineEffector
 import com.itapp.core_architecture.tea.DslReducer
 import com.itapp.core_architecture.tea.ReducerContext
 import com.itapp.core_architecture.tea.Tea
 import com.itapp.core_architecture.tea.TeaFactory
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 
 internal fun TeaFactory.passwordValidationTea(
-    phone: String,
+    phoneNumber: String,
+    loginUseCase: LoginUseCase,
     mainContext: CoroutineContext,
-    ioContext: CoroutineContext,
-    defaultContext: CoroutineContext,
-    validatePhoneNumberUseCase: ValidatePhoneNumberUseCase
+    ioContext: CoroutineContext
 ): PasswordValidationTea =
-    object : PasswordValidationTea, Tea<State, Intent, Event> by create(
-        initialState = State.Init(data = PasswordValidationData(phone = phone)),
+    object : PasswordValidationTea, Tea<State, Intent, Effect> by create(
+        initialState = State(phoneNumber = phoneNumber),
         dispatcher = mainContext,
         effectors = listOf(
-            PasswordValidationEffector(
-                mainContext, ioContext, defaultContext, validatePhoneNumberUseCase
-            )
+            LoginEffector(loginUseCase, mainContext)
         ),
-        reducer = PasswordValidationReducer()
+        reducer = PasswordValidationReducer(),
     ) {}
 
-private class PasswordValidationEffector(
-    private val mainContext: CoroutineContext,
-    private val ioContext: CoroutineContext,
-    private val defaultContext: CoroutineContext,
-    private val validatePhoneNumberUseCase: ValidatePhoneNumberUseCase
-) : CoroutineEffector<Effect, Intent, Event>(mainContext) {
+private class PasswordValidationReducer : DslReducer<State, Intent, Effect>() {
 
-    override fun onEffect(effect: Effect) {
-        when (effect) {
-            is Effect.ValidatePassword -> onLoginClicked(
-                phone = effect.phone,
-                password = effect.password
-            )
-        }
-    }
-
-    private fun onLoginClicked(phone: String, password: String) {
-        scope.launch(defaultContext) {
-            validatePhoneNumberUseCase(
-                ValidatePhoneNumberUseCase.Params(
-                    validationPhoneDto = ValidationPhoneDto(phone, password)
-                )
-            ).fold(
-                onSuccess = {
-                    withContext(mainContext) {
-                        publish(
-                            Event.OpenSmsValidation(
-                                phone = phone,
-                                password = password
-                            )
-                        )
-                    }
-                },
-                onFailure = { throwable ->
-                    withContext(mainContext) {
-                        dispatch(Intent.LoginFailed(throwable))
-                    }
+    override fun ReducerContext<State, Effect>.reduce(intent: Intent) {
+        when (intent) {
+            is Intent.PasswordChanged -> {
+                state { copy(password = intent.text, error = null) }
+            }
+            Intent.LoginClicked -> {
+                val currentState = state
+                if (currentState.password.isNotBlank() && !currentState.isLoading) {
+                    state { copy(isLoading = true, error = null) }
+                    effects(Effect.PerformLogin(currentState.phoneNumber, currentState.password))
                 }
-            )
+            }
+            Intent.LoginSuccess -> {
+                state { copy(isLoading = false) }
+                effects(Effect.NavigateToSuccess)
+            }
+            is Intent.LoginError -> {
+                state { copy(isLoading = false, error = intent.message) }
+            }
         }
     }
 }
 
-private class PasswordValidationReducer : DslReducer<State, Intent, Effect>() {
+private class LoginEffector(
+    private val loginUseCase: LoginUseCase,
+    mainContext: CoroutineContext
+) : CoroutineEffector<Effect, Intent, Effect>(mainContext) {
 
-    override fun ReducerContext<State, Effect>.reduce(
-        intent: Intent
-    ) {
-        when (intent) {
-            is Intent.LoginFailed -> {
-                state {
-                    State.AuthFailed(
-                        data = PasswordValidationData(
-                            phone = data.phone,
-                            password = data.password
-                        ),
-                        throwable = intent.throwable
-                    )
-                }
-            }
+    override fun onEffect(effect: Effect) {
+        when (effect) {
+            is Effect.PerformLogin -> performLogin(effect.phoneNumber, effect.password)
+            is Effect.NavigateToSuccess -> publish(effect)
+        }
+    }
 
-            is Intent.PasswordChanged -> {
-                state {
-                    State.PasswordChanged(
-                        data = PasswordValidationData(
-                            phone = data.phone,
-                            password = intent.text
-                        )
-                    )
-                }
-            }
-
-            Intent.ValidatePasswordClicked -> {
-                effects(
-                    Effect.ValidatePassword(
-                        phone = state.data.phone,
-                        password = state.data.password
+    private fun performLogin(phoneNumber: String, password: String) {
+        scope.launch {
+            val result = loginUseCase(
+                LoginUseCase.Params(
+                    loginDto = LoginDto(
+                        phoneNumber = phoneNumber,
+                        password = password
                     )
                 )
-            }
+            )
+            result.fold(
+                onSuccess = { dispatch(Intent.LoginSuccess) },
+                onFailure = { dispatch(Intent.LoginError(it.message ?: "Unknown error")) }
+            )
         }
     }
 }

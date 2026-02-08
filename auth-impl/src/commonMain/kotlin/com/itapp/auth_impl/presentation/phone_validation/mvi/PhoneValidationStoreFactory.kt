@@ -1,10 +1,7 @@
 package com.itapp.auth_impl.presentation.phone_validation.mvi
 
-import com.itapp.auth_impl.presentation.phone_validation.mvi.PhoneValidationTea.Effect
-import com.itapp.auth_impl.presentation.phone_validation.mvi.PhoneValidationTea.Event
 import com.itapp.auth_impl.presentation.phone_validation.mvi.PhoneValidationTea.Intent
 import com.itapp.auth_impl.presentation.phone_validation.mvi.PhoneValidationTea.State
-import com.itapp.core_architecture.tea.CoroutineEffector
 import com.itapp.core_architecture.tea.DslReducer
 import com.itapp.core_architecture.tea.ReducerContext
 import com.itapp.core_architecture.tea.Tea
@@ -15,33 +12,20 @@ internal fun TeaFactory.phoneValidationTea(
     mainContext: CoroutineContext,
     ioContext: CoroutineContext
 ): PhoneValidationTea =
-    object : PhoneValidationTea, Tea<State, Intent, Event> by create(
+    object : PhoneValidationTea, Tea<State, Intent, Nothing> by create(
         initialState = State(),
         dispatcher = mainContext,
-        effectors = listOf(PhoneValidationEffectorImpl(mainContext)),
+        effectors = emptyList(),
         reducer = PhoneValidationReducer(),
     ) {}
 
-private class PhoneValidationEffectorImpl(
-    mainContext: CoroutineContext
-) : CoroutineEffector<Effect, Intent, Event>(mainContext) {
+private class PhoneValidationReducer : DslReducer<State, Intent, Nothing>() {
 
-    override fun onEffect(effect: Effect) {
-        when (effect) {
-            is Effect.PhoneApply -> {
-                publish(Event.OpenPasswordValidation(effect.phone))
-            }
-        }
-    }
-}
-
-private class PhoneValidationReducer : DslReducer<State, Intent, Effect>() {
-
-    override fun ReducerContext<State, Effect>.reduce(
+    override fun ReducerContext<State, Nothing>.reduce(
         intent: Intent
     ) {
         when (intent) {
-            Intent.PhoneApply -> { effects(Effect.PhoneApply(phone = state.phone)) }
+            Intent.PhoneApply -> { /* No-op for now */ }
             is Intent.PhoneChanged -> { state { copy(phone = intent.text) } }
         }
     }

@@ -1,131 +1,105 @@
 package com.itapp.auth_impl.presentation.password_validation.mapping
 
-import com.itapp.auth_api.password_validation.PasswordValidationComponent.UiState
-import com.itapp.auth_impl.presentation.password_validation.mvi.PasswordValidationTea.PasswordValidationData
 import com.itapp.auth_impl.presentation.password_validation.mvi.PasswordValidationTea.State
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
+import kotlin.test.assertNull
 
-class PasswordValidationStateMappingTest {
-
-    // region Init state tests
+class StateMappingTest {
 
     @Test
-    fun `should return Loading when Init state toUiState called`() {
-        // Given
-        val data = PasswordValidationData(phone = "+79001234567", password = "password123")
-        val state = State.Init(data = data)
+    fun `should map phoneNumber correctly when toUi called`() {
+        val state = State(
+            phoneNumber = "+79001234567",
+            password = "password",
+            isLoading = false,
+            error = null
+        )
 
-        // When
-        val uiState = state.toUiState()
+        val uiState = state.toUi()
 
-        // Then
-        assertTrue(uiState is UiState.Loading)
+        assertEquals("+79001234567", uiState.phoneNumber)
     }
 
     @Test
-    fun `should map password correctly when Init state toUiState called`() {
-        // Given
-        val data = PasswordValidationData(phone = "+79001234567", password = "myPassword")
-        val state = State.Init(data = data)
+    fun `should map password correctly when toUi called`() {
+        val state = State(
+            phoneNumber = "+79001234567",
+            password = "secretPassword",
+            isLoading = false,
+            error = null
+        )
 
-        // When
-        val uiState = state.toUiState()
+        val uiState = state.toUi()
 
-        // Then
-        assertEquals("myPassword", uiState.password)
+        assertEquals("secretPassword", uiState.password)
     }
 
     @Test
-    fun `should map empty password when Init state toUiState called with empty password`() {
-        // Given
-        val data = PasswordValidationData(phone = "+79001234567", password = "")
-        val state = State.Init(data = data)
+    fun `should map isLoading correctly when toUi called with loading true`() {
+        val state = State(
+            phoneNumber = "+79001234567",
+            password = "password",
+            isLoading = true,
+            error = null
+        )
 
-        // When
-        val uiState = state.toUiState()
+        val uiState = state.toUi()
 
-        // Then
+        assertEquals(true, uiState.isLoading)
+    }
+
+    @Test
+    fun `should map isLoading correctly when toUi called with loading false`() {
+        val state = State(
+            phoneNumber = "+79001234567",
+            password = "password",
+            isLoading = false,
+            error = null
+        )
+
+        val uiState = state.toUi()
+
+        assertEquals(false, uiState.isLoading)
+    }
+
+    @Test
+    fun `should map error correctly when toUi called with error`() {
+        val state = State(
+            phoneNumber = "+79001234567",
+            password = "password",
+            isLoading = false,
+            error = "Login failed"
+        )
+
+        val uiState = state.toUi()
+
+        assertEquals("Login failed", uiState.error)
+    }
+
+    @Test
+    fun `should map error correctly when toUi called without error`() {
+        val state = State(
+            phoneNumber = "+79001234567",
+            password = "password",
+            isLoading = false,
+            error = null
+        )
+
+        val uiState = state.toUi()
+
+        assertNull(uiState.error)
+    }
+
+    @Test
+    fun `should map default state correctly when toUi called`() {
+        val state = State()
+
+        val uiState = state.toUi()
+
+        assertEquals("", uiState.phoneNumber)
         assertEquals("", uiState.password)
+        assertEquals(false, uiState.isLoading)
+        assertNull(uiState.error)
     }
-
-    // endregion
-
-    // region PasswordChanged state tests
-
-    @Test
-    fun `should return Content when PasswordChanged state toUiState called`() {
-        // Given
-        val data = PasswordValidationData(phone = "+79001234567", password = "password123")
-        val state = State.PasswordChanged(data = data)
-
-        // When
-        val uiState = state.toUiState()
-
-        // Then
-        assertTrue(uiState is UiState.Content)
-    }
-
-    @Test
-    fun `should map password correctly when PasswordChanged state toUiState called`() {
-        // Given
-        val data = PasswordValidationData(phone = "+79001234567", password = "newPassword")
-        val state = State.PasswordChanged(data = data)
-
-        // When
-        val uiState = state.toUiState()
-
-        // Then
-        assertEquals("newPassword", uiState.password)
-    }
-
-    // endregion
-
-    // region AuthFailed state tests
-
-    @Test
-    fun `should return Error when AuthFailed state toUiState called`() {
-        // Given
-        val data = PasswordValidationData(phone = "+79001234567", password = "password")
-        val throwable = RuntimeException("Auth failed")
-        val state = State.AuthFailed(data = data, throwable = throwable)
-
-        // When
-        val uiState = state.toUiState()
-
-        // Then
-        assertTrue(uiState is UiState.Error)
-    }
-
-    @Test
-    fun `should map throwable correctly when AuthFailed state toUiState called`() {
-        // Given
-        val data = PasswordValidationData(phone = "+79001234567", password = "password")
-        val throwable = RuntimeException("Network error")
-        val state = State.AuthFailed(data = data, throwable = throwable)
-
-        // When
-        val uiState = state.toUiState()
-
-        // Then
-        assertTrue(uiState is UiState.Error)
-        assertEquals(throwable, (uiState as UiState.Error).throwable)
-    }
-
-    @Test
-    fun `should map password correctly when AuthFailed state toUiState called`() {
-        // Given
-        val data = PasswordValidationData(phone = "+79001234567", password = "failedPassword")
-        val throwable = RuntimeException("Error")
-        val state = State.AuthFailed(data = data, throwable = throwable)
-
-        // When
-        val uiState = state.toUiState()
-
-        // Then
-        assertEquals("failedPassword", uiState.password)
-    }
-
-    // endregion
 }

@@ -1,8 +1,10 @@
 package com.itapp.auth_impl.data.repository
 
 import com.itapp.auth_impl.data.api.AuthDataSource
+import com.itapp.auth_impl.data.model.mapping.toLoginRequest
 import com.itapp.auth_impl.data.model.mapping.toRequest
 import com.itapp.auth_impl.domain.model.LoginDto
+import com.itapp.auth_impl.domain.model.ValidateSmsCodeDto
 import com.itapp.auth_impl.domain.model.ValidationPhoneDto
 import com.itapp.auth_impl.domain.repository.AuthRepository
 import dev.zacsweers.metro.Inject
@@ -16,7 +18,11 @@ class AuthRepositoryImpl(
         authDataSource.validatePhone(request = dto.toRequest())
     }
 
+    override suspend fun validateSmsCode(dto: ValidateSmsCodeDto) {
+        authDataSource.validateSmsCode(request = dto.toRequest())
+    }
+
     override suspend fun login(dto: LoginDto) {
-        authDataSource.login(request = dto.toRequest())
+        authDataSource.login(request = dto.toLoginRequest())
     }
 }

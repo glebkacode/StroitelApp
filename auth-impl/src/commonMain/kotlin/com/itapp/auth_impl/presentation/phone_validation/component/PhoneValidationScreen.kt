@@ -102,7 +102,7 @@ fun PhoneValidationScreen(
         Spacer(modifier = Modifier.weight(1f))
 
         TextButton(
-            onClick = {}
+            onClick = { component.onRegisterClicked() }
         ) {
             Text(
                 text = stringResource(Res.string.phone_validation_sign_up),
@@ -128,6 +128,8 @@ fun PhoneValidationScreen() {
                 override fun onPhoneChanged(text: String) {}
 
                 override fun onNextClicked() {}
+
+                override fun onRegisterClicked() {}
 
                 @Composable
                 override fun render(modifier: Modifier) {}

@@ -39,12 +39,6 @@ kotlin {
             implementation(projects.shared)
             implementation(projects.authApi)
             implementation(projects.authImpl)
-            implementation(projects.productsApi)
-            implementation(projects.productsImpl)
-            implementation(projects.shelvesRenderApi)
-            implementation(projects.shelvesRenderImpl)
-            implementation(projects.shelvesApi)
-            implementation(projects.shelvesImpl)
 
             implementation(libs.kotlin.stdlib)
             implementation(libs.kotlin.serialization.json)

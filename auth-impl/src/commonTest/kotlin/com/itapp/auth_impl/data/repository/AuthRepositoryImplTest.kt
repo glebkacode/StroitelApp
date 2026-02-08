@@ -54,34 +54,31 @@ class AuthRepositoryImplTest {
     @Test
     fun `should call dataSource with correct request when login called`() = runTest {
         val dto = LoginDto(
-            phone = "+79001234567",
-            password = "password123",
-            smsCode = "1234"
+            phoneNumber = "+79001234567",
+            password = "password123"
         )
 
         repository.login(dto)
 
         assertEquals(1, fakeDataSource.loginCalls.size)
-        assertEquals("+79001234567", fakeDataSource.loginCalls[0].phone)
+        assertEquals("+79001234567", fakeDataSource.loginCalls[0].phoneNumber)
         assertEquals("password123", fakeDataSource.loginCalls[0].password)
-        assertEquals("1234", fakeDataSource.loginCalls[0].smsCode)
     }
 
     @Test
     fun `should propagate exception when login dataSource throws`() = runTest {
-        val expectedException = RuntimeException("Auth failed")
+        val expectedException = RuntimeException("Login failed")
         fakeDataSource.loginException = expectedException
 
         val dto = LoginDto(
-            phone = "+79001234567",
-            password = "password123",
-            smsCode = "1234"
+            phoneNumber = "+79001234567",
+            password = "password123"
         )
 
         val exception = assertFailsWith<RuntimeException> {
             repository.login(dto)
         }
 
-        assertEquals("Auth failed", exception.message)
+        assertEquals("Login failed", exception.message)
     }
 }

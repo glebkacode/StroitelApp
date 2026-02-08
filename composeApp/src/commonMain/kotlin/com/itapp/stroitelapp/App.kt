@@ -17,7 +17,6 @@ fun App(
         Children(component.stack) {
             when (val child = it.instance) {
                 is RootComponent.Child.Auth -> child.component.render(modifier)
-                is RootComponent.Child.Products -> child.component.render(modifier)
             }
         }
     }

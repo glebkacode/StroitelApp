@@ -13,7 +13,7 @@ internal class Relay<T> {
     private var observers = emptySet<(T) -> Unit>()
 
     fun accept(value: T) {
-        lock.synchronized {
+        lock.withLockSync {
             queue.addLast(value)
 
             if (isDraining) {
@@ -31,7 +31,7 @@ internal class Relay<T> {
             val value: T
             val observersCopy: Set<(T) -> Unit>
 
-            lock.synchronized {
+            lock.withLockSync {
                 if (queue.isEmpty()) {
                     isDraining = false
                     return
@@ -48,24 +48,22 @@ internal class Relay<T> {
     }
 
     fun subscribe(observer: (T) -> Unit): Cancellation {
-        lock.synchronized { observers += observer }
+        lock.withLockSync { observers += observer }
 
         return Cancellation {
-            lock.synchronized { observers -= observer }
+            lock.withLockSync { observers -= observer }
         }
     }
 }
 
 internal class Lock {
-
-    inline fun <T> synchronizedImpl(block: () -> T): T =
-        synchronized(this, block)
-}
-
-@Suppress("LEAKED_IN_PLACE_LAMBDA", "WRONG_INVOCATION_KIND")
-@OptIn(ExperimentalContracts::class)
-internal inline fun <T> Lock.synchronized(block: () -> T): T {
-    contract { callsInPlace(block, InvocationKind.EXACTLY_ONCE) }
-
-    return synchronizedImpl(block)
+    // Since Relay is used on the main thread for Decompose navigation,
+    // we can use a simple inline execution for common code.
+    // The synchronization primitives are platform-specific.
+    @Suppress("LEAKED_IN_PLACE_LAMBDA", "WRONG_INVOCATION_KIND")
+    @OptIn(ExperimentalContracts::class)
+    inline fun <T> withLockSync(block: () -> T): T {
+        contract { callsInPlace(block, InvocationKind.EXACTLY_ONCE) }
+        return block()
+    }
 }

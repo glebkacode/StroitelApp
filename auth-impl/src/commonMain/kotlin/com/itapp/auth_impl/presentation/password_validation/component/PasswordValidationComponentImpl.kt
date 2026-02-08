@@ -3,13 +3,10 @@ package com.itapp.auth_impl.presentation.password_validation.component
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.arkivanov.decompose.ComponentContext
-import com.arkivanov.essenty.lifecycle.doOnCreate
 import com.itapp.auth_api.password_validation.PasswordValidationComponent
-import com.itapp.auth_api.password_validation.PasswordValidationComponent.UiState
-import com.itapp.auth_impl.domain.usecase.ValidatePhoneNumberUseCase
-import com.itapp.auth_impl.presentation.password_validation.mapping.toUiState
-import com.itapp.auth_impl.presentation.password_validation.mvi.PasswordValidationTea.Event.*
-import com.itapp.auth_impl.presentation.password_validation.mvi.PasswordValidationTea.Intent
+import com.itapp.auth_impl.domain.usecase.LoginUseCase
+import com.itapp.auth_impl.presentation.password_validation.mapping.toUi
+import com.itapp.auth_impl.presentation.password_validation.mvi.PasswordValidationTea
 import com.itapp.auth_impl.presentation.password_validation.mvi.passwordValidationTea
 import com.itapp.core_architecture.getTea
 import com.itapp.core_architecture.tea.TeaFactory
@@ -26,54 +23,51 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 
 @AssistedInject
-class PasswordValidationComponentImpl internal constructor(
+class PasswordValidationComponentImpl(
     @Assisted componentContext: ComponentContext,
+    @Assisted("phoneNumber") private val phoneNumber: String,
+    @Assisted("onAuthSuccess") private val onAuthSuccess: () -> Unit,
+    @Assisted("onBack") private val onBack: () -> Unit,
     private val teaFactory: TeaFactory,
-    private val validatePhoneNumberUseCase: ValidatePhoneNumberUseCase,
-    @Assisted private val phone: String,
-    @Assisted private val openSmsScreen: (String, String) -> Unit
+    private val loginUseCase: LoginUseCase
 ) : BaseComponent(componentContext), PasswordValidationComponent {
 
     private val store = instanceKeeper.getTea {
         teaFactory.passwordValidationTea(
-            phone = phone,
-            validatePhoneNumberUseCase = validatePhoneNumberUseCase,
+            phoneNumber = phoneNumber,
+            loginUseCase = loginUseCase,
             mainContext = Dispatchers.Main,
-            ioContext = Dispatchers.IO,
-            defaultContext = Dispatchers.Default
+            ioContext = Dispatchers.IO
         )
     }
 
-    override val uiState = store.state.map { it.toUiState() }.stateIn(
+    init {
+        store.events
+            .onEach { event ->
+                when (event) {
+                    is PasswordValidationTea.Effect.NavigateToSuccess -> onAuthSuccess()
+                    is PasswordValidationTea.Effect.PerformLogin -> { /* handled by effector */ }
+                }
+            }
+            .launchIn(componentScope)
+    }
+
+    override val uiState = store.state.map { it.toUi() }.stateIn(
         scope = componentScope,
         started = SharingStarted.Lazily,
-        initialValue = UiState.Loading()
+        initialValue = PasswordValidationComponent.UiState(phoneNumber = phoneNumber)
     )
 
-    init {
-        lifecycle.doOnCreate {
-            store.events.onEach { event ->
-                when (event) {
-                    is OpenSmsValidation -> openSmsScreen(event.phone, event.password)
-                }
-            }.launchIn(componentScope)
-        }
-    }
-
     override fun onPasswordChanged(text: String) {
-        store.accept(Intent.PasswordChanged(text))
+        store.accept(PasswordValidationTea.Intent.PasswordChanged(text))
     }
 
-    override fun onNextClicked() {
-        store.accept(Intent.ValidatePasswordClicked)
-    }
-
-    override fun onForgotPasswordClicked() {
-
+    override fun onLoginClicked() {
+        store.accept(PasswordValidationTea.Intent.LoginClicked)
     }
 
     override fun onBackClicked() {
-
+        onBack()
     }
 
     @Composable
@@ -88,8 +82,9 @@ class PasswordValidationComponentImpl internal constructor(
     interface Factory : PasswordValidationComponent.Factory {
         override operator fun invoke(
             componentContext: ComponentContext,
-            phone: String,
-            openSmsScreen: (String, String) -> Unit
+            @Assisted("phoneNumber") phoneNumber: String,
+            @Assisted("onAuthSuccess") onAuthSuccess: () -> Unit,
+            @Assisted("onBack") onBack: () -> Unit
         ): PasswordValidationComponentImpl
     }
 }

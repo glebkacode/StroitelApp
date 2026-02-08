@@ -3,7 +3,6 @@ package com.itapp.auth_impl.presentation.phone_validation.component
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.arkivanov.decompose.ComponentContext
-import com.arkivanov.essenty.lifecycle.doOnCreate
 import com.itapp.auth_api.phone_validation.PhoneValidationComponent
 import com.itapp.auth_impl.presentation.phone_validation.mapping.toUi
 import com.itapp.auth_impl.presentation.phone_validation.mvi.PhoneValidationTea
@@ -17,16 +16,15 @@ import dev.zacsweers.metro.AssistedInject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 
 @AssistedInject
 class PhoneValidationComponentImpl(
     @Assisted componentContext: ComponentContext,
-    private val teaFactory: TeaFactory,
-    @Assisted private val openPasswordScreen: (String) -> Unit,
+    @Assisted private val onNavigateToPassword: (phoneNumber: String) -> Unit,
+    @Assisted private val onNavigateToRegistration: () -> Unit,
+    private val teaFactory: TeaFactory
 ) : BaseComponent(componentContext), PhoneValidationComponent {
 
     private val store = instanceKeeper.getTea {
@@ -42,24 +40,19 @@ class PhoneValidationComponentImpl(
         initialValue = PhoneValidationComponent.UiState()
     )
 
-    init {
-        lifecycle.doOnCreate {
-            store.events.onEach { event ->
-                when (event) {
-                    is PhoneValidationTea.Event.OpenPasswordValidation -> openPasswordScreen(
-                        event.phone
-                    )
-                }
-            }.launchIn(componentScope)
-        }
-    }
-
     override fun onPhoneChanged(text: String) {
         store.accept(PhoneValidationTea.Intent.PhoneChanged(text))
     }
 
     override fun onNextClicked() {
-        store.accept(PhoneValidationTea.Intent.PhoneApply)
+        val phone = store.state.value.phone
+        if (phone.isNotBlank()) {
+            onNavigateToPassword(phone)
+        }
+    }
+
+    override fun onRegisterClicked() {
+        onNavigateToRegistration()
     }
 
     @Composable
@@ -74,7 +67,8 @@ class PhoneValidationComponentImpl(
     interface Factory : PhoneValidationComponent.Factory {
         override operator fun invoke(
             componentContext: ComponentContext,
-            openPasswordScreen: (String) -> Unit
+            onNavigateToPassword: (phoneNumber: String) -> Unit,
+            onNavigateToRegistration: () -> Unit
         ): PhoneValidationComponentImpl
     }
 }

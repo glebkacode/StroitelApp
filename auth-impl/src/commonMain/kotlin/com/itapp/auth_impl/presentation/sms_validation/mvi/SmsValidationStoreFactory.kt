@@ -1,119 +1,81 @@
 package com.itapp.auth_impl.presentation.sms_validation.mvi
 
-import com.itapp.auth_impl.domain.model.LoginDto
-import com.itapp.auth_impl.domain.usecase.AuthUseCase
-import com.itapp.auth_impl.presentation.sms_validation.mvi.SmsCodeValidationTea.Effect
-import com.itapp.auth_impl.presentation.sms_validation.mvi.SmsCodeValidationTea.Event
-import com.itapp.auth_impl.presentation.sms_validation.mvi.SmsCodeValidationTea.Intent
-import com.itapp.auth_impl.presentation.sms_validation.mvi.SmsCodeValidationTea.State
+import com.itapp.auth_impl.domain.usecase.ValidateSmsCodeUseCase
+import com.itapp.auth_impl.presentation.sms_validation.mvi.SmsValidationTea.Effect
+import com.itapp.auth_impl.presentation.sms_validation.mvi.SmsValidationTea.Intent
+import com.itapp.auth_impl.presentation.sms_validation.mvi.SmsValidationTea.State
 import com.itapp.core_architecture.tea.CoroutineEffector
 import com.itapp.core_architecture.tea.DslReducer
 import com.itapp.core_architecture.tea.ReducerContext
 import com.itapp.core_architecture.tea.Tea
 import com.itapp.core_architecture.tea.TeaFactory
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 
 internal fun TeaFactory.smsValidationTea(
+    phoneNumber: String,
+    validateSmsCodeUseCase: ValidateSmsCodeUseCase,
     mainContext: CoroutineContext,
-    defaultContext: CoroutineContext,
-    ioContext: CoroutineContext,
-    phone: String,
-    password: String,
-    authUseCase: AuthUseCase
-): SmsCodeValidationTea = object : SmsCodeValidationTea, Tea<State, Intent, Event> by create(
-    initialState = State(
-        phone = phone,
-        password = password
-    ),
-    dispatcher = mainContext,
-    effectors = listOf(
-        SmsValidationEffectorImpl(
-            mainContext,
-            defaultContext,
-            ioContext,
-            authUseCase
-        )
-    ),
-    reducer = SmsValidationReducer()
-) {}
+    ioContext: CoroutineContext
+): SmsValidationTea =
+    object : SmsValidationTea, Tea<State, Intent, Effect> by create(
+        initialState = State(phoneNumber = phoneNumber),
+        dispatcher = mainContext,
+        effectors = listOf(
+            SmsVerificationEffector(validateSmsCodeUseCase, mainContext)
+        ),
+        reducer = SmsValidationReducer(),
+    ) {}
 
-private class SmsValidationEffectorImpl(
-    private val mainContext: CoroutineContext,
-    private val defaultContext: CoroutineContext,
-    private val ioContext: CoroutineContext,
-    private val authUseCase: AuthUseCase
-) : CoroutineEffector<Effect, Intent, Event>(mainContext) {
+private class SmsValidationReducer : DslReducer<State, Intent, Effect>() {
 
-    override fun onEffect(effect: Effect) {
-        when (effect) {
-            is Effect.Login -> onLoginClicked(
-                phone = effect.phone,
-                password = effect.password,
-                smsCode = effect.smsCode
-            )
-        }
-    }
-
-    private fun onLoginClicked(
-        phone: String,
-        password: String,
-        smsCode: String
-    ) {
-        scope.launch(defaultContext) {
-            authUseCase(
-                AuthUseCase.Params(
-                    dto = (LoginDto(
-                        phone = phone,
-                        password = password,
-                        smsCode = smsCode
-                    ))
-                )
-            ).fold(
-                onSuccess = {
-                    withContext(mainContext) {
-                        dispatch(Intent.AuthSuccess)
-                        publish(Event.OpenProducts)
-                    }
-                },
-                onFailure = { throwable ->
-                    withContext(mainContext) {
-                        dispatch(Intent.AuthFailed(throwable))
-                    }
+    override fun ReducerContext<State, Effect>.reduce(intent: Intent) {
+        when (intent) {
+            is Intent.SmsCodeChanged -> {
+                state { copy(smsCode = intent.text, error = null) }
+            }
+            Intent.ConfirmClicked -> {
+                val currentState = state
+                if (currentState.smsCode.isNotBlank() && !currentState.isLoading) {
+                    state { copy(isLoading = true, error = null) }
+                    effects(Effect.VerifySmsCode(currentState.phoneNumber, currentState.smsCode))
                 }
-            )
+            }
+            Intent.VerificationSuccess -> {
+                state { copy(isLoading = false) }
+                effects(Effect.NavigateToPassword)
+            }
+            is Intent.VerificationError -> {
+                state { copy(isLoading = false, error = intent.message) }
+            }
         }
     }
 }
 
-private class SmsValidationReducer : DslReducer<State, Intent, Effect>() {
+private class SmsVerificationEffector(
+    private val validateSmsCodeUseCase: ValidateSmsCodeUseCase,
+    mainContext: CoroutineContext
+) : CoroutineEffector<Effect, Intent, Effect>(mainContext) {
 
-    override fun ReducerContext<State, Effect>.reduce(
-        intent: Intent
-    ) {
-        when (intent) {
-            is Intent.AuthFailed -> {
-                state { copy(loading = false, throwable = intent.throwable) }
-            }
+    override fun onEffect(effect: Effect) {
+        when (effect) {
+            is Effect.VerifySmsCode -> verifySmsCode(effect.phoneNumber, effect.smsCode)
+            is Effect.NavigateToPassword -> publish(effect)
+        }
+    }
 
-            Intent.AuthSuccess -> {
-                state { copy(loading = false) }
-            }
-
-            Intent.LoginClicked -> {
-                effects(
-                    Effect.Login(
-                        phone = state.phone,
-                        password = state.password,
-                        smsCode = state.smsCode
-                    )
+    private fun verifySmsCode(phoneNumber: String, smsCode: String) {
+        scope.launch {
+            val result = validateSmsCodeUseCase(
+                ValidateSmsCodeUseCase.Params(
+                    phoneNumber = phoneNumber,
+                    smsCode = smsCode
                 )
-            }
-
-            is Intent.SmsCodeChanged -> {
-                state { copy(loading = false, smsCode = intent.text) }
-            }
+            )
+            result.fold(
+                onSuccess = { dispatch(Intent.VerificationSuccess) },
+                onFailure = { dispatch(Intent.VerificationError(it.message ?: "Unknown error")) }
+            )
         }
     }
 }

@@ -8,10 +8,12 @@ interface PhoneValidationComponent : UiComponent {
     val uiState: StateFlow<UiState>
     fun onPhoneChanged(text: String)
     fun onNextClicked()
+    fun onRegisterClicked()
     interface Factory {
         operator fun invoke(
             componentContext: ComponentContext,
-            openPasswordScreen: (String) -> Unit
+            onNavigateToPassword: (phoneNumber: String) -> Unit,
+            onNavigateToRegistration: () -> Unit
         ) : PhoneValidationComponent
     }
     data class UiState(

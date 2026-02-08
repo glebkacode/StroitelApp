@@ -1,107 +1,105 @@
 package com.itapp.auth_impl.presentation.sms_validation.mapping
 
-import com.itapp.auth_impl.presentation.sms_validation.mvi.SmsCodeValidationTea.State
+import com.itapp.auth_impl.presentation.sms_validation.mvi.SmsValidationTea.State
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
+import kotlin.test.assertNull
 
-class SmsValidationStateMappingTest {
+class StateMappingTest {
 
     @Test
-    fun `should map loading correctly when toUiState called with loading true`() {
-        // Given
-        val state = State(loading = true, smsCode = "1234")
+    fun `should map phoneNumber correctly when toUi called`() {
+        val state = State(
+            phoneNumber = "+79001234567",
+            smsCode = "1234",
+            isLoading = false,
+            error = null
+        )
 
-        // When
-        val uiState = state.toUiState()
+        val uiState = state.toUi()
 
-        // Then
-        assertTrue(uiState.loading)
+        assertEquals("+79001234567", uiState.phoneNumber)
     }
 
     @Test
-    fun `should map loading correctly when toUiState called with loading false`() {
-        // Given
-        val state = State(loading = false, smsCode = "1234")
+    fun `should map smsCode correctly when toUi called`() {
+        val state = State(
+            phoneNumber = "+79001234567",
+            smsCode = "5678",
+            isLoading = false,
+            error = null
+        )
 
-        // When
-        val uiState = state.toUiState()
+        val uiState = state.toUi()
 
-        // Then
-        assertFalse(uiState.loading)
+        assertEquals("5678", uiState.smsCode)
     }
 
     @Test
-    fun `should map smsCode correctly when toUiState called`() {
-        // Given
-        val state = State(loading = false, smsCode = "9876")
+    fun `should map isLoading correctly when toUi called with loading true`() {
+        val state = State(
+            phoneNumber = "+79001234567",
+            smsCode = "1234",
+            isLoading = true,
+            error = null
+        )
 
-        // When
-        val uiState = state.toUiState()
+        val uiState = state.toUi()
 
-        // Then
-        assertEquals("9876", uiState.smsCode)
+        assertEquals(true, uiState.isLoading)
     }
 
     @Test
-    fun `should map empty smsCode when toUiState called with empty code`() {
-        // Given
-        val state = State(loading = false, smsCode = "")
+    fun `should map isLoading correctly when toUi called with loading false`() {
+        val state = State(
+            phoneNumber = "+79001234567",
+            smsCode = "1234",
+            isLoading = false,
+            error = null
+        )
 
-        // When
-        val uiState = state.toUiState()
+        val uiState = state.toUi()
 
-        // Then
-        assertEquals("", uiState.smsCode)
+        assertEquals(false, uiState.isLoading)
     }
 
     @Test
-    fun `should map default state correctly when toUiState called`() {
-        // Given
+    fun `should map error correctly when toUi called with error`() {
+        val state = State(
+            phoneNumber = "+79001234567",
+            smsCode = "1234",
+            isLoading = false,
+            error = "Invalid code"
+        )
+
+        val uiState = state.toUi()
+
+        assertEquals("Invalid code", uiState.error)
+    }
+
+    @Test
+    fun `should map error correctly when toUi called without error`() {
+        val state = State(
+            phoneNumber = "+79001234567",
+            smsCode = "1234",
+            isLoading = false,
+            error = null
+        )
+
+        val uiState = state.toUi()
+
+        assertNull(uiState.error)
+    }
+
+    @Test
+    fun `should map default state correctly when toUi called`() {
         val state = State()
 
-        // When
-        val uiState = state.toUiState()
+        val uiState = state.toUi()
 
-        // Then
-        assertTrue(uiState.loading)
+        assertEquals("", uiState.phoneNumber)
         assertEquals("", uiState.smsCode)
-    }
-
-    @Test
-    fun `should ignore phone field when toUiState called`() {
-        // Given
-        val state = State(
-            loading = false,
-            phone = "+79001234567",
-            password = "password",
-            smsCode = "1234"
-        )
-
-        // When
-        val uiState = state.toUiState()
-
-        // Then
-        // UiState doesn't contain phone or password, only loading and smsCode
-        assertEquals("1234", uiState.smsCode)
-        assertFalse(uiState.loading)
-    }
-
-    @Test
-    fun `should ignore throwable field when toUiState called`() {
-        // Given
-        val state = State(
-            loading = false,
-            smsCode = "5678",
-            throwable = RuntimeException("Error")
-        )
-
-        // When
-        val uiState = state.toUiState()
-
-        // Then
-        // UiState doesn't contain throwable
-        assertEquals("5678", uiState.smsCode)
+        assertEquals(false, uiState.isLoading)
+        assertNull(uiState.error)
     }
 }

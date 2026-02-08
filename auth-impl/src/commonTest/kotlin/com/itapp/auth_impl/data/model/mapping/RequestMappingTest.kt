@@ -32,41 +32,26 @@ class RequestMappingTest {
     }
 
     @Test
-    fun `should map phone correctly when LoginDto toRequest called`() {
+    fun `should map phoneNumber correctly when LoginDto toLoginRequest called`() {
         val dto = LoginDto(
-            phone = "+79001234567",
-            password = "password123",
-            smsCode = "1234"
+            phoneNumber = "+79001234567",
+            password = "password123"
         )
 
-        val request = dto.toRequest()
+        val request = dto.toLoginRequest()
 
-        assertEquals("+79001234567", request.phone)
+        assertEquals("+79001234567", request.phoneNumber)
     }
 
     @Test
-    fun `should map password correctly when LoginDto toRequest called`() {
+    fun `should map password correctly when LoginDto toLoginRequest called`() {
         val dto = LoginDto(
-            phone = "+79001234567",
-            password = "password123",
-            smsCode = "1234"
+            phoneNumber = "+79001234567",
+            password = "secretPassword"
         )
 
-        val request = dto.toRequest()
+        val request = dto.toLoginRequest()
 
-        assertEquals("password123", request.password)
-    }
-
-    @Test
-    fun `should map smsCode correctly when LoginDto toRequest called`() {
-        val dto = LoginDto(
-            phone = "+79001234567",
-            password = "password123",
-            smsCode = "1234"
-        )
-
-        val request = dto.toRequest()
-
-        assertEquals("1234", request.smsCode)
+        assertEquals("secretPassword", request.password)
     }
 }
