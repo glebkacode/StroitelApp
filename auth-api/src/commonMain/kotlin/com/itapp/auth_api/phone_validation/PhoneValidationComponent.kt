@@ -7,13 +7,16 @@ import kotlinx.coroutines.flow.StateFlow
 interface PhoneValidationComponent : UiComponent {
     val uiState: StateFlow<UiState>
     fun onPhoneChanged(text: String)
-    fun onNextClicked()
-    fun onRegisterClicked()
+    fun onLoginClicked()
+
+    data class Callbacks(
+        val onAuthSuccess: () -> Unit,
+    )
+
     interface Factory {
         operator fun invoke(
             componentContext: ComponentContext,
-            onNavigateToPassword: (phoneNumber: String) -> Unit,
-            onNavigateToRegistration: () -> Unit
+            callbacks: Callbacks,
         ) : PhoneValidationComponent
     }
     data class UiState(

@@ -9,20 +9,12 @@
 
     <!--Password Validation-->
     <string name="password_validation_title">Введите пароль</string>
-    <string name="password_validation_hint_text">Пароль</string>
-    <string name="password_validation_button">Войти</string>
+    <string name="password_validation_hint_text">Введите пароль</string>
+    <string name="password_validation_button">Продолжить</string>
+    <string name="password_validation_remind_password">Напомнить пароль</string>
 
     <!--SMS Validation-->
     <string name="sms_validation_title">Введите код из SMS</string>
     <string name="sms_validation_hint_text">Код подтверждения</string>
     <string name="sms_validation_button">Подтвердить</string>
-
-    <!--Registration-->
-    <string name="registration_title">Регистрация</string>
-    <string name="registration_first_name_hint">Имя</string>
-    <string name="registration_last_name_hint">Фамилия</string>
-    <string name="registration_login_hint">Придумайте логин</string>
-    <string name="registration_password_hint">Придумайте пароль</string>
-    <string name="registration_phone_hint">Номер мобильного телефона</string>
-    <string name="registration_button">Зарегистрироватсья</string>
 </resources>

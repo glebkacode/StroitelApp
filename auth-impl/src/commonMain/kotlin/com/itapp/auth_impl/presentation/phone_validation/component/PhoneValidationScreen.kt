@@ -1,5 +1,6 @@
 package com.itapp.auth_impl.presentation.phone_validation.component
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -11,7 +12,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -32,7 +32,6 @@ import stroitelapp.auth_impl.generated.resources.Res
 import stroitelapp.auth_impl.generated.resources.auth_login_text
 import stroitelapp.auth_impl.generated.resources.auth_login_title
 import stroitelapp.auth_impl.generated.resources.phone_validation_hint_text
-import stroitelapp.auth_impl.generated.resources.phone_validation_sign_up
 
 @Composable
 fun PhoneValidationScreen(
@@ -83,7 +82,7 @@ fun PhoneValidationScreen(
 
         Button(
             modifier = Modifier.fillMaxWidth(),
-            onClick = { component.onNextClicked() },
+            onClick = { component.onLoginClicked() },
             colors = ButtonDefaults.buttonColors(
                 containerColor = StroitelTheme.colorScheme.text.moscow,
                 contentColor = StroitelTheme.colorScheme.text.piter,
@@ -100,24 +99,12 @@ fun PhoneValidationScreen(
         }
 
         Spacer(modifier = Modifier.weight(1f))
-
-        TextButton(
-            onClick = { component.onRegisterClicked() }
-        ) {
-            Text(
-                text = stringResource(Res.string.phone_validation_sign_up),
-                color = StroitelTheme.colorScheme.text.moscow,
-                fontWeight = FontWeight.Normal,
-                fontSize = 15.sp
-            )
-        }
-        Spacer(modifier = Modifier.height(24.dp))
     }
 }
 
 @Preview
 @Composable
-fun PhoneValidationScreen() {
+fun PhoneValidationScreenPreview() {
     MaterialTheme {
         PhoneValidationScreen(
             modifier = Modifier,
@@ -127,9 +114,7 @@ fun PhoneValidationScreen() {
 
                 override fun onPhoneChanged(text: String) {}
 
-                override fun onNextClicked() {}
-
-                override fun onRegisterClicked() {}
+                override fun onLoginClicked() {}
 
                 @Composable
                 override fun render(modifier: Modifier) {}

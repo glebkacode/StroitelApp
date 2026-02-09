@@ -4,7 +4,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.arkivanov.decompose.ComponentContext
 import com.itapp.auth_api.password_validation.PasswordValidationComponent
-import com.itapp.auth_impl.domain.usecase.LoginUseCase
 import com.itapp.auth_impl.presentation.password_validation.mapping.toUi
 import com.itapp.auth_impl.presentation.password_validation.mvi.PasswordValidationTea
 import com.itapp.auth_impl.presentation.password_validation.mvi.passwordValidationTea
@@ -17,57 +16,46 @@ import dev.zacsweers.metro.AssistedInject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 
 @AssistedInject
 class PasswordValidationComponentImpl(
     @Assisted componentContext: ComponentContext,
-    @Assisted("phoneNumber") private val phoneNumber: String,
-    @Assisted("onAuthSuccess") private val onAuthSuccess: () -> Unit,
-    @Assisted("onBack") private val onBack: () -> Unit,
-    private val teaFactory: TeaFactory,
-    private val loginUseCase: LoginUseCase
+    @Assisted private val callbacks: PasswordValidationComponent.Callbacks,
+    private val teaFactory: TeaFactory
 ) : BaseComponent(componentContext), PasswordValidationComponent {
 
     private val store = instanceKeeper.getTea {
         teaFactory.passwordValidationTea(
-            phoneNumber = phoneNumber,
-            loginUseCase = loginUseCase,
             mainContext = Dispatchers.Main,
             ioContext = Dispatchers.IO
         )
     }
 
-    init {
-        store.events
-            .onEach { event ->
-                when (event) {
-                    is PasswordValidationTea.Effect.NavigateToSuccess -> onAuthSuccess()
-                    is PasswordValidationTea.Effect.PerformLogin -> { /* handled by effector */ }
-                }
-            }
-            .launchIn(componentScope)
-    }
-
     override val uiState = store.state.map { it.toUi() }.stateIn(
         scope = componentScope,
         started = SharingStarted.Lazily,
-        initialValue = PasswordValidationComponent.UiState(phoneNumber = phoneNumber)
+        initialValue = PasswordValidationComponent.UiState()
     )
 
     override fun onPasswordChanged(text: String) {
         store.accept(PasswordValidationTea.Intent.PasswordChanged(text))
     }
 
-    override fun onLoginClicked() {
-        store.accept(PasswordValidationTea.Intent.LoginClicked)
+    override fun onContinueClicked() {
+        val password = store.state.value.password
+        if (password.isNotBlank()) {
+            callbacks.onAuthSuccess()
+        }
+    }
+
+    override fun onRemindPasswordClicked() {
+        // TODO: Implement password reminder logic
     }
 
     override fun onBackClicked() {
-        onBack()
+        callbacks.onBack()
     }
 
     @Composable
@@ -82,9 +70,7 @@ class PasswordValidationComponentImpl(
     interface Factory : PasswordValidationComponent.Factory {
         override operator fun invoke(
             componentContext: ComponentContext,
-            @Assisted("phoneNumber") phoneNumber: String,
-            @Assisted("onAuthSuccess") onAuthSuccess: () -> Unit,
-            @Assisted("onBack") onBack: () -> Unit
+            callbacks: PasswordValidationComponent.Callbacks,
         ): PasswordValidationComponentImpl
     }
 }

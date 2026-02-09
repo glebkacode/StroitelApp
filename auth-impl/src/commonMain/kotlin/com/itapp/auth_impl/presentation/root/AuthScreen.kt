@@ -13,9 +13,7 @@ fun AuthScreen(
     Children(component.stack) {
         when (val child = it.instance) {
             is RootAuthComponent.Child.PhoneValidationChild -> child.component.render(modifier = modifier)
-            is RootAuthComponent.Child.SmsValidationChild -> child.component.render(modifier = modifier)
             is RootAuthComponent.Child.PasswordValidationChild -> child.component.render(modifier = modifier)
-            is RootAuthComponent.Child.RegistrationChild -> child.component.render(modifier = modifier)
         }
     }
 }

@@ -22,8 +22,7 @@ import kotlinx.coroutines.flow.stateIn
 @AssistedInject
 class PhoneValidationComponentImpl(
     @Assisted componentContext: ComponentContext,
-    @Assisted private val onNavigateToPassword: (phoneNumber: String) -> Unit,
-    @Assisted private val onNavigateToRegistration: () -> Unit,
+    @Assisted private val callbacks: PhoneValidationComponent.Callbacks,
     private val teaFactory: TeaFactory
 ) : BaseComponent(componentContext), PhoneValidationComponent {
 
@@ -44,15 +43,11 @@ class PhoneValidationComponentImpl(
         store.accept(PhoneValidationTea.Intent.PhoneChanged(text))
     }
 
-    override fun onNextClicked() {
+    override fun onLoginClicked() {
         val phone = store.state.value.phone
         if (phone.isNotBlank()) {
-            onNavigateToPassword(phone)
+            callbacks.onAuthSuccess()
         }
-    }
-
-    override fun onRegisterClicked() {
-        onNavigateToRegistration()
     }
 
     @Composable
@@ -67,8 +62,7 @@ class PhoneValidationComponentImpl(
     interface Factory : PhoneValidationComponent.Factory {
         override operator fun invoke(
             componentContext: ComponentContext,
-            onNavigateToPassword: (phoneNumber: String) -> Unit,
-            onNavigateToRegistration: () -> Unit
+            callbacks: PhoneValidationComponent.Callbacks,
         ): PhoneValidationComponentImpl
     }
 }
