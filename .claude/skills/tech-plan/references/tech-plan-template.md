@@ -1,0 +1,198 @@
+# Tech Plan: [Feature Name]
+
+## Meta
+
+| Key | Value |
+|-----|-------|
+| Feature | [name] |
+| Team | [activation / hardware / moneta / player / retention / vitrina] |
+| Based on | [spec file path or brief description] |
+| Total tasks | [N] |
+| Parallelizable | [M of N] |
+
+---
+
+## Dependency Graph
+
+```
+Phase 0: Contracts
+    |
+    +---> Phase 1: Implementation  [PARALLEL: Task 1.1 | Task 1.2 | Task 1.3]
+    |
+    v
+Phase 2: Integration
+    |
+    v
+Phase 3: Tests  [PARALLEL: Task 3.1 | Task 3.2]
+```
+
+---
+
+## Phase 0: Contracts
+
+> Sequential — must complete before Phase 1
+
+### Task 0.1: [Task Name]
+
+| | |
+|---|---|
+| **Size** | S / M / L |
+| **Creates** | `path/to/NewFile.kt` `(NEW)` |
+| **Modifies** | `path/to/ExistingFile.kt` |
+
+**Steps:**
+1. [Concrete action]
+2. [Concrete action]
+
+**Key code:**
+```kotlin
+// Interface, model, or contract to define
+```
+
+**Done when:**
+- [ ] [Verifiable condition]
+- [ ] [Verifiable condition]
+
+---
+
+## Phase 1: Implementation
+
+> PARALLEL — tasks are independent, execute simultaneously
+
+### Task 1.1: Data Layer
+
+| | |
+|---|---|
+| **Size** | M |
+| **Creates** | `path/to/FeatureApi.kt` `(NEW)`, `path/to/RepositoryImpl.kt` `(NEW)` |
+| **Modifies** | — |
+| **Depends on** | Phase 0 |
+
+**Steps:**
+1. [Create API interface]
+2. [Create RepositoryImpl]
+
+```kotlin
+// Key implementation skeleton
+```
+
+**Done when:**
+- [ ] [Condition]
+
+---
+
+### Task 1.2: Domain Layer
+
+| | |
+|---|---|
+| **Size** | S |
+| **Creates** | `path/to/UseCaseImpl.kt` `(NEW)` |
+| **Modifies** | — |
+| **Depends on** | Phase 0 |
+
+**Steps:**
+1. [Create use case implementation]
+
+```kotlin
+// Key implementation skeleton
+```
+
+**Done when:**
+- [ ] [Condition]
+
+---
+
+### Task 1.3: Presentation Layer
+
+| | |
+|---|---|
+| **Size** | L |
+| **Creates** | `path/to/State.kt` `(NEW)`, `path/to/ReducerImpl.kt` `(NEW)`, `path/to/ViewModel.kt` `(NEW)`, `path/to/Fragment.kt` `(NEW)` |
+| **Modifies** | — |
+| **Depends on** | Phase 0 |
+
+**Steps:**
+1. [Create State / Intent / Event]
+2. [Create ReducerImpl]
+3. [Create ViewModel]
+4. [Create Fragment with ComposeView]
+
+```kotlin
+// Key implementation skeleton
+```
+
+**Done when:**
+- [ ] [Condition]
+
+---
+
+## Phase 2: Integration
+
+> Sequential — depends on all Phase 1 tasks
+
+### Task 2.1: DI and Wiring
+
+| | |
+|---|---|
+| **Size** | S |
+| **Creates** | `path/to/DI.kt` `(NEW)` (or modifies existing) |
+| **Modifies** | `path/to/build.gradle.kts`, `path/to/nav_graph.xml` |
+| **Depends on** | Phase 1 (all tasks) |
+
+**Steps:**
+1. [Register dependencies in Koin module]
+2. [Add module dependencies in build.gradle.kts]
+3. [Add navigation entry if needed]
+4. [Register feature toggle if needed]
+
+```kotlin
+// Koin module
+val featureModule = module {
+    // registrations
+}
+```
+
+**Done when:**
+- [ ] App compiles
+- [ ] DI graph resolves without errors
+- [ ] Navigation to the screen works
+
+---
+
+## Phase 3: Tests
+
+> PARALLEL — test tasks are independent
+> Implementation details: delegate to `/testing` skill
+
+### Task 3.1: [Layer] Tests
+
+| | |
+|---|---|
+| **Size** | S / M / L |
+| **Creates** | `path/to/ClassTest.kt` `(NEW)` |
+| **Depends on** | Phase 2 |
+
+**What to test:**
+- [Scenario 1]
+- [Scenario 2]
+- [Scenario 3]
+
+### Task 3.2: [Layer] Tests
+
+| | |
+|---|---|
+| **Size** | S / M / L |
+| **Creates** | `path/to/ClassTest.kt` `(NEW)` |
+| **Depends on** | Phase 2 |
+
+**What to test:**
+- [Scenario 1]
+- [Scenario 2]
+- [Scenario 3]
+
+---
+
+## Out of Scope
+
+- [Explicitly excluded items]
+- [Future improvements — note but do not implement]
