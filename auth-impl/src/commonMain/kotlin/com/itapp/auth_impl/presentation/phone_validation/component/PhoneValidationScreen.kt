@@ -32,6 +32,7 @@ import stroitelapp.auth_impl.generated.resources.Res
 import stroitelapp.auth_impl.generated.resources.auth_login_text
 import stroitelapp.auth_impl.generated.resources.auth_login_title
 import stroitelapp.auth_impl.generated.resources.phone_validation_hint_text
+import stroitelapp.auth_impl.generated.resources.phone_validation_sign_up
 
 @Composable
 fun PhoneValidationScreen(
@@ -99,6 +100,16 @@ fun PhoneValidationScreen(
         }
 
         Spacer(modifier = Modifier.weight(1f))
+
+        Text(
+            text = stringResource(Res.string.phone_validation_sign_up),
+            color = StroitelTheme.colorScheme.text.moscow,
+            fontWeight = FontWeight.Normal,
+            fontSize = 15.sp,
+            modifier = Modifier
+                .clickable { component.onRegisterClicked() }
+                .padding(vertical = 16.dp)
+        )
     }
 }
 
@@ -115,6 +126,8 @@ fun PhoneValidationScreenPreview() {
                 override fun onPhoneChanged(text: String) {}
 
                 override fun onLoginClicked() {}
+
+                override fun onRegisterClicked() {}
 
                 @Composable
                 override fun render(modifier: Modifier) {}

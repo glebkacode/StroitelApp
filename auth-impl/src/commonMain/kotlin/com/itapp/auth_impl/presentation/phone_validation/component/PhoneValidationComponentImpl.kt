@@ -50,6 +50,10 @@ class PhoneValidationComponentImpl(
         }
     }
 
+    override fun onRegisterClicked() {
+        callbacks.onRegisterClicked()
+    }
+
     @Composable
     override fun render(modifier: Modifier) {
         PhoneValidationScreen(

@@ -1,53 +1,14 @@
 ---
-name: architecture
-description: Архитектура проекта и руководство по созданию новых фич. Используй при создании новых feature-модулей, реализации Clean Architecture слоёв, настройке TEA + Decompose + Compose, или когда нужно понять структуру проекта.
+name: explain-code
+description: Explains code with visual diagrams and analogies. Use when explaining how code works, 
+  teaching about a codebase, or when the user asks "how does this work?"
 ---
 
-# Архитектура проекта
-- Для понимания как в проекте структурируются модули и из каких папок состоят модули, смотри в [module-structure.md](references/module-structure.md)
-- Для понимания как в проекте устроена Clean Architecture, смотри в [clean-architecture.md](references/clean-architecture.md)
-- Для понимания как реализовывать в проекте presentation слой из Clean Architecture, смотри [presentation-architecture.md](references/presentation-architecture.md)
-- Для понимания как работать с DI в проекте, смотри [di.md](references/di.md)
+When explaining code, always include:
 
-## Чеклист создания новой фичи
+1. **Start with an analogy**: Compare the code to something from everyday life
+2. **Draw a diagram**: Use ASCII art to show the flow, structure, or relationships
+3. **Walk through the code**: Explain step-by-step what happens
+4. **Highlight a gotcha**: What's a common mistake or misconception?
 
-### Модули
-- [ ] Создать `feature-api` модуль
-- [ ] Создать `feature-impl` модуль
-- [ ] Добавить в `settings.gradle.kts`
-- [ ] Настроить `build.gradle.kts` с зависимостями
-
-### API модуль
-- [ ] `FeatureComponent` интерфейс с `UiState`, методами, `Factory`
-- [ ] Domain модели (если нужны снаружи)
-- [ ] UseCase абстрактные классы (если нужны снаружи)
-
-### Domain слой (impl)
-- [ ] Domain модели (`domain/model/`)
-- [ ] Repository интерфейс (`domain/repository/`)
-- [ ] UseCase абстрактный класс + реализация (`domain/usecase/`)
-
-### Data слой (impl)
-- [ ] Response/Request модели (`data/model/`)
-- [ ] Mapper extension-функции (`data/mapper/`)
-- [ ] DataSource интерфейс + реализация (`data/api/`)
-- [ ] Repository реализация (`data/repository/`)
-
-### Presentation слой (impl)
-- [ ] `FeatureTea` интерфейс (State, Intent, Effect, Event)
-- [ ] `FeatureReducer` (DslReducer)
-- [ ] `FeatureEffector` (CoroutineEffector)
-- [ ] `TeaFactory.featureTea()` extension
-- [ ] `StateMapping` (State → UiState)
-- [ ] `FeatureComponentImpl` с `@AssistedInject`
-- [ ] `FeatureScreen` (Compose)
-
-### DI
-- [ ] `FeatureGraph` с `@DependencyGraph`
-- [ ] Все `@Binds` для интерфейсов
-- [ ] Подключить к родительскому графу
-
-### Тесты
-- [ ] Unit-тесты для UseCase
-- [ ] Unit-тесты для Repository
-- [ ] Unit-тесты для Reducer (опционально)
+Keep explanations conversational. For complex concepts, use multiple analogies.

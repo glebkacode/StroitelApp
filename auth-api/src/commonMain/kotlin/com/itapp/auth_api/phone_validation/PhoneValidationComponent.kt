@@ -8,9 +8,11 @@ interface PhoneValidationComponent : UiComponent {
     val uiState: StateFlow<UiState>
     fun onPhoneChanged(text: String)
     fun onLoginClicked()
+    fun onRegisterClicked()
 
     data class Callbacks(
         val onAuthSuccess: () -> Unit,
+        val onRegisterClicked: () -> Unit,
     )
 
     interface Factory {

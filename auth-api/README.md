@@ -5,24 +5,20 @@ Public interfaces for the authentication feature.
 ## Screens Overview
 
 ```
-┌─────────────────────┐     ┌─────────────────────┐     ┌─────────────────────┐
-│  PhoneValidation    │────▶│  PasswordValidation │────▶│   SmsValidation     │
-│     Component       │     │      Component      │     │     Component       │
-└─────────────────────┘     └─────────────────────┘     └─────────────────────┘
-        │                           │                           │
-        ▼                           ▼                           ▼
-   Enter phone              Enter password               Enter SMS code
-                                                               │
-                                                               ▼
-                                                      ┌─────────────────┐
-                                                      │    Products     │
-                                                      └─────────────────┘
+┌─────────────────────┐     ┌─────────────────────┐
+│  PhoneValidation    │────▶│    Registration     │
+│     Component       │     │     Component       │
+└─────────────────────┘     └─────────────────────┘
+        │
+        ▼
+   Enter phone
+   (login or register)
 ```
 
 ## Components
 
 ### 1. PhoneValidationComponent
-First screen of auth flow - phone number input.
+First screen of auth flow — phone number input with login / register actions.
 
 **Location:** `phone_validation/PhoneValidationComponent.kt`
 
@@ -30,101 +26,82 @@ First screen of auth flow - phone number input.
 interface PhoneValidationComponent : UiComponent {
     val uiState: StateFlow<UiState>
     fun onPhoneChanged(text: String)
-    fun onNextClicked()
+    fun onLoginClicked()
+    fun onRegisterClicked()
+
+    data class Callbacks(
+        val onAuthSuccess: () -> Unit,
+        val onRegisterClicked: () -> Unit,
+    )
+
+    interface Factory {
+        operator fun invoke(
+            componentContext: ComponentContext,
+            callbacks: Callbacks,
+        ): PhoneValidationComponent
+    }
 
     data class UiState(val phone: String = "")
 }
 ```
 
-**Factory:**
-```kotlin
-interface Factory {
-    operator fun invoke(
-        componentContext: ComponentContext,
-        openPasswordScreen: (String) -> Unit  // Navigation callback
-    ): PhoneValidationComponent
-}
-```
-
 ---
 
-### 2. PasswordValidationComponent
-Second screen - password input and validation.
+### 2. RegistrationComponent
+Registration form with first name, last name, login, password, phone fields.
 
-**Location:** `password_validation/PasswordValidationComponent.kt`
+**Location:** `registration/RegistrationComponent.kt`
 
 ```kotlin
-interface PasswordValidationComponent : UiComponent {
+interface RegistrationComponent : UiComponent {
     val uiState: StateFlow<UiState>
+
+    fun onFirstNameChanged(text: String)
+    fun onLastNameChanged(text: String)
+    fun onLoginChanged(text: String)
     fun onPasswordChanged(text: String)
-    fun onNextClicked()
-    fun onForgotPasswordClicked()
+    fun onPhoneChanged(text: String)
+    fun onPasswordVisibilityToggle()
+    fun onFieldFocusLost(field: Field)
+    fun onRegisterClicked()
     fun onBackClicked()
 
-    sealed class UiState(open val password: String) {
-        data class Loading(override val password: String = "") : UiState(password)
-        data class Content(override val password: String = "") : UiState(password)
-        data class Error(override val password: String = "", val throwable: Throwable) : UiState(password)
+    enum class Field { FIRST_NAME, LAST_NAME, LOGIN, PASSWORD, PHONE }
+
+    data class Callbacks(
+        val onRegistrationSuccess: () -> Unit,
+        val onBack: () -> Unit,
+    )
+
+    interface Factory {
+        operator fun invoke(
+            componentContext: ComponentContext,
+            callbacks: Callbacks,
+        ): RegistrationComponent
     }
 }
 ```
 
-**Factory:**
-```kotlin
-interface Factory {
-    operator fun invoke(
-        componentContext: ComponentContext,
-        phone: String,                              // From previous screen
-        openSmsScreen: (String, String) -> Unit     // Navigation callback
-    ): PasswordValidationComponent
-}
-```
-
 ---
 
-### 3. SmsValidationComponent
-Final auth screen - SMS code verification.
-
-**Location:** `sms_validation/SmsValidationComponent.kt`
-
-```kotlin
-interface SmsValidationComponent : UiComponent {
-    val uiState: StateFlow<UiState>
-    fun onSmsChanged(text: String)
-    fun onContinueClicked()
-
-    data class UiState(
-        val loading: Boolean = true,
-        val smsCode: String = ""
-    )
-}
-```
-
-**Factory:**
-```kotlin
-interface Factory {
-    operator fun invoke(
-        componentContext: ComponentContext,
-        phone: String,
-        password: String,
-        openProducts: () -> Unit    // Navigation to Products flow
-    ): SmsValidationComponent
-}
-```
-
----
-
-### 4. RootAuthComponent
+### 3. RootAuthComponent
 Container component that orchestrates auth flow navigation.
 
 **Location:** `root/RootAuthComponent.kt`
 
 ```kotlin
 interface RootAuthComponent : UiComponent {
+    val stack: Value<ChildStack<*, Child>>
+
+    sealed interface Child {
+        class PhoneValidationChild(val component: PhoneValidationComponent) : Child
+        class RegistrationChild(val component: RegistrationComponent) : Child
+    }
+
     interface Factory {
         operator fun invoke(
             componentContext: ComponentContext,
-            openProducts: Lazy<() -> Unit>    // Lazy callback to avoid circular deps
+            onAuthSuccess: () -> Unit,
         ): RootAuthComponent
     }
 }
@@ -132,12 +109,12 @@ interface RootAuthComponent : UiComponent {
 
 ## Navigation Flow
 
-| From | Event | To |
-|------|-------|-----|
-| PhoneValidation | `openPasswordScreen(phone)` | PasswordValidation |
-| PasswordValidation | `openSmsScreen(phone, password)` | SmsValidation |
-| SmsValidation | `openProducts()` | Products (via RootComponent) |
+| From | Action | To |
+|------|--------|-----|
+| PhoneValidation | `onLoginClicked()` → `onAuthSuccess()` | Out of auth flow |
+| PhoneValidation | `onRegisterClicked()` | Registration |
+| Registration | `onRegistrationSuccess()` / `onBack()` | PhoneValidation |
 
 ## Dependencies
 
-This module has no external feature dependencies - it only defines interfaces.
+This module has no external feature dependencies — it only defines interfaces.

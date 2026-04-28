@@ -3,15 +3,14 @@ package com.itapp.auth_impl.presentation.root
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.arkivanov.decompose.ComponentContext
-import com.arkivanov.decompose.DelicateDecomposeApi
 import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.router.stack.StackNavigation
 import com.arkivanov.decompose.router.stack.childStack
 import com.arkivanov.decompose.router.stack.pop
-import com.arkivanov.decompose.router.stack.push
+import com.arkivanov.decompose.router.stack.pushNew
 import com.arkivanov.decompose.value.Value
-import com.itapp.auth_api.password_validation.PasswordValidationComponent
 import com.itapp.auth_api.phone_validation.PhoneValidationComponent
+import com.itapp.auth_api.registration.RegistrationComponent
 import com.itapp.auth_api.root.RootAuthComponent
 import com.itapp.core_navigation.BaseComponent
 import dev.zacsweers.metro.Assisted
@@ -19,13 +18,12 @@ import dev.zacsweers.metro.AssistedFactory
 import dev.zacsweers.metro.AssistedInject
 import kotlinx.serialization.Serializable
 
-@OptIn(DelicateDecomposeApi::class)
 @AssistedInject
 class RootAuthComponentImpl(
     @Assisted componentContext: ComponentContext,
     @Assisted private val onAuthSuccess: () -> Unit,
     private val phoneComponentFactory: Lazy<PhoneValidationComponent.Factory>,
-    private val passwordComponentFactory: Lazy<PasswordValidationComponent.Factory>,
+    private val registrationComponentFactory: Lazy<RegistrationComponent.Factory>,
 ) : BaseComponent(componentContext), RootAuthComponent {
 
     private val navigation = StackNavigation<Config>()
@@ -44,8 +42,8 @@ class RootAuthComponentImpl(
             Config.PhoneValidation -> RootAuthComponent.Child.PhoneValidationChild(
                 phoneValidationComponent(componentContext)
             )
-            Config.PasswordValidation -> RootAuthComponent.Child.PasswordValidationChild(
-                passwordValidationComponent(componentContext)
+            Config.Registration -> RootAuthComponent.Child.RegistrationChild(
+                registrationComponent(componentContext)
             )
         }
 
@@ -55,17 +53,18 @@ class RootAuthComponentImpl(
         phoneComponentFactory.value(
             componentContext = componentContext,
             callbacks = PhoneValidationComponent.Callbacks(
-                onAuthSuccess = { navigation.push(Config.PasswordValidation) },
+                onAuthSuccess = onAuthSuccess,
+                onRegisterClicked = { navigation.pushNew(Config.Registration) },
             ),
         )
 
-    private fun passwordValidationComponent(
-        componentContext: ComponentContext
-    ): PasswordValidationComponent =
-        passwordComponentFactory.value(
+    private fun registrationComponent(
+        componentContext: ComponentContext,
+    ): RegistrationComponent =
+        registrationComponentFactory.value(
             componentContext = componentContext,
-            callbacks = PasswordValidationComponent.Callbacks(
-                onAuthSuccess = onAuthSuccess,
+            callbacks = RegistrationComponent.Callbacks(
+                onRegistrationSuccess = { navigation.pop() },
                 onBack = { navigation.pop() },
             ),
         )
@@ -74,8 +73,9 @@ class RootAuthComponentImpl(
     private sealed interface Config {
         @Serializable
         data object PhoneValidation : Config
+
         @Serializable
-        data object PasswordValidation : Config
+        data object Registration : Config
     }
 
     @Composable

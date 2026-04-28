@@ -1,3 +1,0 @@
-# Описание задачи
-Сверстай новый экран ввода пароля, открывай его по нажатию на кнопку "Войти" на экране ввода номера телефона.
-Ссылка на макет Figma доступна по ссылке https://www.figma.com/design/jH8Se4kBfwHHv6Nj37oZIq/%D0%94%D0%B8%D0%B7%D0%B0%D0%B9%D0%BD-%D0%BC%D0%BE%D0%B1%D0%B8%D0%BB%D1%8C%D0%BD%D0%BE%D0%B3%D0%BE-%D0%BF%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F---Mobile-app-design--Community-?node-id=1-661&m=dev

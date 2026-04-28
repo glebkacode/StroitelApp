@@ -7,14 +7,17 @@
     <string name="phone_validation_hint_text">Номер мобильного телефона</string>
     <string name="phone_validation_sign_up">Зарегистрироваться</string>
 
-    <!--Password Validation-->
-    <string name="password_validation_title">Введите пароль</string>
-    <string name="password_validation_hint_text">Введите пароль</string>
-    <string name="password_validation_button">Продолжить</string>
-    <string name="password_validation_remind_password">Напомнить пароль</string>
-
-    <!--SMS Validation-->
-    <string name="sms_validation_title">Введите код из SMS</string>
-    <string name="sms_validation_hint_text">Код подтверждения</string>
-    <string name="sms_validation_button">Подтвердить</string>
+    <!--Registration-->
+    <string name="registration_title">Регистрация</string>
+    <string name="registration_hint_first_name">Имя</string>
+    <string name="registration_hint_last_name">Фамилия</string>
+    <string name="registration_hint_login">Придумайте логин</string>
+    <string name="registration_hint_password">Придумайте пароль</string>
+    <string name="registration_hint_phone">Номер мобильного телефона</string>
+    <string name="registration_button">Зарегистрироваться</string>
+    <string name="registration_error_first_name">Введите имя</string>
+    <string name="registration_error_last_name">Введите фамилию</string>
+    <string name="registration_error_login">Придумайте логин</string>
+    <string name="registration_error_password">Придумайте пароль</string>
+    <string name="registration_error_phone">Введите номер телефона</string>
 </resources>
