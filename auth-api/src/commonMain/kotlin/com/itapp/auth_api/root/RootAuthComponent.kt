@@ -12,6 +12,10 @@ interface RootAuthComponent : UiComponent {
     sealed interface Child {
         class PhoneValidationChild(val component: PhoneValidationComponent) : Child
         class RegistrationChild(val component: RegistrationComponent) : Child
+        class SmsConfirmationChild(
+            val onConfirmed: () -> Unit,
+            val onBack: () -> Unit,
+        ) : Child
     }
     interface Factory {
         operator fun invoke(

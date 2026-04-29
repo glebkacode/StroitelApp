@@ -45,6 +45,10 @@ class RootAuthComponentImpl(
             Config.Registration -> RootAuthComponent.Child.RegistrationChild(
                 registrationComponent(componentContext)
             )
+            Config.SmsConfirmation -> RootAuthComponent.Child.SmsConfirmationChild(
+                onConfirmed = onAuthSuccess,
+                onBack = { navigation.pop() },
+            )
         }
 
     private fun phoneValidationComponent(
@@ -53,7 +57,7 @@ class RootAuthComponentImpl(
         phoneComponentFactory.value(
             componentContext = componentContext,
             callbacks = PhoneValidationComponent.Callbacks(
-                onAuthSuccess = onAuthSuccess,
+                onAuthSuccess = { navigation.pushNew(Config.SmsConfirmation) },
                 onRegisterClicked = { navigation.pushNew(Config.Registration) },
             ),
         )
@@ -76,6 +80,9 @@ class RootAuthComponentImpl(
 
         @Serializable
         data object Registration : Config
+
+        @Serializable
+        data object SmsConfirmation : Config
     }
 
     @Composable
