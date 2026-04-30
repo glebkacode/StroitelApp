@@ -1,7 +1,7 @@
-package com.itapp.auth_impl.presentation.phone_validation.mvi
+package com.itapp.auth_impl.phone_validation.presentation.mvi
 
-import com.itapp.auth_impl.presentation.phone_validation.mvi.PhoneValidationTea.Intent
-import com.itapp.auth_impl.presentation.phone_validation.mvi.PhoneValidationTea.State
+import com.itapp.auth_impl.phone_validation.presentation.mvi.PhoneValidationTea.Intent
+import com.itapp.auth_impl.phone_validation.presentation.mvi.PhoneValidationTea.State
 import com.itapp.core_architecture.tea.Tea
 
 internal interface PhoneValidationTea : Tea<State, Intent, Nothing> {

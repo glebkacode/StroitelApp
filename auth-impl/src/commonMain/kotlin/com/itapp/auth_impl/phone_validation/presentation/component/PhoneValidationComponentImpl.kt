@@ -1,12 +1,12 @@
-package com.itapp.auth_impl.presentation.phone_validation.component
+package com.itapp.auth_impl.phone_validation.presentation.component
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.arkivanov.decompose.ComponentContext
 import com.itapp.auth_api.phone_validation.PhoneValidationComponent
-import com.itapp.auth_impl.presentation.phone_validation.mapping.toUi
-import com.itapp.auth_impl.presentation.phone_validation.mvi.PhoneValidationTea
-import com.itapp.auth_impl.presentation.phone_validation.mvi.phoneValidationTea
+import com.itapp.auth_impl.phone_validation.presentation.mapping.toUi
+import com.itapp.auth_impl.phone_validation.presentation.mvi.PhoneValidationTea
+import com.itapp.auth_impl.phone_validation.presentation.mvi.phoneValidationTea
 import com.itapp.core_architecture.getTea
 import com.itapp.core_architecture.tea.TeaFactory
 import com.itapp.core_navigation.BaseComponent

@@ -1,6 +1,6 @@
-package com.itapp.auth_impl.presentation.phone_validation.mapping
+package com.itapp.auth_impl.phone_validation.presentation.mapping
 
-import com.itapp.auth_impl.presentation.phone_validation.mvi.PhoneValidationTea.State
+import com.itapp.auth_impl.phone_validation.presentation.mvi.PhoneValidationTea.State
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

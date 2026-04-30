@@ -1,4 +1,4 @@
-package com.itapp.auth_impl.presentation.phone_validation.component
+package com.itapp.auth_impl.phone_validation.presentation.component
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
