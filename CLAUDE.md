@@ -171,7 +171,7 @@ Compose Screen  ───►  Component  ───►  ViewModel  ───►  
 
 Когда AI-ассистент завершает реализацию production-кода в любом модуле проекта (UseCase / Repository / DataSource / ViewModel / Component / Mapping / domain-модель / DI-биндинг и т.д.), **до финального отчёта пользователю и до коммита** обязательно выполнить следующий конвейер subagent-ов:
 
-1. **Параллельный батч в одном tool message** (два `Agent` tool call'а рядом):
+1. **параллельно/батчем, если возможно**:
    - `documentation-writer` — KDoc на новый публичный API + README модуля при необходимости.
    - `unit-tester` — тесты в `commonTest` + прогон `:<module>:testAndroidHostTest`.
 

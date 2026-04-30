@@ -21,13 +21,16 @@ class AuthRepositoryImplTest {
 
     @Test
     fun `should call dataSource with correct request when validatePhone called`() = runTest {
+        // Given
         val dto = ValidationPhoneDto(
             phoneNumber = "+79001234567",
             password = "password123"
         )
 
+        // When
         repository.validatePhone(dto)
 
+        // Then
         assertEquals(1, fakeDataSource.validatePhoneCalls.size)
         assertEquals("+79001234567", fakeDataSource.validatePhoneCalls[0].phoneNumber)
         assertEquals("password123", fakeDataSource.validatePhoneCalls[0].password)
@@ -35,18 +38,18 @@ class AuthRepositoryImplTest {
 
     @Test
     fun `should propagate exception when validatePhone dataSource throws`() = runTest {
+        // Given
         val expectedException = RuntimeException("Network error")
         fakeDataSource.validatePhoneException = expectedException
-
         val dto = ValidationPhoneDto(
             phoneNumber = "+79001234567",
             password = "password123"
         )
 
+        // When / Then
         val exception = assertFailsWith<RuntimeException> {
             repository.validatePhone(dto)
         }
-
         assertEquals("Network error", exception.message)
     }
 }
