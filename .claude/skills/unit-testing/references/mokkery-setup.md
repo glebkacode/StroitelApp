@@ -70,10 +70,6 @@ import dev.mokkery.matcher.any
 
 В Kover-конфигурации в `build-logic/.../KoverConventions.kt` уже исключены `*Graph*`, `*Factory*`, `*.di`. Для Mokkery дополнительно ничего не нужно — сгенерированные mock-классы существуют только в test source set и не влияют на покрытие.
 
-## 6. Альтернатива — Fake вместо Mokkery
+## 6. Fake-классы запрещены
 
-Mokkery — это плагин компилятора и +зависимость. Если в модуле всего 1-2 интерфейса с простой логикой — оставь Fake-классы (как в `auth-impl`). Подключай Mokkery только когда:
-- Интерфейсов с моками >5
-- Нужен matcher (`any()`, `eq()`, capture)
-- Нужен verify count / order
-- Поведение зависит от вызова (return по аргументу)
+В проекте действует правило: все unit-тесты используют только Mokkery. Создавать `Fake*` классы (как `FakeAuthRepository`) нельзя — даже для простых случаев. Если встретил существующий Fake — мигрируй его на `mock<Interface>()` + `everySuspend` / `verifySuspend` и удали.

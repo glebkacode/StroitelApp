@@ -25,6 +25,7 @@ metro = "0.7.3"
 mvikotlin = "4.3.0"
 coil = "3.0.0-alpha08"
 kover = "0.8.3"
+mokkery = "2.10.0"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -81,3 +82,4 @@ kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", versio
 metro = { id = "dev.zacsweers.metro", version.ref = "metro" }
 androidLint = { id = "com.android.lint", version.ref = "agp" }
 kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
+mokkery = { id = "dev.mokkery", version.ref = "mokkery" }

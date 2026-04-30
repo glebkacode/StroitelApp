@@ -1,7 +1,14 @@
 package com.itapp.auth_impl.domain.usecase
 
 import com.itapp.auth_impl.domain.model.ValidationPhoneDto
-import com.itapp.auth_impl.fake.FakeAuthRepository
+import com.itapp.auth_impl.domain.repository.AuthRepository
+import dev.mokkery.answering.returns
+import dev.mokkery.answering.throws
+import dev.mokkery.everySuspend
+import dev.mokkery.matcher.any
+import dev.mokkery.matcher.eq
+import dev.mokkery.mock
+import dev.mokkery.verifySuspend
 import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -10,75 +17,93 @@ import kotlin.test.assertTrue
 
 class ValidatePhoneNumberUseCaseImplTest {
 
-    private lateinit var fakeRepository: FakeAuthRepository
+    private lateinit var repository: AuthRepository
     private lateinit var useCase: ValidatePhoneNumberUseCaseImpl
 
     @BeforeTest
     fun setup() {
-        fakeRepository = FakeAuthRepository()
-        useCase = ValidatePhoneNumberUseCaseImpl(fakeRepository)
+        repository = mock<AuthRepository>()
+        useCase = ValidatePhoneNumberUseCaseImpl(repository)
     }
 
     @Test
     fun `should call repository validatePhone with correct dto when run called`() = runTest {
+        // Given
+        everySuspend { repository.validatePhone(any()) } returns Unit
         val validationDto = ValidationPhoneDto(
             phoneNumber = "+79001234567",
             password = "password123"
         )
 
+        // When
         useCase.run(ValidatePhoneNumberUseCase.Params(validationDto))
 
-        assertEquals(1, fakeRepository.validatePhoneCalls.size)
-        assertEquals(validationDto, fakeRepository.validatePhoneCalls[0])
+        // Then
+        verifySuspend { repository.validatePhone(eq(validationDto)) }
     }
 
     @Test
     fun `should return success result when invoke succeeds`() = runTest {
+        // Given
+        everySuspend { repository.validatePhone(any()) } returns Unit
         val validationDto = ValidationPhoneDto(
             phoneNumber = "+79001234567",
             password = "password123"
         )
 
+        // When
         val result = useCase(ValidatePhoneNumberUseCase.Params(validationDto))
 
+        // Then
         assertTrue(result.isSuccess)
     }
 
     @Test
     fun `should return failure result when invoke throws exception`() = runTest {
-        fakeRepository.validatePhoneException = RuntimeException("Validation failed")
+        // Given
+        everySuspend { repository.validatePhone(any()) } throws RuntimeException("Validation failed")
         val validationDto = ValidationPhoneDto(
             phoneNumber = "+79001234567",
             password = "password123"
         )
 
+        // When
         val result = useCase(ValidatePhoneNumberUseCase.Params(validationDto))
 
+        // Then
         assertTrue(result.isFailure)
         assertEquals("Validation failed", result.exceptionOrNull()?.message)
     }
 
     @Test
     fun `should pass phoneNumber correctly when run called`() = runTest {
+        // Given
+        everySuspend { repository.validatePhone(any()) } returns Unit
         val validationDto = ValidationPhoneDto(
             phoneNumber = "+79999999999",
             password = "pass"
         )
 
+        // When
         useCase.run(ValidatePhoneNumberUseCase.Params(validationDto))
 
-        assertEquals("+79999999999", fakeRepository.validatePhoneCalls[0].phoneNumber)
+        // Then
+        verifySuspend { repository.validatePhone(eq(validationDto)) }
     }
 
     @Test
     fun `should pass password correctly when run called`() = runTest {
+        // Given
+        everySuspend { repository.validatePhone(any()) } returns Unit
         val validationDto = ValidationPhoneDto(
             phoneNumber = "+79001234567",
             password = "secretPassword"
         )
 
+        // When
         useCase.run(ValidatePhoneNumberUseCase.Params(validationDto))
 
-        assertEquals("secretPassword", fakeRepository.validatePhoneCalls[0].password)
+        // Then
+        verifySuspend { repository.validatePhone(eq(validationDto)) }
     }
 }

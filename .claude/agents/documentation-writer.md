@@ -123,7 +123,7 @@ interface PhoneValidationComponent : UiComponent { ... }
 - ❌ Геттеры/сеттеры/`copy()` data class.
 - ❌ Очевидные перегрузки (`toString()`, `equals()`, `hashCode()` без особой логики).
 - ❌ Сгенерированный код (`*Graph*`, `*Factory*` от Metro).
-- ❌ Тестовый код (`src/commonTest/`, `Fake*`).
+- ❌ Тестовый код (`src/commonTest/`).
 - ❌ DTO-поля, имя которых полностью раскрывает смысл (`val phoneNumber: String` — пропускаем; `val createdAt: Long` — добавляем единицу измерения и таймзону, если есть нюанс).
 
 ## Чек-лист перед сдачей

@@ -163,7 +163,7 @@ Compose Screen  ───►  Component  ───►  ViewModel  ───►  
 ## Conventions & Tips
 
 - **Code style:** официальный Kotlin code style (`kotlin.code.style=official`).
-- **Тесты:** располагаются в source set `commonTest`, файлы именуются `*Test.kt`. Для корутин используется `runTest`. Для дублёров — `Fake*` репозитории / data sources.
+- **Тесты:** располагаются в source set `commonTest`, файлы именуются `*Test.kt`. Для корутин используется `runTest`. Все зависимости мокаются **только через Mokkery** (`mock<T>()` + `everySuspend` / `verifySuspend`) — Fake-классы запрещены.
 - **Kover excludes:** классы `*Graph*`, `*Factory*`, `*Component*Impl*Factory*`; пакеты `*.di`, `*.generated`.
 - **Metro Assisted Inject:** Metro **не поддерживает** несколько `@Assisted`-параметров одного типа (например, два `() -> Unit`). Workaround — обернуть их в `data class Callbacks(...)` и передавать как один assisted-параметр.
 

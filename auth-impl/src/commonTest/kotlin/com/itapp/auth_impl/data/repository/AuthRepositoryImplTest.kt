@@ -1,7 +1,15 @@
 package com.itapp.auth_impl.data.repository
 
+import com.itapp.auth_impl.data.api.AuthDataSource
+import com.itapp.auth_impl.data.model.request.ValidatePhoneRequestDto
 import com.itapp.auth_impl.domain.model.ValidationPhoneDto
-import com.itapp.auth_impl.fake.FakeAuthDataSource
+import dev.mokkery.answering.returns
+import dev.mokkery.answering.throws
+import dev.mokkery.everySuspend
+import dev.mokkery.matcher.any
+import dev.mokkery.matcher.matching
+import dev.mokkery.mock
+import dev.mokkery.verifySuspend
 import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -10,18 +18,19 @@ import kotlin.test.assertFailsWith
 
 class AuthRepositoryImplTest {
 
-    private lateinit var fakeDataSource: FakeAuthDataSource
+    private lateinit var dataSource: AuthDataSource
     private lateinit var repository: AuthRepositoryImpl
 
     @BeforeTest
     fun setup() {
-        fakeDataSource = FakeAuthDataSource()
-        repository = AuthRepositoryImpl(fakeDataSource)
+        dataSource = mock<AuthDataSource>()
+        repository = AuthRepositoryImpl(dataSource)
     }
 
     @Test
     fun `should call dataSource with correct request when validatePhone called`() = runTest {
         // Given
+        everySuspend { dataSource.validatePhone(any()) } returns Unit
         val dto = ValidationPhoneDto(
             phoneNumber = "+79001234567",
             password = "password123"
@@ -31,16 +40,19 @@ class AuthRepositoryImplTest {
         repository.validatePhone(dto)
 
         // Then
-        assertEquals(1, fakeDataSource.validatePhoneCalls.size)
-        assertEquals("+79001234567", fakeDataSource.validatePhoneCalls[0].phoneNumber)
-        assertEquals("password123", fakeDataSource.validatePhoneCalls[0].password)
+        verifySuspend {
+            dataSource.validatePhone(
+                matching<ValidatePhoneRequestDto> { request ->
+                    request.phoneNumber == "+79001234567" && request.password == "password123"
+                }
+            )
+        }
     }
 
     @Test
     fun `should propagate exception when validatePhone dataSource throws`() = runTest {
         // Given
-        val expectedException = RuntimeException("Network error")
-        fakeDataSource.validatePhoneException = expectedException
+        everySuspend { dataSource.validatePhone(any()) } throws RuntimeException("Network error")
         val dto = ValidationPhoneDto(
             phoneNumber = "+79001234567",
             password = "password123"
