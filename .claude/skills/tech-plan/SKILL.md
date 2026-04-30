@@ -1,171 +1,177 @@
 ---
 name: tech-plan
 description: >
-  Generates a phased technical implementation plan with parallelizable tasks
-  for Android mobile and KMP (kion-shared) projects. Use when the user wants to
-  break down a feature into concrete, executable tasks before implementation.
-  Triggers: "create tech plan", "make implementation plan", "break this down into tasks",
-  "plan implementation", "how should I implement this", "tech plan",
-  or when starting a complex feature that benefits from parallel execution.
+  Генерирует фазированный технический план реализации с параллелизуемыми задачами
+  для проектов. Используй, когда пользователь хочет разбить фичу на конкретные
+  исполняемые задачи перед началом имплементации.
+  Триггеры: "создай tech plan", "сделай план реализации", "разбей это на задачи",
+  "план имплементации", "как мне это реализовать", "tech plan",
+  или когда стартует сложная фича, которая выигрывает от параллельного исполнения.
 ---
 
 # Tech Plan Generator
 
-Creates a phased implementation plan with parallel task groups, optimized for execution by Claude Code agents running simultaneously.
+Создаёт фазированный план реализации с группами параллельных задач, оптимизированный под одновременное исполнение агентами Claude Code.
 
-## Key Difference from Spec Generator
+## Ключевое отличие от Spec Generator
 
-|            | Spec (`/spec-generator`)         | Tech Plan (`/tech-plan`)            |
-|------------|----------------------------------|-------------------------------------|
-| Purpose    | **What** and **Why** to build    | **How** to build it                 |
-| Output     | Requirements, acceptance criteria | Phases, tasks, execution commands   |
-| Focus      | Completeness of requirements     | Parallelism and execution order     |
-| Audience   | Decision-making                  | Implementation (Claude Code agents) |
+|             | Spec (`/spec-generator`)              | Tech Plan (`/tech-plan`)               |
+|-------------|---------------------------------------|----------------------------------------|
+| Назначение  | **Что** и **зачем** делать            | **Как** делать                          |
+| Выход       | Требования, acceptance criteria       | Фазы, задачи, команды запуска           |
+| Фокус       | Полнота требований                    | Параллелизм и порядок исполнения        |
+| Аудитория   | Принятие решений                      | Имплементация (агенты Claude Code)      |
 
-A spec can serve as input for a tech plan. They complement each other.
+Спека может быть входом для tech plan. Они дополняют друг друга.
 
 ---
 
 ## Workflow
 
-### Step 1: Input
+### Шаг 1: Вход
 
-Accept one of:
-- A **spec file** (`spec_*.md`) — extract tasks from it
-- A **user description** — ask clarifying questions (reuse question bank from `../spec-generator/references/interview-questions.md`)
-- A **ticket** description — ask user to paste the content from Jira
+Принимай один из:
+- **Файл спеки** (`spec_*.md`) — извлекай задачи из него
+- **Описание от пользователя** — задавай уточняющие вопросы (переиспользуй банк вопросов из `../spec-generator/references/interview-questions.md`)
+- **Описание тикета** — попроси пользователя вставить контент из Jira
 
-**Must know before planning:**
-- Feature name
-- Feature team (activation / hardware / moneta / player / retention / vitrina / core)
+**Что нужно знать перед планированием:**
+- Имя фичи
+---
+
+### Шаг 2: Исследование кодовой базы
+
+Изучи кодовую базу, чтобы найти:
+- Существующие файлы для модификации (только реальные пути)
+- Структуру модулей и конвенции именования
+- DI-модули, которые надо расширить
+- Похожие фичи в качестве референсной реализации
+---
+
+### Шаг 3: Декомпозиция на фазы и задачи
+
+**Базовый принцип:** граница фазы возникает там, где есть жёсткая зависимость. Внутри фазы задачи ОБЯЗАНЫ быть независимы — никаких общих файлов, никаких предположений о порядке.
+
+#### Стандартные структуры фаз
+
+**Только Mobile:**
+
+| Фаза | Содержимое                                | Исполнение  |
+|------|-------------------------------------------|-------------|
+| 0    | API-модуль: интерфейсы, модели            | Последовательно |
+| 1    | Impl: data, domain, presentation          | **Параллельно** |
+| 2    | DI, навигация, feature toggle             | Последовательно |
+| 3    | Тесты                                     | **Параллельно** |
+
+**Только KMP:**
+
+| Фаза | Содержимое                                                | Исполнение  |
+|------|-----------------------------------------------------------|-------------|
+| 0    | Shared API: интерфейсы, модели, абстрактные use cases     | Последовательно |
+| 1    | Shared Impl: data layer, domain layer                     | **Параллельно** |
+| 2    | DI-модуль, build.gradle.kts                               | Последовательно |
+| 3    | Тесты (commonTest)                                        | **Параллельно** |
+
+**Оба сразу (KMP + Mobile):**
+
+| Фаза | Содержимое                                | Исполнение  |
+|------|-------------------------------------------|-------------|
+| 0    | Shared API + Mobile API модули            | **Параллельно** (если независимы) |
+| 1    | Shared Impl: data, domain                 | **Параллельно** |
+| 2    | Mobile Impl: data, domain, presentation   | **Параллельно** |
+| 3    | DI wiring (shared + mobile)               | Последовательно |
+| 4    | Тесты (shared + mobile)                   | **Параллельно** |
+
+> **Ключевая идея:** как только интерфейсы определены в Фазе 0, все слои реализации могут идти параллельно, потому что зависят только от абстракций, а не от реализаций друг друга.
+
+#### Правила параллелизма
+
+1. Две задачи параллельны ТОЛЬКО если они трогают **полностью разные файлы**
+2. Если задачи делят файл (даже build.gradle.kts), они идут в **одной задаче** или в **последовательных фазах**
+3. Регистрация в DI всегда уходит в **отдельную последовательную фазу** после всех реализаций
+4. Тесты идут **после** кода, который тестируют, но тестовые задачи для разных слоёв идут **параллельно**
 
 ---
 
-### Step 2: Codebase Research
+### Шаг 4: Написание плана
 
-Explore the codebase to find:
-- Existing files to modify (real paths only)
-- Module structure and naming conventions
-- DI modules to extend
-- Similar features to use as reference implementation
+Используй шаблон из `references/tech-plan-template.md`.
 
-Platform-specific patterns:
-- **mobile** — `../spec-generator/references/platform-mobile.md`
-- **kion-shared** — `../spec-generator/references/platform-kmp.md`
-
----
-
-### Step 3: Decompose into Phases and Tasks
-
-**Core principle:** A phase boundary exists where there is a hard dependency. Within a phase, tasks MUST be independent — no shared files, no ordering assumptions.
-
-#### Standard phase structures
-
-**Mobile only:**
-
-| Phase           | Content                          | Execution |
-|-----------------|----------------------------------|-----------|
-| 0               | API module: interfaces, models   | Sequential |
-| 1               | Impl: data, domain, presentation | **Parallel** |
-| 2               | DI, navigation, feature toggle   | Sequential |
-| 3               | Tests                            | **Parallel** |
-
-**KMP only:**
-
-| Phase   | Content                                             | Execution |
-|---------|-----------------------------------------------------|-----------|
-| 0       | Shared API: interfaces, models, abstract use cases  | Sequential |
-| 1       | Shared Impl: data layer, domain layer               | **Parallel** |
-| 2       | DI module, build.gradle.kts                         | Sequential |
-| 3       | Tests (commonTest)                                  | **Parallel** |
-
-**Both (KMP + Mobile):**
-
-| Phase   | Content                                  | Execution |
-|---------|------------------------------------------|-----------|
-| 0       | Shared API + Mobile API modules          | **Parallel** (if independent) |
-| 1       | Shared Impl: data, domain                | **Parallel** |
-| 2       | Mobile Impl: data, domain, presentation  | **Parallel** |
-| 3       | DI wiring (shared + mobile)              | Sequential |
-| 4       | Tests (shared + mobile)                  | **Parallel** |
-
-> **Key insight:** Once interfaces are defined in Phase 0, all implementation layers can proceed in parallel because they depend only on abstractions, not on each other's implementations.
-
-#### Parallelism rules
-
-1. Two tasks are parallel ONLY if they touch **completely different files**
-2. If tasks share a file (even build.gradle.kts), they go in the **same task** or **sequential phases**
-3. DI registration always goes to a **separate sequential phase** after all implementations
-4. Tests run **after** the code they test, but test tasks for different layers run **in parallel**
+**Правила для каждой задачи:**
+- **Самодостаточна:** агент может выполнить её, ничего не зная о других параллельных задачах
+- **Реальные пути:** перечисляет точные файлы для создания или модификации
+- **С чёткой границей:** включает мини-критерий "done when"
+- **С размером:** S (1-2 файла), M (3-5 файлов), L (6+ файлов)
+- **Без пересечений по файлам:** параллельные задачи НЕ ДОЛЖНЫ трогать одни и те же файлы
 
 ---
 
-### Step 4: Write the Plan
+### Шаг 5: Генерация команд исполнения
 
-Use the template from `references/tech-plan-template.md`.
+Выдавай готовые к запуску команды для каждой фазы.
 
-**Rules for each task:**
-- **Self-contained:** an agent can complete it without knowing about other parallel tasks
-- **Real paths:** lists exact files to create or modify
-- **Scoped:** includes a mini "done when" criteria
-- **Sized:** S (1-2 files), M (3-5 files), L (6+ files)
-- **No cross-task file overlap:** parallel tasks must NOT touch the same files
-
----
-
-### Step 5: Generate Execution Commands
-
-Output ready-to-run commands for each phase.
-
-**Sequential phase:**
+**Последовательная фаза:**
 ```bash
-claude "Read tech_plan_<name>.md and execute Phase 0 completely. After each file — confirm what was changed."
+claude "Прочитай tech_plan_<name>.md и выполни Фазу 0 целиком. После каждого файла — подтверди, что было изменено."
 ```
 
-**Parallel phase — option A (separate terminals):**
+**Параллельная фаза — вариант A (отдельные терминалы):**
 ```bash
-# Terminal 1:
-claude "Read plan_<name>.md and execute ONLY Task 1.1 (Data Layer). Do not modify files listed in other tasks."
+# Терминал 1:
+claude "Прочитай plan_<name>.md и выполни ТОЛЬКО Задачу 1.1 (Data Layer). Не модифицируй файлы из других задач."
 
-# Terminal 2:
-claude "Read plan_<name>.md and execute ONLY Task 1.2 (Domain Layer). Do not modify files listed in other tasks."
+# Терминал 2:
+claude "Прочитай plan_<name>.md и выполни ТОЛЬКО Задачу 1.2 (Domain Layer). Не модифицируй файлы из других задач."
 
-# Terminal 3:
-claude "Read plan_<name>.md and execute ONLY Task 1.3 (Presentation Layer). Do not modify files listed in other tasks."
+# Терминал 3:
+claude "Прочитай plan_<name>.md и выполни ТОЛЬКО Задачу 1.3 (Presentation Layer). Не модифицируй файлы из других задач."
 ```
 
-**Parallel phase — option B (subagents within one session):**
+**Параллельная фаза — вариант B (subagent-ы внутри одной сессии):**
 ```
-claude "Read tech_plan_<name>.md. Execute Phase 1 tasks in parallel using Agent tool with isolation: worktree."
+claude "Прочитай tech_plan_<name>.md. Выполни задачи Фазы 1 параллельно через Agent tool с isolation: worktree."
 ```
 
 ---
 
-### Step 6: Save
+### Шаг 6: Добавь раздел Post-Implementation Pipeline
 
-File name: `plan.md`
-Location: `specs/feature-name/` if the directory exists, otherwise project root.
+**Всегда** включай в сгенерированный план финальный раздел `## Post-Implementation Pipeline`, который явно перечисляет цепочку subagent-ов, запускаемых после написания production-кода, но до коммита. План должен ссылаться на каноничное определение пайплайна в `CLAUDE.md` → `Workflow после реализации фичи (для AI-ассистентов)`, а не дублировать его.
 
----
+Раздел обязан:
+- называть параллельный батч (`documentation-writer` + `unit-tester`),
+- называть последовательный батч (`spec-compliance-checker` → `code-review-kmp`),
+- напоминать, что это запускается **до** любого коммита,
+- давать однострочную команду запуска (например, `claude "Запусти post-implementation pipeline по плану из CLAUDE.md для фичи <name>"`).
 
-## Quality Checklist
-
-Before delivering the plan, verify:
-
-- [ ] All file paths are real or explicitly marked as `(NEW)`
-- [ ] Every parallel task touches **completely different files** (no overlaps)
-- [ ] Phase dependencies are explicit and correct
-- [ ] Each task has: file list, steps, done criteria, size
-- [ ] DI registration is covered in a dedicated phase
-- [ ] build.gradle.kts changes are listed where needed
-- [ ] Execution commands are provided for every phase
-- [ ] Out of scope section is present and non-empty
+Это гарантирует, что тот, кто исполняет план (Claude или человек), не пропустит цепочку документации / тестов / ревью.
 
 ---
 
-## Reference Files
+### Шаг 7: Сохранение
 
-- `references/tech-plan-template.md` — plan template
-- `../spec-generator/references/interview-questions.md` — question bank
-- `../spec-generator/references/platform-mobile.md` — Android patterns
-- `../spec-generator/references/platform-kmp.md` — KMP patterns
+Имя файла: `plan.md`
+Расположение: `specs/feature-name/`, если такая директория существует, иначе — корень проекта.
+
+---
+
+## Чек-лист качества
+
+Перед сдачей плана убедись, что:
+
+- [ ] Все пути к файлам реальны или явно помечены как `(NEW)`
+- [ ] Каждая параллельная задача трогает **полностью разные файлы** (никаких пересечений)
+- [ ] Зависимости между фазами явные и корректные
+- [ ] У каждой задачи есть: список файлов, шаги, критерий done, размер
+- [ ] Регистрация в DI покрыта отдельной фазой
+- [ ] Изменения в build.gradle.kts перечислены там, где нужны
+- [ ] Команды исполнения предоставлены для каждой фазы
+- [ ] Раздел Out of scope присутствует и непустой
+- [ ] **Раздел Post-Implementation Pipeline присутствует** и ссылается на workflow в CLAUDE.md
+
+---
+
+## Reference-файлы
+
+- `references/tech-plan-template.md` — шаблон плана
+- `../spec-generator/references/interview-questions.md` — банк вопросов

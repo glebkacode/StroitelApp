@@ -1,7 +1,5 @@
 # Feature: [Feature Name]
 
-**Team:** [activation | hardware | moneta | player | retention | vitrina | core]
-**Target module:** [mobile | kion-shared | both]
 **Path:** `[real path to the module]`
 
 ## Context

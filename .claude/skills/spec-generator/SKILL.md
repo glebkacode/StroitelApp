@@ -1,108 +1,100 @@
 ---
 name: spec-generator
 description: >
-  Generates a structured feature specification (.md file) for Claude Code consumption.
-  Use this skill whenever the user wants to plan, document, or hand off a feature for
-  AI-driven development. Triggers: "write a spec", "generate spec", "create specification",
-  "spec for Claude Code", "plan a feature", "document a feature", "I want to implement X",
-  "help me outline X", "let's plan X", "what's the best way to do X",
-  or when the user describes a feature and needs a structured implementation plan.
-  Always use this skill before starting implementation if the feature has more than 2 moving parts.
+  Генерирует структурированную спецификацию фичи (.md файл), оптимизированную под Claude Code.
+  Используй этот skill всегда, когда пользователь хочет спланировать, задокументировать
+  или передать фичу для AI-driven разработки. Триггеры: "напиши спеку", "сгенерируй spec",
+  "создай спецификацию", "spec для Claude Code", "спланируй фичу", "задокументируй фичу",
+  "хочу реализовать X", "помоги расписать X", "давай спланируем X", "как лучше сделать X",
+  или когда пользователь описывает фичу и нуждается в структурированном плане реализации.
+  Всегда используй этот skill до начала имплементации, если у фичи больше 2 движущихся частей.
 ---
 
-# Spec Generator for Claude Code
+# Spec Generator для Claude Code
 
-Creates a production-ready feature specification in Markdown, optimized for consumption and implementation by Claude Code.
+Создаёт production-ready спецификацию фичи в Markdown, оптимизированную под потребление и реализацию агентом Claude Code.
 
 ## Workflow
 
-### Step 1: User Interview
+### Шаг 1: Интервью с пользователем
 
-Before writing — clarify everything you don't know from context. Only ask questions that cannot be answered by exploring the codebase.
+Перед написанием — уточни всё, чего нельзя понять из контекста. Задавай только те вопросы, ответы на которые нельзя получить, изучив кодовую базу.
 
-**Required:**
-- Feature name (short, slug-friendly)
-- What problem does it solve / why is it needed
-- Target module: **mobile** (Android UI + logic) or **kion-shared** (KMP, shared business logic for Android/ATV/iOS)
-- Feature team (activation, hardware, moneta, player, retention, vitrina)
+**Обязательно:**
+- Имя фичи (короткое, в kebab-case)
+- Какую проблему решает / зачем нужна
 
-**Find in the codebase yourself:**
-- Existing files related to the feature
-- Naming conventions
-- Folder structure patterns
-- Existing DI modules to extend
+**Найди в кодовой базе самостоятельно:**
+- Существующие файлы, связанные с фичей
+- Конвенции именования
+- Паттерны структуры папок
+- Существующие DI-модули, которые надо расширить
 
-**Optional but valuable:**
-- Known edge cases
-- What is explicitly out of scope
+**Опционально, но ценно:**
+- Известные edge cases
+- Что явно out of scope
 - Acceptance criteria / definition of done
 
-Question bank by feature type — see `references/interview-questions.md`.
+Банк вопросов по типам фич — см. `references/interview-questions.md`.
 
 ---
 
-### Step 2: Codebase Research
+### Шаг 2: Исследование кодовой базы
 
-If running inside the project — gather context before writing the spec.
-
-Use the target platform reference guide for file discovery and module structure:
-- **mobile** → `references/platform-mobile.md`
-- **kion-shared** → `references/platform-kmp.md`
+Изучи кодовую базу, чтобы лучше понять проект.
 
 ---
 
-### Step 3: Write the Spec
+### Шаг 3: Написание спеки
 
-Use the template from `references/spec-template.md`.
+Используй шаблон из `references/spec-template.md`.
 
-**Critical rules:**
-- DON'T ADD technical details (HOW) to current spec, only WHAT and WHY. This means: no code snippets, no API signatures or interface definitions (current or target), no file paths to change or delete, no implementation details, architecture diagrams, or migration steps. All of that belongs to the tech plan, not the spec.
-- Do NOT copy any meta-instructions or comments from the template into the output spec file. The template is a structure guide, not content to reproduce verbatim.
-- Reference only **real file paths** from the codebase (not invented ones)
-- The `Out of scope` section is **mandatory** — AI tends to do more than asked
-- `Acceptance criteria` — use checkboxes `- [ ]` only
-- Keep every section concise — Claude Code reads the entire file as context
+**Критичные правила:**
+- НЕ ДОБАВЛЯЙ технические детали (HOW) в текущую спеку, только WHAT и WHY. Это значит: никаких сниппетов кода, никаких сигнатур API или определений интерфейсов (текущих или целевых), никаких путей к файлам, которые надо изменить или удалить, никаких деталей реализации, архитектурных диаграмм или шагов миграции. Всё это — в tech plan, а не в спеку.
+- НЕ копируй мета-инструкции или комментарии из шаблона в выходной файл спеки. Шаблон — это руководство по структуре, а не контент для дословного воспроизведения.
+- Ссылайся только на **реальные пути к файлам** из кодовой базы (а не выдуманные)
+- Раздел `Out of scope` — **обязателен**, AI склонен делать больше, чем просили
+- `Acceptance criteria` — только чекбоксы `- [ ]`
+- Каждый раздел держи лаконичным — Claude Code читает весь файл целиком как контекст
 ---
 
-### Step 4: File Name and Location
+### Шаг 4: Имя файла и расположение
 
 ```
 spec.md
 ```
 
-Where to save:
-- `specs/feature-name/` — if the directory exists
-- `./` (project root) — default
+Куда сохранять:
+- `specs/feature-name/` — если такая директория существует
+- `./` (корень проекта) — по умолчанию
 
 ---
 
-### Step 5: Launch Command
+### Шаг 5: Команда запуска
 
-After creating the file — always finish with the exact command to run:
+После создания файла — всегда заверши точной командой для запуска:
 
 ```bash
-claude "Read spec/feature-name/spec.md and implement step by step.
-Start with [first logical step from the spec].
-After each file — confirm what was changed before moving on."
+claude "Прочитай spec/feature-name/spec.md и реализуй пошагово.
+Начни с [первого логического шага из спеки].
+После каждого файла — подтверди, что было изменено, прежде чем двигаться дальше."
 ```
 
 ---
 
-## Quality Checklist
+## Чек-лист качества
 
-Before delivering the spec, verify:
+Перед сдачей спеки убедись, что:
 
-- [ ] All file paths exist in the real codebase (or are explicitly marked as NEW)
-- [ ] "Out of scope" section is present and non-empty
-- [ ] Acceptance criteria use checkboxes `- [ ]`
-- [ ] No invented library names or non-existent APIs
-- [ ] Edge cases table is populated (minimum 3 rows)
-- [ ] Feature team is specified (activation/hardware/moneta/player/retention/vitrina)
-- [ ] Spec conforms to the target platform reference (platform-mobile.md or platform-kmp.md)
+- [ ] Все пути к файлам существуют в реальной кодовой базе (или явно помечены как NEW)
+- [ ] Раздел "Out of scope" присутствует и непустой
+- [ ] Acceptance criteria используют чекбоксы `- [ ]`
+- [ ] Нет выдуманных имён библиотек или несуществующих API
+- [ ] Таблица edge cases заполнена (минимум 3 строки)
+- [ ] Указана команда фичи (activation/hardware/moneta/player/retention/vitrina)
+- [ ] Спека соответствует референсу целевой платформы (platform-mobile.md или platform-kmp.md)
 ---
 
-## Reference Files
-- `references/spec-template.md` — spec template to fill in
-- `references/interview-questions.md` — question bank by feature type
-- `references/platform-mobile.md` — Mobile (Android) reference: structure, DI, build, implementation order
-- `references/platform-kmp.md` — kion-shared (KMP) reference: structure, DI, build, differences from mobile
+## Reference-файлы
+- `references/spec-template.md` — шаблон спеки для заполнения
+- `references/interview-questions.md` — банк вопросов по типам фич

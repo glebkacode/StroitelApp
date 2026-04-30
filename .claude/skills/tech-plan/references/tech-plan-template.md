@@ -4,8 +4,6 @@
 
 | Key | Value |
 |-----|-------|
-| Feature | [name] |
-| Team | [activation / hardware / moneta / player / retention / vitrina] |
 | Based on | [spec file path or brief description] |
 | Total tasks | [N] |
 | Parallelizable | [M of N] |
@@ -196,3 +194,26 @@ val featureModule = module {
 
 - [Explicitly excluded items]
 - [Future improvements — note but do not implement]
+
+---
+
+## Post-Implementation Pipeline
+
+> Запускается **после Phase N (последней) и до коммита**. Канонический источник — `CLAUDE.md` → `Workflow после реализации фичи (для AI-ассистентов)`. Здесь — короткое напоминание для исполнителя плана.
+
+**Параллельный батч (запускать одновременно — работают на непересекающихся файлах):**
+- `documentation-writer` — KDoc на новый публичный API + README модуля при необходимости.
+- `unit-tester` — тесты в `commonTest` + прогон `:<module>:testAndroidHostTest`.
+
+**Последовательно после батча:**
+1. `spec-compliance-checker` — сверка реализации со `spec.md` / `plan.md` (если они есть).
+2. `code-review-kmp` — общее ревью архитектуры / KMP / UI-производительности.
+
+Только после успешного прохождения всей цепочки — коммит (если пользователь его просил).
+
+**Триггер-команда:**
+```bash
+claude "Запусти post-implementation pipeline по CLAUDE.md для фичи <feature-name> (модули <list>). Параллельно: documentation-writer + unit-tester. Последовательно: spec-compliance-checker → code-review-kmp."
+```
+
+Если пользователь явно отказался от какого-либо шага («без тестов» / «без ревью») — уважать.
