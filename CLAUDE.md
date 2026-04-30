@@ -18,7 +18,6 @@
 | Язык | Kotlin | 2.2.20 |
 | UI | Compose Multiplatform | 1.9.1 |
 | Hot Reload | Compose Hot Reload | 1.0.0-rc02 |
-| Архитектура | Собственная TEA-реализация (`core-architecture`) | — |
 | DI | Metro (`dev.zacsweers.metro`) | 0.7.3 |
 | Навигация | Decompose (+ extensions-compose) | 3.4.0 |
 | Сеть | Ktor (client + server) | 3.3.1 |
@@ -44,7 +43,7 @@ StroitelApp/
 ├── server/              # Ktor JVM бэкенд
 ├── shared/              # Код, общий для всех таргетов (константы, абстракция платформы)
 │
-├── core-architecture/   # Фреймворк TEA (Tea, Reducer, DslReducer, CoroutineEffector, BaseCoroutineUseCase)
+├── core-architecture/   # Базовые архитектурные примитивы (BaseCoroutineUseCase и пр.)
 ├── core-navigation/     # Примитивы навигации поверх Decompose (BaseComponent, UiComponent, реле, child lists)
 ├── uikit/               # Дизайн-система: StroitelTheme, цвета, типографика, переиспользуемые компоненты
 │
@@ -76,12 +75,10 @@ StroitelApp/
 
 ```
 presentation/
-  └── <screen>/
-      ├── component/ScreenComponentImpl.kt   # Decompose-компонент
-      ├── component/ScreenScreen.kt          # Compose UI
-      ├── mvi/ScreenTea.kt                   # State / Intent / Effect
-      ├── mvi/ScreenStoreFactory.kt          # Сборка TEA-store
-      └── mapping/StateMapping.kt            # State → UiState
+  └── <screen>/                              # Presentation UI-логика
+      ├── viewmodel/                         # Plain Kotlin ViewModel (StateFlow + one-shot Channel)
+      ├── component/                         # Decompose Component impl + Compose Screen
+      └── mapping/                           # (опционально) VM.State → UiState
 domain/
   ├── model/                                 # Доменные модели
   ├── usecase/                               # Use case (interface + Impl)
@@ -93,6 +90,21 @@ data/
 di/
   └── FeatureGraph.kt                        # Metro @DependencyGraph
 ```
+
+### Presentation pattern: ТОЛЬКО MVVM
+
+В presentation-слое всех `*-impl` модулей использовать **исключительно MVVM**:
+
+```
+Compose Screen  ───►  Component  ───►  ViewModel  ───►  UseCase  ───►  Repository
+                       (Decompose)      (StateFlow)
+```
+
+- **ViewModel** — plain Kotlin class в `commonMain` (НЕ `androidx.lifecycle.ViewModel`), хранит `MutableStateFlow<UiState>` и `Channel`/`SharedFlow` для one-shot событий (навигация, toast).
+- **Component** — тонкая Decompose-обёртка: владеет ViewModel через `instanceKeeper.getOrCreate { RetainedViewModel(...) }`, подписывает one-shot Flow и дёргает `Callbacks`. Без бизнес-логики.
+- **Screen** — чистый Compose-рендер, разбит на внешний `Screen(component)` и внутренний `private Content(state, onX, ...)` для preview/тестов.
+
+**TEA/MVI запрещён**, даже если встречается в существующем коде. Фича `phone_validation` использует TEA — это легаси, **не копировать**. Эталон — `RegistrationViewModel` + `RegistrationComponentImpl`. Полная спецификация: [`.claude/skills/architecture/references/presentation-architecture.md`](.claude/skills/architecture/references/presentation-architecture.md). Перед написанием любого presentation-кода обязательно вызвать skill `architecture`.
 
 ### Навигация (Decompose)
 
@@ -154,6 +166,3 @@ di/
 - **Тесты:** располагаются в source set `commonTest`, файлы именуются `*Test.kt`. Для корутин используется `runTest`. Для дублёров — `Fake*` репозитории / data sources.
 - **Kover excludes:** классы `*Graph*`, `*Factory*`, `*Component*Impl*Factory*`; пакеты `*.di`, `*.generated`.
 - **Metro Assisted Inject:** Metro **не поддерживает** несколько `@Assisted`-параметров одного типа (например, два `() -> Unit`). Workaround — обернуть их в `data class Callbacks(...)` и передавать как один assisted-параметр.
-- **TEA нюансы:**
-    - `ReducerContext.state {}` возвращает `Unit`, а не state. Чтобы прочитать текущее значение перед изменением, обращайтесь к свойству `state` напрямую.
-    - Передавайте данные в Effector через поля `Effect`, а не читайте state внутри Effector.
