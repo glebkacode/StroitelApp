@@ -49,6 +49,8 @@ StroitelApp/
 │
 ├── auth-api/            # Публичные интерфейсы фичи авторизации
 ├── auth-impl/           # Реализация фичи авторизации (data + domain + presentation + DI)
+├── products-api/        # [Объявлен, не реализован] Публичные интерфейсы каталога товаров
+├── products-impl/       # [Объявлен, не реализован] Реализация каталога товаров
 │
 ├── build-logic/         # Gradle convention-плагины (kover-conventions и др.)
 ├── iosApp/              # Xcode-проект для iOS

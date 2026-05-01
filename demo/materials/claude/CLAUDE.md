@@ -74,9 +74,6 @@ StroitelApp/
 ```
 presentation/
   └── <screen>/                              # Presentation UI-логика
-      ├── viewmodel/                         # Plain Kotlin ViewModel (StateFlow + one-shot Channel)
-      ├── component/                         # Decompose Component impl + Compose Screen
-      └── mapping/                           # (опционально) VM.State → UiState
 domain/
   ├── model/                                 # Доменные модели
   ├── usecase/                               # Use case (interface + Impl)
@@ -88,21 +85,6 @@ data/
 di/
   └── FeatureGraph.kt                        # Metro @DependencyGraph
 ```
-
-### Presentation pattern: ТОЛЬКО MVVM
-
-В presentation-слое всех `*-impl` модулей использовать **исключительно MVVM**:
-
-```
-Compose Screen  ───►  Component  ───►  ViewModel  ───►  UseCase  ───►  Repository
-                       (Decompose)      (StateFlow)
-```
-
-- **ViewModel** — plain Kotlin class в `commonMain` (НЕ `androidx.lifecycle.ViewModel`), хранит `MutableStateFlow<UiState>` и `Channel`/`SharedFlow` для one-shot событий (навигация, toast).
-- **Component** — тонкая Decompose-обёртка: владеет ViewModel через `instanceKeeper.getOrCreate { RetainedViewModel(...) }`, подписывает one-shot Flow и дёргает `Callbacks`. Без бизнес-логики.
-- **Screen** — чистый Compose-рендер, разбит на внешний `Screen(component)` и внутренний `private Content(state, onX, ...)` для preview/тестов.
-
-**TEA/MVI запрещён**, даже если встречается в существующем коде. Фича `phone_validation` использует TEA — это легаси, **не копировать**. Эталон — `RegistrationViewModel` + `RegistrationComponentImpl`. Полная спецификация: [`.claude/skills/architecture/references/presentation-architecture.md`](.claude/skills/architecture/references/presentation-architecture.md). Перед написанием любого presentation-кода обязательно вызвать skill `architecture`.
 
 ### Навигация (Decompose)
 
@@ -164,27 +146,3 @@ Compose Screen  ───►  Component  ───►  ViewModel  ───►  
 - **Тесты:** располагаются в source set `commonTest`, файлы именуются `*Test.kt`. Для корутин используется `runTest`. Все зависимости мокаются **только через Mokkery** (`mock<T>()` + `everySuspend` / `verifySuspend`) — Fake-классы запрещены.
 - **Kover excludes:** классы `*Graph*`, `*Factory*`, `*Component*Impl*Factory*`; пакеты `*.di`, `*.generated`.
 - **Metro Assisted Inject:** Metro **не поддерживает** несколько `@Assisted`-параметров одного типа (например, два `() -> Unit`). Workaround — обернуть их в `data class Callbacks(...)` и передавать как один assisted-параметр.
-
-## Workflow после реализации фичи (для AI-ассистентов)
-
-```
-impl ──►  ┌─ documentation-writer ─┐  ──►  spec-compliance-checker  ──►  code-review-kmp  ──►  commit
-          └─ unit-tester ──────────┘
-             (parallel batch)              (опционально, если есть spec.md/plan.md)
-```
-
-Когда AI-ассистент завершает реализацию production-кода в любом модуле проекта (UseCase / Repository / DataSource / ViewModel / Component / Mapping / domain-модель / DI-биндинг и т.д.), **до финального отчёта пользователю и до коммита** обязательно выполнить следующий конвейер subagent-ов:
-
-1. **Параллельный батч** — оба агента вызываются **в одном сообщении** двумя `Agent` tool calls (НЕ последовательно — это удваивает время):
-   - `documentation-writer` — KDoc на новый публичный API + README модуля при необходимости. Пишет в production-файлы.
-   - `unit-tester` — тесты в `commonTest` + прогон `:<module>:testAndroidHostTest`. Пишет в `commonTest/`.
-
-   File scope не пересекается → конфликтов записи нет, батч безопасен.
-
-2. **Последовательно после батча** (каждый зависит от результатов предыдущих):
-   - `spec-compliance-checker` — если у фичи был `spec.md` / `plan.md`.
-   - `code-review-kmp` — общее ревью архитектуры/KMP/UI-производительности.
-
-3. Только после прохождения цепочки — коммит (если пользователь его просил).
-
-**Триггер:** собственная формулировка ассистента «готово / реализовал / закончил / можно коммитить» или эквивалентный сигнал, что основной код собран. Пользователю **не нужно** явно просить «покрой тестами» / «задокументируй» / «отревьюй» — это default. Если пользователь явно отказывается («без тестов»), уважать.
