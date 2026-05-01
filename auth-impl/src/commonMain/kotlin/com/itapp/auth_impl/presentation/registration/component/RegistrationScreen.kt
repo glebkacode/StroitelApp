@@ -1,4 +1,4 @@
-package com.itapp.auth_impl.presentation.screens
+package com.itapp.auth_impl.presentation.registration.component
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row

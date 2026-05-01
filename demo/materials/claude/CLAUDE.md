@@ -72,8 +72,8 @@ StroitelApp/
 Структура новых папок должна ВСЕГДА СТРОГО следовать этому описанию.
 
 ```
-presentation/
-  └── <screen>/                              # Presentation UI-логика
+presentation/                                # Presentation UI-логика
+  └── <screen>/                              # Папка хранит экраны текущего данного модуля со своей структурой
 domain/
   ├── model/                                 # Доменные модели
   ├── usecase/                               # Use case (interface + Impl)

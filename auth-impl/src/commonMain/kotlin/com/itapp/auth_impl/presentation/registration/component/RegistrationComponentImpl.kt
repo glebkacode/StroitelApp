@@ -1,11 +1,10 @@
-package com.itapp.auth_impl.presentation.components
+package com.itapp.auth_impl.presentation.registration.component
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.arkivanov.decompose.ComponentContext
 import com.itapp.auth_api.registration.RegistrationComponent
-import com.itapp.auth_impl.presentation.screens.RegistrationScreen
-import com.itapp.auth_impl.presentation.viewmodels.RegistrationViewModel
+import com.itapp.auth_impl.presentation.registration.viewmodel.RegistrationViewModel
 import com.itapp.core_navigation.BaseComponent
 import dev.zacsweers.metro.Assisted
 import dev.zacsweers.metro.AssistedFactory

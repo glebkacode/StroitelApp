@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.arkivanov.decompose.extensions.compose.stack.Children
 import com.itapp.auth_api.root.RootAuthComponent
-import com.itapp.auth_impl.presentation.SmsConfirmationScreen
+import com.itapp.auth_impl.presentation.screens.SmsConfirmationScreen
 
 @Composable
 fun AuthScreen(

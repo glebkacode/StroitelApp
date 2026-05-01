@@ -1,4 +1,4 @@
-package com.itapp.auth_impl.presentation.viewmodels
+package com.itapp.auth_impl.presentation.registration.viewmodel
 
 import com.itapp.auth_api.registration.RegistrationComponent.Field
 import com.itapp.auth_api.registration.RegistrationComponent.UiState

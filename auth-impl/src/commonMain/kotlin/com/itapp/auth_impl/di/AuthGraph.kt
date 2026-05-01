@@ -10,7 +10,7 @@ import com.itapp.auth_impl.domain.repository.AuthRepository
 import com.itapp.auth_impl.domain.usecase.ValidatePhoneNumberUseCase
 import com.itapp.auth_impl.domain.usecase.ValidatePhoneNumberUseCaseImpl
 import com.itapp.auth_impl.phone_validation.presentation.component.PhoneValidationComponentImpl
-import com.itapp.auth_impl.presentation.components.RegistrationComponentImpl
+import com.itapp.auth_impl.presentation.registration.component.RegistrationComponentImpl
 import com.itapp.auth_impl.presentation.root.RootAuthComponentImpl
 import com.itapp.core_architecture.tea.TeaFactory
 import dev.zacsweers.metro.Binds
