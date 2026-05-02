@@ -8,7 +8,7 @@
 class ProductComponent(componentContext: ComponentContext,) : BaseComponent(componentContext) {
     fun loadProducts() {
         componentScope.launch {
-            // автоматически отменится при очистке ViewModel
+            // автоматически отменится при очистке компонента
         }
     }
 }
