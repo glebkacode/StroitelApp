@@ -1,18 +1,18 @@
 # Тестирование
 
-> Все зависимости мокаются через **Mokkery** (`mock<T>()` + `everySuspend` / `verifySuspend`). Fake-классы в проекте запрещены — см. `.claude/skills/unit-testing/SKILL.md`.
+> Все зависимости мокаются через **MockK** (`mockk()` + `coEvery` / `coVerify` / `slot()`). Fake-классы в проекте запрещены — см. `.claude/skills/unit-testing/SKILL.md`.
 
 ## runTest
 ```kotlin
 @Test
 fun `loadProducts updates state`() = runTest {
-    val repository = mock<ProductRepository>()
-    everySuspend { repository.getProducts() } returns testProducts
-    val viewModel = ProductViewModel(repository)
+    val repository = mockk<ProductRepository>()
+    coEvery { repository.getProducts() } returns testProducts
+    val component = ProductComponent(repository)
+        
+    component.loadProducts()
 
-    viewModel.loadProducts()
-
-    assertEquals(State.Success(testProducts), viewModel.state.value)
+    assertEquals(State.Success(testProducts), component.state.value)
 }
 ```
 
@@ -20,17 +20,17 @@ fun `loadProducts updates state`() = runTest {
 ```kotlin
 @Test
 fun `delayed operation completes`() = runTest {
-    val repository = mock<ProductRepository>()
-    everySuspend { repository.getProducts() } returns testProducts
-    val viewModel = ProductViewModel(
+    val repository = mockk<ProductRepository>()
+    coEvery { repository.getProducts() } returns testProducts
+    val component = ProductComponent(
         repository = repository,
         ioDispatcher = StandardTestDispatcher(testScheduler)
     )
 
-    viewModel.loadProducts()
+    component.loadProducts()
     advanceUntilIdle()  // прокручивает виртуальное время
 
-    assertEquals(expected, viewModel.state.value)
+    assertEquals(expected, component.state.value)
 }
 ```
 

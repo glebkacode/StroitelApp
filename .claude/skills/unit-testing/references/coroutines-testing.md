@@ -64,49 +64,29 @@ fun `should load on io dispatcher`() = runTest {
 
 ---
 
-## Тестирование Flow с Turbine
+## Тестирование Flow без Turbine
 
-Turbine — стандартный инструмент проекта для тестирования `Flow`.
+Сейчас Turbine в проекте не подключён. Простые случаи покрываются вручную через `toList()` и `runTest`:
 
 ```kotlin
-import app.cash.turbine.test
-
 @Test
 fun `should emit values in order`() = runTest {
-    repository.observeProducts().test {
-        assertEquals(emptyList(), awaitItem())
+    val emitted = mutableListOf<List<Product>>()
+    val job = launch { repository.observeProducts().toList(emitted) }
 
-        repository.addProduct(testProduct)
-        assertEquals(listOf(testProduct), awaitItem())
+    repository.addProduct(testProduct)
+    advanceUntilIdle()
 
-        cancelAndIgnoreRemainingEvents()
-    }
+    assertEquals(emptyList(), emitted[0])
+    assertEquals(listOf(testProduct), emitted[1])
+
+    job.cancel()
 }
 ```
 
-Подключение:
+Для одиночных `StateFlow` достаточно `flow.first()` или `flow.value`.
 
-```kotlin
-// build.gradle.kts
-kotlin {
-    sourceSets {
-        commonTest.dependencies {
-            implementation("app.cash.turbine:turbine:1.1.0")
-        }
-    }
-}
-```
-
-### Полезные методы Turbine
-
-| Метод | Назначение |
-|-------|------------|
-| `awaitItem()` | Ждать следующий элемент. |
-| `awaitComplete()` | Ждать завершение flow. |
-| `awaitError()` | Ждать выброс исключения. |
-| `expectNoEvents()` | Утверждать, что нет неожиданных эмитов. |
-| `cancelAndIgnoreRemainingEvents()` | Завершить тест без проверки хвоста. |
-| `skipItems(n)` | Пропустить N элементов. |
+> Если Flow-тестов станет много — можно подключить `app.cash.turbine:turbine` (`testImplementation`). Но это не дефолт стека.
 
 ---
 
@@ -118,15 +98,16 @@ kotlin {
 @Test
 fun `should emit initial state then update`() = runTest {
     val sut = createSut()
+    val states = mutableListOf<State>()
+    val job = launch { sut.state.toList(states) }
 
-    sut.state.test {
-        assertEquals(State.initial, awaitItem())   // ← initial всегда первый
+    sut.accept(Intent.Load)
+    advanceUntilIdle()
 
-        sut.accept(Intent.Load)
+    assertEquals(State.initial, states[0])    // ← initial всегда первый
+    assertEquals(State.loading, states[1])
 
-        assertEquals(State.loading, awaitItem())
-        cancelAndIgnoreRemainingEvents()
-    }
+    job.cancel()
 }
 ```
 
@@ -142,16 +123,16 @@ fun `should retry after 5 seconds`() = runTest {
     sut.startWithRetry()
 
     advanceTimeBy(4_999)
-    verifySuspend(VerifyMode.exactly(1)) { repository.fetch() }
+    coVerify(exactly = 1) { repository.fetch() }
 
     advanceTimeBy(2)  // 5_001 мс — должен сработать retry
-    verifySuspend(VerifyMode.exactly(2)) { repository.fetch() }
+    coVerify(exactly = 2) { repository.fetch() }
 }
 ```
 
 ---
 
-## Несколько диспетчеров — `Dispatchers.setMain` (только Android/JVM)
+## Несколько диспетчеров — `Dispatchers.setMain`
 
 Только если SUT использует `Dispatchers.Main` напрямую (а не инжектит):
 
@@ -167,21 +148,25 @@ fun tearDown() {
 }
 ```
 
-> В KMP `commonTest` это недоступно. Лучше — инжектируй диспетчер через конструктор.
+> Лучше — инжектируй диспетчер через конструктор. Тогда `setMain` не нужен.
 
 ---
 
 ## Подключение coroutines-test
 
+Уже подключено в `gradle/libs.versions.toml`:
+
 ```toml
-# libs.versions.toml — уже есть
 kotlin-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
 ```
 
+В `build.gradle.kts` модуля:
+
 ```kotlin
-// build.gradle.kts
-commonTest.dependencies {
-    implementation(libs.kotlin.coroutines.test)
-    implementation(libs.kotlin.test)
+dependencies {
+    testImplementation(libs.kotlin.coroutines.test)
+    testImplementation(libs.kotlin.test.junit)
+    testImplementation(libs.junit)
+    testImplementation(libs.mockk)
 }
 ```

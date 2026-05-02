@@ -176,11 +176,11 @@ fun validatePhone(phone: String): Boolean
 
 ## Документирование в контексте проекта
 
-### TEA компоненты
+### MviKotlin Store
 
 ```kotlin
 /**
- * TEA store для экрана каталога товаров.
+ * MviKotlin Store для экрана каталога товаров.
  *
  * Управляет состоянием списка товаров, фильтрации и поиска.
  *
@@ -194,13 +194,12 @@ fun validatePhone(phone: String): Boolean
  * - [Intent.ApplyFilter] — применить фильтр
  * - [Intent.Search] — поиск по названию
  *
- * ## События
- * - [Event.NavigateToProduct] — переход к детальной странице
+ * ## Метки (one-shot события)
+ * - [Label.NavigateToProduct] — переход к детальной странице
  *
- * @see CatalogReducer для логики обработки интентов
- * @see CatalogEffector для побочных эффектов
+ * @see CatalogStoreFactory фабрика, реализующая reducer и executor
  */
-interface CatalogTea : Tea<State, Intent, Event>
+internal interface CatalogStore : Store<CatalogStore.Intent, CatalogStore.State, CatalogStore.Label>
 ```
 
 ### Decompose компоненты

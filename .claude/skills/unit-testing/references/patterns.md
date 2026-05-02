@@ -1,6 +1,6 @@
 # Паттерны тестов по слоям
 
-Все примеры — для KMP-модуля, source set `commonTest`. Использование Mokkery + `kotlinx-coroutines-test` + `kotlin.test`.
+Все примеры — для Android-модуля, source set `src/test/java/`. Использование MockK + `kotlinx-coroutines-test` + `kotlin.test`.
 
 ---
 
@@ -20,7 +20,7 @@ class ValidatePhoneNumberUseCaseImplTest {
 
     @BeforeTest
     fun setup() {
-        repository = mock<AuthRepository>()
+        repository = mockk()
         useCase = ValidatePhoneNumberUseCaseImpl(repository)
     }
 
@@ -28,19 +28,19 @@ class ValidatePhoneNumberUseCaseImplTest {
     fun `should call repository validatePhone with correct dto`() = runTest {
         // Given
         val dto = ValidationPhoneDto("+79001234567", "password123")
-        everySuspend { repository.validatePhone(any()) } returns Unit
+        coEvery { repository.validatePhone(any()) } returns Unit
 
         // When
         useCase.run(ValidatePhoneNumberUseCase.Params(dto))
 
         // Then
-        verifySuspend { repository.validatePhone(eq(dto)) }
+        coVerify { repository.validatePhone(dto) }
     }
 
     @Test
     fun `should return success when repository succeeds`() = runTest {
         val dto = ValidationPhoneDto("+79001234567", "password123")
-        everySuspend { repository.validatePhone(any()) } returns Unit
+        coEvery { repository.validatePhone(any()) } returns Unit
 
         val result = useCase(ValidatePhoneNumberUseCase.Params(dto))
 
@@ -50,7 +50,7 @@ class ValidatePhoneNumberUseCaseImplTest {
     @Test
     fun `should return failure when repository throws`() = runTest {
         val dto = ValidationPhoneDto("+79001234567", "password123")
-        everySuspend { repository.validatePhone(any()) } throws RuntimeException("Validation failed")
+        coEvery { repository.validatePhone(any()) } throws RuntimeException("Validation failed")
 
         val result = useCase(ValidatePhoneNumberUseCase.Params(dto))
 
@@ -78,28 +78,28 @@ class AuthRepositoryImplTest {
 
     @BeforeTest
     fun setup() {
-        dataSource = mock<AuthDataSource>()
+        dataSource = mockk()
         repository = AuthRepositoryImpl(dataSource)
     }
 
     @Test
     fun `should call dataSource with mapped request when validatePhone called`() = runTest {
         // Given
-        val captor = Capture.slot<ValidatePhoneRequest>()
-        everySuspend { dataSource.validatePhone(capture(captor)) } returns Unit
+        val captured = slot<ValidatePhoneRequest>()
+        coEvery { dataSource.validatePhone(capture(captured)) } returns Unit
         val dto = ValidationPhoneDto("+79001234567", "password123")
 
         // When
         repository.validatePhone(dto)
 
         // Then
-        assertEquals("+79001234567", captor.value.phoneNumber)
-        assertEquals("password123", captor.value.password)
+        assertEquals("+79001234567", captured.captured.phoneNumber)
+        assertEquals("password123", captured.captured.password)
     }
 
     @Test
     fun `should propagate exception when dataSource throws`() = runTest {
-        everySuspend { dataSource.validatePhone(any()) } throws RuntimeException("Network error")
+        coEvery { dataSource.validatePhone(any()) } throws RuntimeException("Network error")
 
         val exception = assertFailsWith<RuntimeException> {
             repository.validatePhone(ValidationPhoneDto("+79001234567", "p"))
@@ -112,174 +112,145 @@ class AuthRepositoryImplTest {
 
 ---
 
-## 3. Reducer (DslReducer)
+## 3. Reducer (MviKotlin)
 
-Reducer — чистая функция. Не нужны корутины, не нужны моки. Тестируем:
+Reducer — чистая функция `(State, Msg) -> State`. Не нужны корутины, не нужны моки.
 
-- Каждый Intent → ожидаемый State
-- Каждый Intent → ожидаемые Effects (или их отсутствие)
+Если reducer определён inline внутри `StoreFactory.create(reducer = Reducer<State, Msg> { ... })`, вынеси его в `internal val FeatureReducer = Reducer<State, Msg> { ... }`, чтобы тестировать отдельно.
 
 ```kotlin
-class PhoneValidationReducerTest {
+class FeatureReducerTest {
 
-    private val reducer = PhoneValidationReducer()
+    @Test
+    fun `should set isLoading=true when LoadingStarted`() {
+        val state = FeatureStore.State(isLoading = false)
 
-    private fun reduce(state: State, intent: Intent): ReduceResult<State, Effect> {
-        return reducer(state, intent)  // адаптируй под реальный API проекта
+        val next = with(FeatureReducer) { state.reduce(FeatureStoreFactory.Msg.LoadingStarted) }
+
+        assertEquals(true, next.isLoading)
     }
 
     @Test
-    fun `should update phone in state when OnPhoneChanged dispatched`() {
-        val initial = State(phone = "")
+    fun `should populate items and reset loading when ItemsLoaded`() {
+        val state = FeatureStore.State(isLoading = true)
+        val items = listOf(Item(1, "a"))
 
-        val (newState, effects) = reduce(initial, Intent.OnPhoneChanged("+79001234567"))
+        val next = with(FeatureReducer) { state.reduce(FeatureStoreFactory.Msg.ItemsLoaded(items)) }
 
-        assertEquals("+79001234567", newState.phone)
-        assertTrue(effects.isEmpty())
+        assertEquals(items, next.items)
+        assertEquals(false, next.isLoading)
     }
 
     @Test
-    fun `should emit ValidatePhone effect when OnContinueClicked with valid phone`() {
-        val initial = State(phone = "+79001234567")
+    fun `should set error when LoadFailed`() {
+        val state = FeatureStore.State(isLoading = true)
 
-        val (_, effects) = reduce(initial, Intent.OnContinueClicked)
+        val next = with(FeatureReducer) { state.reduce(FeatureStoreFactory.Msg.LoadFailed("boom")) }
 
-        assertEquals(listOf(Effect.ValidatePhone("+79001234567")), effects)
-    }
-
-    @Test
-    fun `should not emit effects when OnContinueClicked with empty phone`() {
-        val initial = State(phone = "")
-
-        val (newState, effects) = reduce(initial, Intent.OnContinueClicked)
-
-        assertEquals(initial, newState)
-        assertTrue(effects.isEmpty())
+        assertEquals("boom", next.error)
+        assertEquals(false, next.isLoading)
     }
 }
 ```
 
-> Если в проекте Reducer возвращает `Unit` через DSL и пишет state/effects через контекст — адаптируй тестовый хелпер под актуальный API из `core-architecture`.
+> Подробности и тесты Store целиком (Intent → Msg/Label через executor) — см. [`mvikotlin-testing.md`](mvikotlin-testing.md).
 
 ---
 
-## 4. Mapping (State → UiState, DTO → Domain)
+## 4. Mapping (State → UiState, Response → Domain)
 
 Чистые функции — мокать нечего. Покрывай все ветки.
 
 ```kotlin
-class PhoneValidationStateMappingTest {
+class FeatureStateMappingTest {
 
     @Test
-    fun `should map phone correctly when toUi called`() {
-        val state = State(phone = "+79001234567")
+    fun `should map items to ui items`() {
+        val state = FeatureStore.State(items = listOf(Item(1, "Foo")))
 
         val uiState = state.toUi()
 
-        assertEquals("+79001234567", uiState.phone)
+        assertEquals(1, uiState.items.size)
+        assertEquals("Foo", uiState.items[0].title)
     }
 
     @Test
-    fun `should map empty phone when toUi called with empty state`() {
-        assertEquals("", State(phone = "").toUi().phone)
-    }
-
-    @Test
-    fun `should preserve isLoading flag in ui state`() {
-        val state = State(phone = "+79001234567", isLoading = true)
+    fun `should preserve isLoading flag`() {
+        val state = FeatureStore.State(isLoading = true)
 
         assertTrue(state.toUi().isLoading)
     }
+
+    @Test
+    fun `should map empty state correctly`() {
+        val ui = FeatureStore.State().toUi()
+
+        assertTrue(ui.items.isEmpty())
+        assertEquals(false, ui.isLoading)
+        assertEquals(null, ui.error)
+    }
 }
 ```
 
 ---
 
-## 5. Effector (CoroutineEffector)
+## 5. Executor (через Store целиком)
 
-Effector принимает Effect, делает побочный эффект (вызов use case), может dispatch Intent / publish Event.
+Executor — это бизнес-логика поверх MviKotlin: реакция на `Intent`, вызов UseCase, диспатч `Msg`, публикация `Label`. Тестируется через собранный `Store` с реальным `DefaultStoreFactory`.
 
 ```kotlin
-class PhoneValidationEffectorTest {
+class FeatureStoreExecutorTest {
 
-    private lateinit var validatePhoneUseCase: ValidatePhoneNumberUseCase
-    private lateinit var effector: PhoneValidationEffector
+    private lateinit var getItemsUseCase: GetItemsUseCase
+    private lateinit var feature: FeatureStoreFactory
 
     @BeforeTest
     fun setup() {
-        validatePhoneUseCase = mock<ValidatePhoneNumberUseCase>()
-        effector = PhoneValidationEffector(validatePhoneUseCase)
+        getItemsUseCase = mockk()
+        feature = FeatureStoreFactory(DefaultStoreFactory(), getItemsUseCase)
     }
 
     @Test
-    fun `should dispatch ValidationSucceeded when use case returns success`() = runTest {
-        // Given
-        everySuspend { validatePhoneUseCase(any()) } returns Result.success(Unit)
-        val dispatched = mutableListOf<Intent>()
-        val published = mutableListOf<Event>()
+    fun `should call use case and emit items when Intent_Load`() = runTest {
+        coEvery { getItemsUseCase(Unit) } returns Result.success(listOf(Item(1, "a")))
+        val store = feature.create()
 
-        // When
-        with(effector) {
-            EffectorScope(
-                dispatch = { dispatched.add(it) },
-                publish = { published.add(it) }
-            ).handle(Effect.ValidatePhone("+79001234567"))
-        }
+        store.accept(FeatureStore.Intent.Load)
+        advanceUntilIdle()
 
-        // Then
-        assertEquals(listOf(Intent.ValidationSucceeded), dispatched)
-        assertTrue(published.isEmpty())
+        assertEquals(listOf(Item(1, "a")), store.state.items)
+        assertEquals(false, store.state.isLoading)
+        coVerify { getItemsUseCase(Unit) }
     }
 
     @Test
-    fun `should publish ShowError event when use case returns failure`() = runTest {
-        everySuspend { validatePhoneUseCase(any()) } returns Result.failure(RuntimeException("e"))
-        // ... аналогично
+    fun `should publish NavigateToDetails label when Intent_ItemClicked`() = runTest {
+        val store = feature.create()
+        val labels = mutableListOf<FeatureStore.Label>()
+        val job = launch { store.labels.toList(labels) }
+
+        store.accept(FeatureStore.Intent.ItemClicked(42L))
+        advanceUntilIdle()
+
+        assertEquals(listOf(FeatureStore.Label.NavigateToDetails(42L)), labels)
+        job.cancel()
     }
 }
 ```
 
-> Точная подпись Effector / EffectorScope — смотри `core-architecture`. Если API сложный — оборачивай вызов в фабрику `createEffector(...)` и тестируй её результат.
-
 ---
 
-## 6. DataSource (Ktor MockEngine)
+## 6. DataSource (если используется HttpClient)
 
-DataSource напрямую работает с `HttpClient`. Используй `MockEngine` для тестирования сериализации запроса и парсинга ответа.
+Если в проекте появится сетевой DataSource — тестируем его через тестовый http-движок (`MockEngine` Ktor / `MockWebServer` для OkHttp). Сейчас в проекте сетевого слоя нет — это шаблон на будущее.
 
 ```kotlin
 class AuthDataSourceImplTest {
 
     @Test
     fun `should send correct json when validatePhone called`() = runTest {
-        // Given
-        var capturedBody: String? = null
-        val mockEngine = MockEngine { request ->
-            capturedBody = (request.body as TextContent).text
-            respond("", HttpStatusCode.OK)
-        }
-        val client = HttpClient(mockEngine) {
-            install(ContentNegotiation) { json() }
-        }
-        val dataSource = AuthDataSourceImpl(client)
-
-        // When
-        dataSource.validatePhone(ValidatePhoneRequest("+79001234567", "p"))
-
-        // Then
-        assertTrue(capturedBody!!.contains("+79001234567"))
-        assertTrue(capturedBody!!.contains("password"))
-    }
-
-    @Test
-    fun `should throw when server returns 500`() = runTest {
-        val mockEngine = MockEngine { respond("", HttpStatusCode.InternalServerError) }
-        val client = HttpClient(mockEngine)
-        val dataSource = AuthDataSourceImpl(client)
-
-        assertFailsWith<ServerResponseException> {
-            dataSource.validatePhone(ValidatePhoneRequest("+79001234567", "p"))
-        }
+        val capturedBody = slot<ValidatePhoneRequest>()
+        // ... через Ktor MockEngine или мок HttpClient
     }
 }
 ```
@@ -291,11 +262,10 @@ class AuthDataSourceImplTest {
 ```kotlin
 package com.itapp.<module>.<layer>
 
-import dev.mokkery.everySuspend
-import dev.mokkery.matcher.any
-import dev.mokkery.mock
-import dev.mokkery.verifySuspend
-import dev.mokkery.answering.returns
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.mockk
+import io.mockk.slot
 import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -309,20 +279,20 @@ class ClassUnderTestTest {
 
     @BeforeTest
     fun setup() {
-        dependency = mock<Dependency>()
+        dependency = mockk()
         sut = ClassUnderTest(dependency)
     }
 
     @Test
     fun `should <expected behavior> when <condition>`() = runTest {
         // Given
-        everySuspend { dependency.method(any()) } returns Unit
+        coEvery { dependency.method(any()) } returns Unit
 
         // When
         sut.action()
 
         // Then
-        verifySuspend { dependency.method(any()) }
+        coVerify { dependency.method(any()) }
     }
 }
 ```

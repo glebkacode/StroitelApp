@@ -140,16 +140,16 @@ fun `should map item id by doubling`() {
 
 ```kotlin
 // ❌
-verifySuspend { repo.fetch(any()) }
+coVerify { repo.fetch(any()) }
 
 // ✅ — проверяй конкретное значение, если известно
-verifySuspend { repo.fetch(eq("expected_id")) }
+coVerify { repo.fetch("expected_id") }
 
 // ✅ — или захвати и ассертни
-val captor = Capture.slot<String>()
-everySuspend { repo.fetch(capture(captor)) } returns user
+val captured = slot<String>()
+coEvery { repo.fetch(capture(captured)) } returns user
 useCase.run("expected_id")
-assertEquals("expected_id", captor.value)
+assertEquals("expected_id", captured.captured)
 ```
 
 **Почему:** `any()` пропустит передачу любого мусора. Если знаешь что должно прийти — проверяй.
@@ -184,11 +184,11 @@ fun `data class copy works`() {
 // ❌ — verify дублирует ассерт результата
 val result = useCase("123")
 assertTrue(result.isSuccess)
-verifySuspend { repository.fetch(any()) }  // и так понятно из result
+coVerify { repository.fetch(any()) }  // и так понятно из result
 
 // ✅ — verify когда ничего больше не наблюдаемо
 useCase.fireAndForget("123")
-verifySuspend { repository.log(eq("123")) }
+coVerify { repository.log("123") }
 ```
 
 Правило: **проверяй результат, если он есть; verify — только если результата нет.**
@@ -219,17 +219,18 @@ val customPhone = AuthTestData.validationDto(phone = "+79999999999")
 ## 13. ❌ Прокидывание реального HTTP-клиента
 
 ```kotlin
-// ❌
+// ❌ — настоящий клиент, реальная сеть
 val client = HttpClient(OkHttp)
 val dataSource = AuthDataSourceImpl(client)
 
-// ✅
-val mockEngine = MockEngine { respond("{\"ok\":true}", HttpStatusCode.OK) }
-val client = HttpClient(mockEngine)
-val dataSource = AuthDataSourceImpl(client)
+// ✅ — мок DataSource через MockK,
+//    либо тестовый http-движок (Ktor MockEngine / OkHttp MockWebServer),
+//    либо абстракция HTTP-клиента поверх интерфейса (тогда mockk() контракта)
+val dataSource: AuthDataSource = mockk()
+coEvery { dataSource.validatePhone(any()) } returns Unit
 ```
 
-**Почему:** реальные сети — flaky, медленные, требуют интернет. Только `MockEngine`.
+**Почему:** реальные сети — flaky, медленные, требуют интернет. Тестируй контракт, не транспорт.
 
 ---
 
@@ -262,6 +263,6 @@ fun `should validate`() { ... }
 
 ---
 
-## 16. ❌ Излишний MockMode.autofill
+## 16. ❌ Излишний `mockk(relaxed = true)`
 
-`autofill` маскирует "забыл застабить метод X". Используй `strict` (default) — пусть тест падает на нестабленном вызове.
+`relaxed = true` маскирует «забыл застабить метод X» — мок молча возвращает дефолты. Используй обычный `mockk()` (strict) — пусть тест падает на нестабленном вызове. Если у мока много `Unit suspend fun`, ограничься `mockk(relaxUnitFun = true)`.

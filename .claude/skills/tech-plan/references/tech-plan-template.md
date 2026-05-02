@@ -105,15 +105,15 @@ Phase 3: Tests  [PARALLEL: Task 3.1 | Task 3.2]
 | | |
 |---|---|
 | **Size** | L |
-| **Creates** | `path/to/State.kt` `(NEW)`, `path/to/ReducerImpl.kt` `(NEW)`, `path/to/ViewModel.kt` `(NEW)`, `path/to/Fragment.kt` `(NEW)` |
+| **Creates** | `path/to/mvi/FeatureStore.kt` `(NEW)`, `path/to/mvi/FeatureStoreFactory.kt` `(NEW)`, `path/to/component/FeatureComponentImpl.kt` `(NEW)`, `path/to/component/FeatureScreen.kt` `(NEW)`, `path/to/mapping/StateMapping.kt` `(NEW, опц.)` |
 | **Modifies** | — |
 | **Depends on** | Phase 0 |
 
 **Steps:**
-1. [Create State / Intent / Event]
-2. [Create ReducerImpl]
-3. [Create ViewModel]
-4. [Create Fragment with ComposeView]
+1. [Create FeatureStore: Intent, State, Label]
+2. [Create FeatureStoreFactory: executor + reducer + internal Msg]
+3. [Create FeatureComponentImpl: getStore, store.stateFlow → UiState, store.labels → callbacks]
+4. [Create FeatureScreen: collectAsState, action delegation]
 
 ```kotlin
 // Key implementation skeleton
@@ -203,17 +203,17 @@ val featureModule = module {
 
 **Параллельный батч (запускать одновременно — работают на непересекающихся файлах):**
 - `documentation-writer` — KDoc на новый публичный API + README модуля при необходимости.
-- `unit-tester` — тесты в `commonTest` + прогон `:<module>:testAndroidHostTest`.
+- `unit-tester` — тесты в `src/test/java` + прогон `:<module>:testDebugUnitTest`.
 
 **Последовательно после батча:**
 1. `spec-compliance-checker` — сверка реализации со `spec.md` / `plan.md` (если они есть).
-2. `code-review-kmp` — общее ревью архитектуры / KMP / UI-производительности.
+2. `code-reviewer` — общее ревью архитектуры (MVI/MviKotlin) / конкурентности / UI-производительности.
 
 Только после успешного прохождения всей цепочки — коммит (если пользователь его просил).
 
 **Триггер-команда:**
 ```bash
-claude "Запусти post-implementation pipeline по CLAUDE.md для фичи <feature-name> (модули <list>). Параллельно: documentation-writer + unit-tester. Последовательно: spec-compliance-checker → code-review-kmp."
+claude "Запусти post-implementation pipeline по CLAUDE.md для фичи <feature-name> (модули <list>). Параллельно: documentation-writer + unit-tester. Последовательно: spec-compliance-checker → code-reviewer."
 ```
 
 Если пользователь явно отказался от какого-либо шага («без тестов» / «без ревью») — уважать.

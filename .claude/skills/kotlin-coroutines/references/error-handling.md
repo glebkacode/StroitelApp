@@ -2,7 +2,7 @@
 
 ## Try-catch в корутине
 ```kotlin
-viewModelScope.launch {
+componentScope.launch {
     try {
         val data = repository.getData()
         _state.value = State.Success(data)
@@ -32,7 +32,7 @@ suspend fun  safeCall(block: suspend () -> T): Result {
 }
 
 // Использование
-viewModelScope.launch {
+componentScope.launch {
     when (val result = safeCall { repository.getProducts() }) {
         is Result.Success -> _state.value = State.Success(result.data)
         is Result.Error -> _state.value = State.Error(result.exception.message)
@@ -48,7 +48,7 @@ private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
 }
 
 fun loadData() {
-    viewModelScope.launch(exceptionHandler) {
+    componentScope.launch(exceptionHandler) {
         val data = repository.getData()  // исключение поймается handler'ом
         _state.value = State.Success(data)
     }

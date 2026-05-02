@@ -72,8 +72,9 @@ fun `should map phone with spaces when toUi called`() {
 ## 8. Не тестируй фреймворки
 
 - Не тестируй, что Kotlin `data class` правильно делает `copy()`.
-- Не тестируй, что Ktor правильно сериализует `@Serializable`.
+- Не тестируй, что `kotlinx.serialization` правильно сериализует `@Serializable`.
 - Не тестируй, что Compose `MutableState` обновляется.
+- Не тестируй, что MviKotlin Store сам по себе работает (это библиотечный контракт).
 
 Тестируй **свою** логику.
 
@@ -86,7 +87,7 @@ fun `should map phone with spaces when toUi called`() {
 К тестам применяются те же правила качества: имена, структура, отсутствие дублирования (выноси `setup()`, фабрики тестовых данных в `Factory.kt` файлы).
 
 ```kotlin
-// commonTest/.../testdata/AuthTestData.kt
+// src/test/java/.../testdata/AuthTestData.kt
 object AuthTestData {
     fun validationDto(
         phone: String = "+79001234567",

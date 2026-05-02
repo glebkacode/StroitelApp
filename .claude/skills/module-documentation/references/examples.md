@@ -111,20 +111,20 @@ interface PhoneValidationComponent : UiComponent {
 }
 ```
 
-## TEA интерфейс
+## MviKotlin Store интерфейс
 
 ```kotlin
 /**
- * TEA store для экрана валидации телефона.
+ * MviKotlin Store для экрана валидации телефона.
  *
  * Управляет состоянием ввода номера телефона и процессом
  * отправки запроса на получение SMS-кода.
  *
  * ## Поток данных
  * ```
- * User Input → Intent → Reducer → State
- *                          ↓
- *                       Effect → Effector → Intent/Event
+ * User Input → Intent → Executor → Msg → Reducer → State
+ *                          │
+ *                          └────► Label (one-shot для UI)
  * ```
  *
  * ## State
@@ -135,23 +135,17 @@ interface PhoneValidationComponent : UiComponent {
  * ## Intents
  * - [Intent.PhoneChanged] — изменение номера
  * - [Intent.SubmitClicked] — нажатие кнопки отправки
- * - [Intent.RequestCompleted] — результат запроса
  *
- * ## Effects
- * - [Effect.SendSmsCode] — отправка SMS
- * - [Effect.ValidatePhone] — валидация номера
+ * ## Labels (one-shot события)
+ * - [Label.NavigateToSmsCode] — переход к вводу кода
+ * - [Label.ShowError] — отображение ошибки
  *
- * ## Events
- * - [Event.NavigateToSmsCode] — переход к вводу кода
- * - [Event.ShowError] — отображение ошибки
- *
- * @see PhoneValidationReducer
- * @see PhoneValidationEffector
+ * @see PhoneValidationStoreFactory фабрика, реализующая reducer и executor
  */
-interface PhoneValidationTea : Tea<
-    PhoneValidationTea.State,
-    PhoneValidationTea.Intent,
-    PhoneValidationTea.Event
+internal interface PhoneValidationStore : Store<
+    PhoneValidationStore.Intent,
+    PhoneValidationStore.State,
+    PhoneValidationStore.Label
 > {
 
     /**

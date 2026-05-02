@@ -21,11 +21,11 @@ Domain слой **не зависит** ни от чего. Presentation и Data
 data class ProductDto(
     val id: Long,
     val name: String,
-    val price: Money,
-    val category: Category
+    val price: MoneyDto,
+    val category: CategoryDto
 )
 
-data class Money(
+data class MoneyDto(
     val amount: BigDecimal,
     val currency: String
 )

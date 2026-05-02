@@ -86,19 +86,34 @@ sealed interface FeatureAction {
 }
 ```
 
-### Интеграция с ViewModel
+### Интеграция с MviKotlin Store через Decompose Component
+
+В проекте Compose-экран взаимодействует со Store не напрямую, а через Decompose-`Component`, который мапит `store.stateFlow` в `UiState` и принимает action-методы. Screen получает `Component` (или его публичный интерфейс из `*-api`) и не знает про Store.
+
 ```kotlin
 @Composable
-fun FeatureRoute(
-    viewModel: FeatureViewModel = koinViewModel()
+fun FeatureScreen(
+    component: FeatureComponent,
+    modifier: Modifier = Modifier,
 ) {
-    val state by viewModel.state.collectAsStateWithLifecycle()
-    
-    FeatureScreen(
+    val state by component.uiState.collectAsState()
+
+    FeatureContent(
         state = state,
-        onAction = viewModel::onAction
+        onAction = component::onAction,
+        modifier = modifier,
     )
 }
+```
+
+Внутри `FeatureComponentImpl` Store создаётся так:
+
+```kotlin
+private val store = instanceKeeper.getStore { storeFactory.create() }
+
+override val uiState: StateFlow<UiState> = store.stateFlow
+    .map { it.toUi() }
+    .stateIn(componentScope, SharingStarted.Eagerly, initialUi)
 ```
 
 ---

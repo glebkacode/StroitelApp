@@ -8,7 +8,7 @@ GlobalScope.launch {
 }
 
 // Правильно: привязка к lifecycle
-viewModelScope.launch {
+componentScope.launch {
     repository.syncData()
 }
 ```
@@ -48,12 +48,12 @@ suspend fun readFile(): String = withContext(Dispatchers.IO) {
 ## ❌ collect в launch без обработки ошибок
 ```kotlin
 // Неправильно: краш при ошибке
-viewModelScope.launch {
+componentScope.launch {
     flow.collect { }
 }
 
 // Правильно
-viewModelScope.launch {
+componentScope.launch {
     flow
         .catch { e -> handleError(e) }
         .collect { }
@@ -64,14 +64,14 @@ viewModelScope.launch {
 ```kotlin
 // Неправильно: новый Flow при каждой рекомпозиции
 @Composable
-fun Screen(viewModel: ViewModel) {
-    val state by viewModel.getProducts().collectAsState(emptyList())
+fun Screen(component: ProductsComponent) {
+    val state by component.getProducts().collectAsState(emptyList())
 }
 
 // Правильно: Flow как свойство
 @Composable
-fun Screen(viewModel: ViewModel) {
-    val state by viewModel.products.collectAsStateWithLifecycle()
+fun Screen(component: ProductsComponent) {
+    val state by component.products.collectAsStateWithLifecycle()
 }
 ```
 

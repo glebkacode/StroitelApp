@@ -2,7 +2,7 @@
 
 Каждый модуль должен содержать `README.md` в корневой директории с описанием назначения и использования.
 
-## Шаблон для API модуля
+## Шаблон README.md документа API модуля
 
 ```markdown
 # :feature-api
@@ -35,7 +35,7 @@
 
 ## Зависимости
 
-- `:core-architecture` — базовые классы TEA
+- `:core-architecture` — базовые классы (BaseCoroutineUseCase, getStore extension)
 - `:core-navigation` — интерфейс UiComponent
 
 ## Использование
@@ -47,9 +47,8 @@ val component = featureComponentFactory.create(
     navigation = { event -> /* handle navigation */ }
 )
 ```
-```
 
-## Шаблон для Implementation модуля
+## Шаблон README.md документа IMPL модуля
 
 ```markdown
 # :feature-impl
@@ -63,12 +62,12 @@ val component = featureComponentFactory.create(
 ## Архитектура
 
 ```
-feature-impl/
+feature-impl/src/main/java/com/itapp/<feature>_impl/
 ├── presentation/
 │   └── feature_name/
 │       ├── component/      # Decompose компонент и Screen
-│       ├── mapping/        # Маппинг State → UiState
-│       └── mvi/            # TEA: Store, Reducer, Effector
+│       ├── mapping/        # Маппинг Store.State → UiState
+│       └── mvi/            # MviKotlin: Store + StoreFactory (Intent/State/Label/Msg)
 ├── domain/
 │   ├── model/              # Domain модели
 │   ├── repository/         # Интерфейсы репозиториев
@@ -122,10 +121,9 @@ interface FeatureGraph {
 - `:feature-api` — публичный интерфейс
 
 ### Implementation
-- `:core-architecture` — TEA
-- `:core-navigation` — Decompose
-- `:core-network` — Ktor клиент
-- `:uikit` — UI компоненты
+- `:core-architecture` — BaseCoroutineUseCase, MviKotlin re-exports, `getStore` extension
+- `:core-navigation` — Decompose обёртки
+- `:uikit` — дизайн-система (StroitelTheme, цвета, типографика)
 ```
 
 ## Шаблон для Core модуля
@@ -222,67 +220,38 @@ interface FeatureGraph {
 ```markdown
 # :core-architecture
 
-Кастомная реализация The Elm Architecture (TEA) для управления состоянием.
+Базовые архитектурные примитивы и интеграция MviKotlin с Decompose.
 
 ## Назначение
 
-Предоставляет унифицированный подход к управлению состоянием во всех
-feature-модулях через паттерн однонаправленного потока данных.
-
-## Основные компоненты
-
-### Tea
-
-Главный интерфейс store:
-
-```kotlin
-interface Tea<State, Intent, Event> {
-    val state: StateFlow<State>
-    val events: Flow<Event>
-    fun accept(intent: Intent)
-    fun init()
-    fun dispose()
-}
-```
-
-### Reducer
-
-Чистая функция для обработки интентов:
-
-```kotlin
-abstract class Reducer<State, Intent, Effect> {
-    abstract fun State.reduce(intent: Intent): Next<State, Effect>
-}
-```
-
-### Effector
-
-Обработчик побочных эффектов:
-
-```kotlin
-abstract class CoroutineEffector<Effect, Intent, Event> {
-    abstract suspend fun execute(effect: Effect)
-    protected fun dispatch(intent: Intent)
-    protected fun publish(event: Event)
-}
-```
+Предоставляет:
+- `BaseCoroutineUseCase` — базовый класс UseCase с обработкой ошибок через `Result`.
+- Расширение `InstanceKeeper.getStore { ... }` — связывает MviKotlin Store с жизненным циклом Decompose-компонента.
+- Re-export базовых артефактов MviKotlin (`mvikotlin`, `mvikotlin-main`, `mvikotlin-extensions-coroutines`).
 
 ## Использование
 
 ```kotlin
-// Создание store
-val store = DefaultTea(
-    initialState = State(),
-    reducer = MyReducer(),
-    effectors = listOf(MyEffector()),
-    scope = viewModelScope
-)
+// в feature-impl Component
+private val store = instanceKeeper.getStore { storeFactory.create() }
 
-// Подписка на состояние
-store.state.collect { state -> updateUi(state) }
+override val uiState = store.stateFlow
+    .map { it.toUi() }
+    .stateIn(componentScope, SharingStarted.Eagerly, initialUi)
+```
 
-// Отправка интента
-store.accept(Intent.LoadData)
+```kotlin
+// UseCase
+abstract class GetItemsUseCase : BaseCoroutineUseCase<Unit, List<Item>>()
+
+@Inject
+class GetItemsUseCaseImpl(
+    private val repo: ItemsRepository,
+) : GetItemsUseCase() {
+    override suspend fun run(input: Unit): List<Item> = repo.getAll()
+}
+
+val result: Result<List<Item>> = useCase(Unit)
 ```
 ```
 
@@ -305,14 +274,14 @@ store.accept(Intent.LoadData)
 | Компонент | Описание |
 |-----------|----------|
 | `PhoneValidationComponent` | Экран ввода номера телефона |
-| `SmsCodeComponent` | Экран ввода SMS-кода |
+| `RegistrationComponent` | Экран регистрации |
+| `RootAuthComponent` | Корневой компонент флоу авторизации |
 
-### События навигации
+### Колбэки навигации (Callbacks)
 
-| Event | Описание |
-|-------|----------|
-| `PhoneValidationComponent.Event.NavigateToSmsCode` | Переход к вводу кода |
-| `SmsCodeComponent.Event.NavigateToMain` | Успешная авторизация |
+Каждый Component-интерфейс содержит вложенный `data class Callbacks(...)`,
+который потребитель передаёт в `Factory.invoke(...)`. Через колбэки
+Component сообщает родителю об успешной авторизации, нажатии "назад" и т.п.
 
 ## Зависимости
 

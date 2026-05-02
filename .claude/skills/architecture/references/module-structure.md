@@ -3,9 +3,11 @@
 Каждая фича разделена на два модуля:
 
 ```
-feature-api/     # Публичные контракты
-feature-impl/    # Реализация
+feature-api/     # Публичные контракты (com.android.library)
+feature-impl/    # Реализация       (com.android.library)
 ```
+
+Все модули — стандартные Android Gradle Library модули (`com.android.library` или `com.android.application` для `composeApp`). Без KMP source-set'ов: код в `src/main/java/`, тесты в `src/test/java/`, ресурсы в `src/main/res/`.
 
 ### feature-api содержит:
 - **Component интерфейсы** — контракт UI компонента
@@ -47,14 +49,16 @@ interface FeatureComponent : UiComponent {
 
 **Правила контракта в `*-api`:**
 
-- Component-интерфейс не упоминает ViewModel, корутины, UseCase или Decompose-навигацию.
+- Component-интерфейс не упоминает корутины, UseCase или Decompose-навигацию.
 - Все взаимодействия с навигацией — через `data class Callbacks(...)`, передаваемый в `Factory.invoke(...)`.
 - `UiState` помечается `@Immutable` для оптимизации Compose-рекомпозиции.
 
 ### feature-impl содержит:
 
+Файлы лежат в `feature-impl/src/main/java/com/itapp/<feature>_impl/...`. Тесты — в `feature-impl/src/test/java/...` с зеркальной структурой пакетов. Android-ресурсы — в `feature-impl/src/main/res/`.
+
 ```
-feature-impl/
+feature-impl/src/main/java/com/itapp/<feature>_impl/
 ├── di/
 │   └── FeatureGraph.kt
 ├── presentation/
@@ -62,8 +66,9 @@ feature-impl/
 │       ├── component/
 │       │   ├── FeatureComponentImpl.kt
 │       │   └── FeatureScreen.kt
-│       ├── viewmodel/
-│       │   └── FeatureViewModel.kt
+│       ├── mvi/
+│       │   ├── FeatureStore.kt
+│       │   └── FeatureStoreFactory.kt
 │       └── mapping/
 │           └── StateMapping.kt              # опционально
 ├── domain/
@@ -89,8 +94,9 @@ feature-impl/
 
 **Правила presentation-слоя:**
 
-- На каждый экран — отдельная папка `presentation/<screen>/` с подпапками `component/`, `viewmodel/`, при необходимости `mapping/`.
-- `mapping/` создаётся только если `ViewModel.State` отличается от публичного `UiState` из `*-api`. Если ViewModel хранит сразу `UiState` — папку не создаём.
+- На каждый экран — отдельная папка `presentation/<screen>/` с подпапками `component/`, `mvi/`, при необходимости `mapping/`.
+- В `mvi/` лежат `FeatureStore.kt` (контракт: `Intent`, `State`, `Label`) и `FeatureStoreFactory.kt` (реализация: executor + reducer + внутренний `Msg`).
+- `mapping/` создаётся только если `Store.State` отличается от публичного `UiState` из `*-api`.
 - Component и Screen лежат рядом в `component/`, потому что Screen вызывается только из этого Component-а.
 
 ---

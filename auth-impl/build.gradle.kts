@@ -1,133 +1,59 @@
 plugins {
-    alias(libs.plugins.kotlinMultiplatform)
-    alias(libs.plugins.androidKotlinMultiplatformLibrary)
-    alias(libs.plugins.composeMultiplatform)
+    alias(libs.plugins.androidLibrary)
+    alias(libs.plugins.kotlinAndroid)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.metro)
-    alias(libs.plugins.mokkery)
     id("kover-conventions")
 }
 
-kotlin {
+android {
+    namespace = "com.itapp.auth_impl"
+    compileSdk = libs.versions.android.compileSdk.get().toInt()
 
-    // Target declarations - add or remove as needed below. These define
-    // which platforms this KMP module supports.
-    // See: https://kotlinlang.org/docs/multiplatform-discover-project.html#targets
-    androidLibrary {
-        namespace = "com.itapp.auth_impl"
-        compileSdk = 36
-        minSdk = 24
-
-        withHostTestBuilder {
-        }
-
-        withDeviceTestBuilder {
-            sourceSetTreeName = "test"
-        }.configure {
-            instrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        }
-        experimentalProperties["android.experimental.kmp.enableAndroidResources"] = true
+    defaultConfig {
+        minSdk = libs.versions.android.minSdk.get().toInt()
     }
 
-    // For iOS targets, this is also where you should
-    // configure native binary output. For more information, see:
-    // https://kotlinlang.org/docs/multiplatform-build-native-binaries.html#build-xcframeworks
-
-    // A step-by-step guide on how to include this library in an XCode
-    // project can be found here:
-    // https://developer.android.com/kotlin/multiplatform/migrate
-    val xcfName = "auth-implKit"
-
-    iosX64 {
-        binaries.framework {
-            baseName = xcfName
-        }
+    buildFeatures {
+        compose = true
     }
 
-    iosArm64 {
-        binaries.framework {
-            baseName = xcfName
-        }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
 
-    iosSimulatorArm64 {
-        binaries.framework {
-            baseName = xcfName
-        }
+    kotlinOptions {
+        jvmTarget = "11"
     }
+}
 
-    // Source set declarations.
-    // Declaring a target automatically creates a source set with the same name. By default, the
-    // Kotlin Gradle Plugin creates additional source sets that depend on each other, since it is
-    // common to share sources between related targets.
-    // See: https://kotlinlang.org/docs/multiplatform-hierarchy.html
-    sourceSets {
-        commonMain {
-            dependencies {
-                // projects
-                implementation(projects.uikit)
-                implementation(projects.coreNavigation)
-                implementation(projects.coreArchitecture)
-                implementation(projects.authApi)
+dependencies {
+    implementation(projects.uikit)
+    implementation(projects.coreNavigation)
+    implementation(projects.coreArchitecture)
+    implementation(projects.authApi)
 
-                implementation(libs.kotlin.stdlib)
-                implementation(libs.kotlin.serialization.json)
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.compose.runtime)
+    implementation(libs.androidx.compose.foundation)
+    implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.material.icons.extended)
+    implementation(libs.androidx.compose.ui)
+    implementation(libs.androidx.compose.ui.tooling.preview)
+    implementation(libs.androidx.lifecycle.runtime.compose)
 
-                // compose
-                implementation(compose.runtime)
-                implementation(compose.foundation)
-                implementation(compose.material3)
-                implementation(compose.materialIconsExtended)
-                implementation(compose.ui)
-                implementation(compose.components.resources)
-                implementation(compose.components.uiToolingPreview)
-                implementation(libs.androidx.lifecycle.runtimeCompose)
+    implementation(libs.decompose)
+    implementation(libs.decompose.compose)
 
-                // decompose
-                implementation(libs.decompose)
-                implementation(libs.decompose.compose)
-                implementation(libs.decompose.compose.experimental)
+    implementation(libs.kotlin.coroutines.core)
+    implementation(libs.kotlin.serialization.json)
 
-                implementation(libs.ktor.client.core)
-                implementation(libs.kotlin.coroutines.core)
-                implementation(libs.kotlin.serialization.json)
-            }
-        }
+    debugImplementation(libs.androidx.compose.ui.tooling)
 
-        commonTest {
-            dependencies {
-                implementation(libs.kotlin.test)
-                implementation(libs.kotlin.coroutines.test)
-            }
-        }
-
-        androidMain {
-            dependencies {
-                // Add Android-specific dependencies here. Note that this source set depends on
-                // commonMain by default and will correctly pull the Android artifacts of any KMP
-                // dependencies declared in commonMain.
-                implementation(libs.ktor.client.okhttp)
-            }
-        }
-
-        getByName("androidDeviceTest") {
-            dependencies {
-                implementation(libs.androidx.runner)
-                implementation(libs.androidx.core)
-                implementation(libs.androidx.testExt.junit)
-            }
-        }
-
-        iosMain {
-            dependencies {
-                // Add iOS-specific dependencies here. This a source set created by Kotlin Gradle
-                // Plugin (KGP) that each specific iOS target (e.g., iosX64) depends on as
-                // part of KMP’s default source set hierarchy. Note that this source set depends
-                // on common by default and will correctly pull the iOS artifacts of any
-                // KMP dependencies declared in commonMain.
-                implementation(libs.ktor.client.darwin)
-            }
-        }
-    }
+    testImplementation(libs.junit)
+    testImplementation(libs.kotlin.test.junit)
+    testImplementation(libs.kotlin.coroutines.test)
+    testImplementation(libs.mockk)
 }

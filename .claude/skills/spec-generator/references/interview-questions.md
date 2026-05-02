@@ -103,7 +103,6 @@ Use these to fill in gaps before writing the spec. Don't ask questions that can 
 
 ## Android / Kotlin (mobile-specific)
 
-- MVI via Knot (State/Intent/Event/Reducer) or plain ViewModel?
 - api/impl modular structure — new module or extension of an existing one?
 - Is a Switcher (feature toggle) needed via ConfigGetter/ConfigRegistrar?
 - Navigation: AppNavigator + NavigationArguments or Navigation Component (nav_graph)?

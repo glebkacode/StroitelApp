@@ -1,108 +1,34 @@
 plugins {
-    alias(libs.plugins.kotlinMultiplatform)
-    alias(libs.plugins.androidKotlinMultiplatformLibrary)
+    alias(libs.plugins.androidLibrary)
+    alias(libs.plugins.kotlinAndroid)
 }
 
-kotlin {
+android {
+    namespace = "com.itapp.core_architecture"
+    compileSdk = libs.versions.android.compileSdk.get().toInt()
 
-    // Target declarations - add or remove as needed below. These define
-    // which platforms this KMP module supports.
-    // See: https://kotlinlang.org/docs/multiplatform-discover-project.html#targets
-    androidLibrary {
-        namespace = "com.itapp.core_architecture"
-        compileSdk = 36
-        minSdk = 24
-
-        withHostTestBuilder {
-        }
-
-        withDeviceTestBuilder {
-            sourceSetTreeName = "test"
-        }.configure {
-            instrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        }
+    defaultConfig {
+        minSdk = libs.versions.android.minSdk.get().toInt()
     }
 
-    // For iOS targets, this is also where you should
-    // configure native binary output. For more information, see:
-    // https://kotlinlang.org/docs/multiplatform-build-native-binaries.html#build-xcframeworks
-
-    // A step-by-step guide on how to include this library in an XCode
-    // project can be found here:
-    // https://developer.android.com/kotlin/multiplatform/migrate
-    val xcfName = "core-architectureKit"
-
-    iosX64 {
-        binaries.framework {
-            baseName = xcfName
-        }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
 
-    iosArm64 {
-        binaries.framework {
-            baseName = xcfName
-        }
+    kotlinOptions {
+        jvmTarget = "11"
     }
+}
 
-    iosSimulatorArm64 {
-        binaries.framework {
-            baseName = xcfName
-        }
-    }
+dependencies {
+    implementation(libs.kotlin.coroutines.core)
 
-    // Source set declarations.
-    // Declaring a target automatically creates a source set with the same name. By default, the
-    // Kotlin Gradle Plugin creates additional source sets that depend on each other, since it is
-    // common to share sources between related targets.
-    // See: https://kotlinlang.org/docs/multiplatform-hierarchy.html
-    sourceSets {
-        commonMain {
-            dependencies {
-                implementation(libs.kotlin.stdlib)
+    api(libs.mvikotlin)
+    api(libs.mvikotlin.main)
+    api(libs.mvikotlin.timetravel)
+    api(libs.mvikotlin.logging)
+    api(libs.mvikotlin.extensions.coroutines)
 
-                implementation(libs.kotlin.coroutines.core)
-
-
-                // mvikotlin
-                implementation(libs.mvikotlin)
-                implementation(libs.mvikotlin.main)
-                implementation(libs.mvikotlin.timetravel)
-                implementation(libs.mvikotlin.logging)
-                implementation(libs.mvikotlin.extensions.coroutines)
-            }
-        }
-
-        commonTest {
-            dependencies {
-                implementation(libs.kotlin.test)
-            }
-        }
-
-        androidMain {
-            dependencies {
-                // Add Android-specific dependencies here. Note that this source set depends on
-                // commonMain by default and will correctly pull the Android artifacts of any KMP
-                // dependencies declared in commonMain.
-            }
-        }
-
-        getByName("androidDeviceTest") {
-            dependencies {
-                implementation(libs.androidx.runner)
-                implementation(libs.androidx.core)
-                implementation(libs.androidx.testExt.junit)
-            }
-        }
-
-        iosMain {
-            dependencies {
-                // Add iOS-specific dependencies here. This a source set created by Kotlin Gradle
-                // Plugin (KGP) that each specific iOS target (e.g., iosX64) depends on as
-                // part of KMP’s default source set hierarchy. Note that this source set depends
-                // on common by default and will correctly pull the iOS artifacts of any
-                // KMP dependencies declared in commonMain.
-            }
-        }
-    }
-
+    api(libs.decompose)
 }

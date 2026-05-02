@@ -1,5 +1,10 @@
 # Анти-паттерны
 
+Избегай:
+- MutableState в Component без необходимости
+- Передача огромных state-объектов в composable
+- Логика внутри composable, которая не относится к UI
+
 ## ❌ Бизнес-логика в Composable
 ```kotlin
 // Неправильно
@@ -10,7 +15,7 @@ fun CheckoutButton(cart: Cart) {
     // ...
 }
 
-// Правильно: логика во ViewModel, UI получает готовое состояние
+// Правильно: логика в Component, а оттуда в MviKotlin Store, UI получает готовое состояние
 @Composable
 fun CheckoutButton(
     total: String,
@@ -22,15 +27,15 @@ fun CheckoutButton(
 ```kotlin
 // Неправильно
 @Composable
-fun Screen(viewModel: ViewModel) {
-    viewModel.loadData()  // вызывается при каждой рекомпозиции!
+fun Screen(component: ProductsComponent) {
+    component.loadData()  // вызывается при каждой рекомпозиции!
 }
 
 // Правильно
 @Composable
-fun Screen(viewModel: ViewModel) {
+fun Screen(component: ProductsComponent) {
     LaunchedEffect(Unit) {
-        viewModel.loadData()
+        component.loadData()
     }
 }
 ```

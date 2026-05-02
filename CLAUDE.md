@@ -4,11 +4,11 @@
 
 ## Project Overview
 
-**StroitelApp** («Магазин Строитель») — мультиплатформенное e-commerce приложение / маркетплейс строительных товаров с русскоязычным интерфейсом.
+**StroitelApp** («Магазин Строитель») — нативное Android e-commerce приложение / маркетплейс строительных товаров с русскоязычным интерфейсом.
 
-- **Платформы:** Android, iOS, Web (JS / WASM), Desktop (JVM), бэкенд на Ktor.
+- **Платформа:** только Android (Jetpack Compose).
 - **Текущая функциональность:** авторизация по номеру телефона и регистрация пользователя.
-- **В планах:** каталог товаров и сопутствующая e-commerce функциональность (модули `products-api` / `products-impl` уже объявлены в `settings.gradle.kts`, но пока не реализованы).
+- **В планах:** каталог товаров и сопутствующая e-commerce функциональность.
 - **Application ID:** `com.itapp.stroitelapp`.
 
 ## Project Technology Stack
@@ -16,20 +16,19 @@
 | Категория | Технология | Версия |
 |-----------|------------|--------|
 | Язык | Kotlin | 2.2.20 |
-| UI | Compose Multiplatform | 1.9.1 |
-| Hot Reload | Compose Hot Reload | 1.0.0-rc02 |
+| UI | Jetpack Compose (BOM) | 2025.10.00 |
 | DI | Metro (`dev.zacsweers.metro`) | 0.7.3 |
 | Навигация | Decompose (+ extensions-compose) | 3.4.0 |
-| Сеть | Ktor (client + server) | 3.3.1 |
+| MVI / Store | MviKotlin | 4.3.0 |
 | Корутины | Kotlinx Coroutines | 1.10.2 |
 | Сериализация | Kotlinx Serialization JSON | 1.9.0 |
-| Изображения | Coil 3 (multiplatform) | 3.0.0-alpha08 |
+| Тесты — моки | MockK | 1.13.13 |
+| Тесты — корутины | kotlinx-coroutines-test | 1.10.2 |
 | Сборка | Gradle (build cache + configuration cache) | 8.13 |
+| AGP | Android Gradle Plugin | 8.11.2 |
 | Покрытие | Kover | 0.8.3 |
 
-**HTTP-движки Ktor:** `okhttp` (Android), `darwin` (iOS), `js` (Web).
-
-**Таргеты:** Android (`minSdk 24`, `compile/targetSdk 36`), iOS (`x64` / `arm64` / `simulatorArm64`), JVM Desktop, JS, WASM.
+**Android SDK:** `minSdk 24`, `compileSdk 36`, `targetSdk 36`.
 
 **Сборочные конвенции:** custom convention-плагины в `build-logic/` (например, `kover-conventions`).
 
@@ -39,25 +38,22 @@
 
 ```
 StroitelApp/
-├── composeApp/          # Точка входа мультиплатформенного Compose-приложения (Android/iOS/Desktop/Web)
-├── server/              # Ktor JVM бэкенд
-├── shared/              # Код, общий для всех таргетов (константы, абстракция платформы)
+├── composeApp/          # Точка входа Android-приложения (com.android.application)
 │
-├── core-architecture/   # Базовые архитектурные примитивы (BaseCoroutineUseCase и пр.)
-├── core-navigation/     # Примитивы навигации поверх Decompose (BaseComponent, UiComponent, реле, child lists)
-├── uikit/               # Дизайн-система: StroitelTheme, цвета, типографика, переиспользуемые компоненты
+├── core-architecture/   # Базовые архитектурные примитивы (BaseCoroutineUseCase, getStore extension и пр.)
+├── core-navigation/     # Примитивы навигации поверх Decompose (BaseComponent, UiComponent, Relay, child lists)
+├── uikit/               # Дизайн-система: StroitelTheme, цвета, типографика, шрифты Inter
 │
 ├── auth-api/            # Публичные интерфейсы фичи авторизации
 ├── auth-impl/           # Реализация фичи авторизации (data + domain + presentation + DI)
-├── products-api/        # [Объявлен, не реализован] Публичные интерфейсы каталога товаров
-├── products-impl/       # [Объявлен, не реализован] Реализация каталога товаров
 │
 ├── build-logic/         # Gradle convention-плагины (kover-conventions и др.)
-├── iosApp/              # Xcode-проект для iOS
 └── gradle/              # Gradle wrapper и version catalog (libs.versions.toml)
 ```
 
 **Корень пакетов:** `com.itapp.<module>`.
+
+**Все модули — `com.android.library`/`com.android.application`** (без KMP, без iOS/Web/Desktop таргетов).
 
 ## Architecture
 
@@ -74,37 +70,41 @@ StroitelApp/
 Структура новых папок должна ВСЕГДА СТРОГО следовать этому описанию.
 
 ```
-presentation/
-  └── <screen>/                              # Presentation UI-логика
-      ├── viewmodel/                         # Plain Kotlin ViewModel (StateFlow + one-shot Channel)
-      ├── component/                         # Decompose Component impl + Compose Screen
-      └── mapping/                           # (опционально) VM.State → UiState
-domain/
-  ├── model/                                 # Доменные модели
-  ├── usecase/                               # Use case (interface + Impl)
-  └── repository/                            # Интерфейсы репозиториев
-data/
-  ├── api/                                   # DataSource (interface + Impl)
-  ├── repository/                            # Реализации репозиториев
-  └── model/                                 # Request/Response DTO + маппинг
-di/
-  └── FeatureGraph.kt                        # Metro @DependencyGraph
+src/main/java/com/itapp/<feature>_impl/
+├── presentation/
+│   └── <screen>/                              # Presentation UI-логика
+│       ├── component/                         # Decompose Component impl + Compose Screen
+│       ├── mvi/                               # MviKotlin Store + StoreFactory (Intent/State/Label)
+│       └── mapping/                           # (опционально) Store.State → UiState
+├── domain/
+│   ├── model/                                 # Доменные модели
+│   ├── usecase/                               # Use case (interface + Impl)
+│   └── repository/                            # Интерфейсы репозиториев
+├── data/
+│   ├── api/                                   # DataSource (interface + Impl)
+│   ├── repository/                            # Реализации репозиториев
+│   └── model/                                 # Request/Response DTO + маппинг
+└── di/
+    └── FeatureGraph.kt                        # Metro @DependencyGraph
 ```
 
-### Presentation pattern: ТОЛЬКО MVVM
+Ресурсы фичи (строки, drawable) — в `src/main/res/`.
 
-В presentation-слое всех `*-impl` модулей использовать **исключительно MVVM**:
+### Presentation pattern: ТОЛЬКО MVI на MviKotlin
+
+В presentation-слое всех `*-impl` модулей используется **исключительно MVI на основе MviKotlin Store**. Plain Kotlin ViewModel / `StateFlow + Channel` без Store — **запрещены**.
 
 ```
-Compose Screen  ───►  Component  ───►  ViewModel  ───►  UseCase  ───►  Repository
-                       (Decompose)      (StateFlow)
+Compose Screen  ───►  Component  ───►  Store  ───►  UseCase  ───►  Repository
+                       (Decompose)     (MviKotlin)
 ```
 
-- **ViewModel** — plain Kotlin class в `commonMain` (НЕ `androidx.lifecycle.ViewModel`), хранит `MutableStateFlow<UiState>` и `Channel`/`SharedFlow` для one-shot событий (навигация, toast).
-- **Component** — тонкая Decompose-обёртка: владеет ViewModel через `instanceKeeper.getOrCreate { RetainedViewModel(...) }`, подписывает one-shot Flow и дёргает `Callbacks`. Без бизнес-логики.
+- **Store** — `Store<Intent, State, Label>` из MviKotlin. Создаётся через `StoreFactory` (`DefaultStoreFactory`), внутри — `coroutineExecutorFactory` (обработка `Intent` + side effects) и `Reducer<State, Msg>` (чистая функция). Внутренние сообщения редьюсера (`Msg`) скрыты от внешнего мира.
+- **StoreFactory** (фича-локальный) — создаёт инстанс Store, конфигурирует executor (бизнес-логика, вызовы UseCase) и reducer.
+- **Component** — тонкая Decompose-обёртка: владеет Store через `instanceKeeper.getStore { storeFactory.create() }` (`com.itapp.core_architecture.getStore`), мапит `store.stateFlow` в `UiState`, подписывает `store.labels` на one-shot события и дёргает `Callbacks`. Без бизнес-логики.
 - **Screen** — чистый Compose-рендер, разбит на внешний `Screen(component)` и внутренний `private Content(state, onX, ...)` для preview/тестов.
 
-**TEA/MVI запрещён**, даже если встречается в существующем коде. Фича `phone_validation` использует TEA — это легаси, **не копировать**. Эталон — `RegistrationViewModel` + `RegistrationComponentImpl`. Полная спецификация: [`.claude/skills/architecture/references/presentation-architecture.md`](.claude/skills/architecture/references/presentation-architecture.md). Перед написанием любого presentation-кода обязательно вызвать skill `architecture`.
+Эталоны — фичи `phone_validation` и `registration` (`*Store` + `*StoreFactory` + `*ComponentImpl`). Полная спецификация: [`.claude/skills/architecture/references/presentation-architecture.md`](.claude/skills/architecture/references/presentation-architecture.md). Перед написанием любого presentation-кода обязательно вызвать skill `architecture`.
 
 ### Навигация (Decompose)
 
@@ -119,50 +119,47 @@ Compose Screen  ───►  Component  ───►  ViewModel  ───►  
 - `@AssistedInject` / `@AssistedFactory` — для зависимостей с runtime-параметрами.
 - `@DependencyGraph` — конфигурация графа фичи.
 - `@Binds` — связывание интерфейсов с реализациями.
+- `@Provides` — фабрики (включая `StoreFactory` в `AppGraph`).
 
 ## Build Commands
 
 ```bash
-# Android
+# Сборка debug APK
 ./gradlew :composeApp:assembleDebug
+
+# Установка debug на подключённое устройство
 ./gradlew :composeApp:installDebug
 
-# Desktop (JVM)
-./gradlew :composeApp:run
+# Релизная сборка
+./gradlew :composeApp:assembleRelease
 
-# Web (WASM — современные браузеры)
-./gradlew :composeApp:wasmJsBrowserDevelopmentRun
-
-# Web (JS — старые браузеры)
-./gradlew :composeApp:jsBrowserDevelopmentRun
-
-# Server
-./gradlew :server:run
-
-# iOS — открыть iosApp/ в Xcode
+# Чистая сборка
+./gradlew clean :composeApp:assembleDebug
 ```
 
 ## Testing
 
 ```bash
-# Все тесты
+# Все unit-тесты
 ./gradlew test
 
-# Тесты конкретного модуля
-./gradlew :auth-impl:testAndroidHostTest      # commonTest на JVM (рекомендуется)
-./gradlew :auth-impl:iosSimulatorArm64Test    # тесты на iOS-симуляторе
+# Тесты конкретного модуля (debug-вариант)
+./gradlew :auth-impl:testDebugUnitTest
+
+# Принудительный перезапуск (без кэша)
+./gradlew test --rerun-tasks
 
 # Покрытие
 ./gradlew koverReport
 ```
 
-> ⚠️ `:auth-impl:test` неоднозначен (выбирает между `testAndroid` и `testAndroidHostTest`). Для запуска `commonTest` используйте `:auth-impl:testAndroidHostTest`.
-
-**Быстрая проверка компиляции:** `./gradlew :auth-impl:compileAndroidMain`.
+**Быстрая проверка компиляции:** `./gradlew :auth-impl:compileDebugKotlin`.
 
 ## Conventions & Tips
 
 - **Code style:** официальный Kotlin code style (`kotlin.code.style=official`).
-- **Тесты:** располагаются в source set `commonTest`, файлы именуются `*Test.kt`. Для корутин используется `runTest`. Все зависимости мокаются **только через Mokkery** (`mock<T>()` + `everySuspend` / `verifySuspend`) — Fake-классы запрещены.
+- **Тесты:** располагаются в `src/test/java/`, файлы именуются `*Test.kt`. Для корутин используется `runTest` из `kotlinx-coroutines-test`. Все зависимости мокаются **только через MockK** (`mockk()` + `coEvery` / `coVerify`) — Fake-классы запрещены.
+- **Ресурсы:** строки в `src/main/res/values/strings.xml`, шрифты в `src/main/res/font/` (имена в lower_snake_case), drawable в `src/main/res/drawable/`. В Compose использовать `androidx.compose.ui.res.stringResource(R.string.X)` и `androidx.compose.ui.text.font.Font(R.font.X)`.
 - **Kover excludes:** классы `*Graph*`, `*Factory*`, `*Component*Impl*Factory*`; пакеты `*.di`, `*.generated`.
 - **Metro Assisted Inject:** Metro **не поддерживает** несколько `@Assisted`-параметров одного типа (например, два `() -> Unit`). Workaround — обернуть их в `data class Callbacks(...)` и передавать как один assisted-параметр.
+- **MviKotlin generic order:** при использовании `storeFactory.create<Intent, Action, State, Message, Label>` и `coroutineExecutorFactory<Intent, Action, State, Message, Label>` важен порядок типов: **Intent, Action, State, Message, Label**.

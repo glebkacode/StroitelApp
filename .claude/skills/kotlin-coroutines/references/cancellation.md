@@ -1,6 +1,7 @@
 # Отмена
 
 ## Проверка отмены
+Длительные циклы необходимо проверять на отмену:
 ```kotlin
 suspend fun processItems(items: List) {
     items.forEach { item ->

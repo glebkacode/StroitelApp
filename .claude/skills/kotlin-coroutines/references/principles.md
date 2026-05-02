@@ -2,18 +2,19 @@
 
 ## 1. Structured Concurrency
 Корутины привязаны к scope и автоматически отменяются вместе с ним.
+Всегда используй принцип structured concurrency — никогда GlobalScope.
 ```kotlin
-// ✅ Правильно: корутина привязана к viewModelScope
-class ProductViewModel : ViewModel() {
+// ✅ Правильно: корутина привязана к компоненту
+class ProductComponent(componentContext: ComponentContext,) : BaseComponent(componentContext) {
     fun loadProducts() {
-        viewModelScope.launch {
+        componentScope.launch {
             // автоматически отменится при очистке ViewModel
         }
     }
 }
 
 // ❌ Неправильно: глобальный scope, утечка корутины
-class ProductViewModel : ViewModel() {
+class ProductComponent(componentContext: ComponentContext,) : BaseComponent(componentContext) {
     fun loadProducts() {
         GlobalScope.launch {
             // никогда не отменится!
@@ -56,7 +57,7 @@ class ProductRepository(
 }
 
 // Вызывающий код не думает о диспетчерах
-viewModelScope.launch {
+componentScope.launch {
     val products = repository.getProducts()  // безопасно
 }
 ```
