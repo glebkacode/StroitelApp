@@ -1,54 +1,94 @@
-# Feature: [Feature Name]
+# Feature: [Название фичи]
 
-**Path:** `[real path to the module]`
+**Path:** `[путь до модуля / сервиса]`
+
+---
 
 ## Context
 
-[1-2 sentences: what problem it solves and why it's needed now.]
+[1–2 предложения: какую проблему решаем и почему это важно сейчас]
 
 ---
 
 ## Goal
 
-[One sentence: what should work when the feature is done.]
+[Одно чёткое предложение: что должно работать после реализации]
+
+---
+
+## User Flow
+
+1. [Пользователь делает действие X]
+2. [Система отвечает Y]
+3. [Пользователь получает результат Z]
+
+---
+
+## Assumptions
+
+- [Предположение 1]
+- [Предположение 2]
+- [Например: пользователь авторизован]
+- [Например: внешний сервис доступен]
 
 ---
 
 ## Requirements
 
 ### Functional
-- [ ] [User can do X]
-- [ ] [System does Y under condition Z]
-- [ ] [Edge case handled: ...]
+
+- [ ] Пользователь может [конкретное действие]
+- [ ] Система делает [конкретное поведение]
+- [ ] При условии [X] происходит [Y]
+- [ ] Обработан edge-case: [описание]
 
 ### Non-functional
-- [Performance requirement, if any]
-- [Expected test coverage — minimum 80%]
-- [No new dependencies / specific constraint]
+
+- [Требования к производительности (если есть)]
+- [Минимальное покрытие тестами — 80%]
+- [Ограничения (например: не добавлять зависимости)]
+- [Требования к безопасности / логированию (если есть)]
 
 ---
 
 ## Edge Cases
 
-| Scenario | Expected Behavior |
+| Сценарий | Ожидаемое поведение |
 |---|---|
-| [What if X == null?] | [Return Y / show error Z] |
-| [Network error] | [Retry / fallback] |
-| [Empty state] | [Show placeholder] |
+| [X == null] | [Ошибка / fallback / дефолт] |
+| [Ошибка сети] | [Retry / fallback] |
+| [Пустое состояние] | [Placeholder / сообщение] |
+| [Некорректные данные] | [Валидация / ошибка] |
 
 ---
 
 ## Out of Scope
 
-- [Something that sounds related but is not part of this task]
-- [Future improvement — note it, don't implement now]
+- [Что похоже на задачу, но не входит]
+- [Будущие улучшения — не реализуем сейчас]
+
+---
+
+## Technical Notes (optional)
+
+- Использовать существующий модуль: [X]
+- Переиспользовать сервис: [Y]
+- Не трогать: [Z]
+- Особые ограничения по архитектуре
+
+---
+
+## Open Questions
+
+- [Вопрос 1]
+- [Вопрос 2]
 
 ---
 
 ## Acceptance Criteria
 
-- [ ] [Specific verifiable outcome 1]
-- [ ] [Specific verifiable outcome 2]
-- [ ] All existing tests pass without changes
-- [ ] New logic is covered by unit tests (minimum 80%)
-- [ ] Detekt passes with no new errors
+- [ ] [Конкретный проверяемый результат 1]
+- [ ] [Конкретный проверяемый результат 2]
+- [ ] Все существующие тесты проходят без изменений
+- [ ] Новая логика покрыта unit-тестами (минимум 80%)
+- [ ] Линтер/статический анализ (например, Detekt) проходит без новых ошибок

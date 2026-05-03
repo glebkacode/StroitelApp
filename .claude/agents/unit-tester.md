@@ -17,7 +17,7 @@ description: |
   правок DI graph (Metro), изменений в сгенерированном коде (*Graph*, *Factory*),
   чисто косметических правок (форматирование, переименования без смены семантики).
 model: sonnet
-color: Magenta
+color: purple
 tools: Read, Grep, Glob, Edit, Write, Bash
 skills:
   - unit-testing
