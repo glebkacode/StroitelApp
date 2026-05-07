@@ -16,7 +16,7 @@ description: |
   в UI/Compose composable (это Compose UI test / Paparazzi, не unit),
   правок DI graph (Metro), изменений в сгенерированном коде (*Graph*, *Factory*),
   чисто косметических правок (форматирование, переименования без смены семантики).
-model: sonnet
+model: haiku
 color: purple
 tools: Read, Grep, Glob, Edit, Write, Bash
 skills:

@@ -62,6 +62,10 @@ StroitelApp/
 ### Схема
 
 ```
+[0] OpenAPI → data-модели (subagent: openapi-generator)  ← opt-in
+        │   Только если в задаче нужен HTTP-вызов к беку И есть OpenAPI-спека.
+        │   Генерирует *Request.kt / *Response.kt в *-impl/data/model/.
+        ▼
 [1] Реализация            (skill: architecture; по ситуации compose-ui / kotlin-coroutines)
         │
         ▼
@@ -79,6 +83,7 @@ StroitelApp/
 ```
 
 ### Шаги
+0. **OpenAPI → data-модели (opt-in).** Если задача предполагает HTTP-вызов к бекенду И есть OpenAPI-спецификация (URL или локальный файл) — перед реализацией запустить субагент `openapi-generator`. Он сгенерирует `*Request.kt` / `*Response.kt` плоско в `*-impl/data/model/`. Маппинг в domain (`*Dto`), DataSource и репозитории — основной агент пишет уже на шаге 1, поверх готовых data-моделей. Если HTTP-вызова нет или нет спеки — шаг пропускается.
 1. **Реализация.** Перед presentation-кодом — обязательно skill `architecture`. По ситуации — `compose-ui` для UI, `kotlin-coroutines` для асинхронной логики.
 2. **Code review.** Субагент `code-reviewer` по «сырому» коду. Critical/Major замечания закрываются до перехода к следующему шагу. Minor — согласовать с пользователем.
 3. **Unit-тесты + документация.** После закрытия замечаний — субагенты `unit-tester` и `documentation-writer`. Рекомендуется запускать параллельно (они не зависят друг от друга), но это **не строгое требование** — можно последовательно. Прогон `./gradlew :<module>:testDebugUnitTest` обязателен и должен быть зелёным.
@@ -108,31 +113,6 @@ StroitelApp/
 - `*-api` — публичные интерфейсы, навигационные конфиги, доменные модели для внешних потребителей.
 - `*-impl` — реализация (data / domain / presentation + DI).
 - Другие фичи зависят **только от `*-api`**, что предотвращает циклические зависимости и снижает связность.
-
-### Слоистая структура `*-impl` модуля
-
-Структура новых папок должна ВСЕГДА СТРОГО следовать этому описанию.
-
-```
-src/main/java/com/itapp/<feature>_impl/
-├── presentation/
-│   └── <screen>/                              # Presentation UI-логика
-│       ├── component/                         # Decompose Component impl + Compose Screen
-│       ├── mvi/                               # MviKotlin Store + StoreFactory (Intent/State/Label)
-│       └── mapping/                           # (опционально) Store.State → UiState
-├── domain/
-│   ├── model/                                 # Доменные модели
-│   ├── usecase/                               # Use case (interface + Impl)
-│   └── repository/                            # Интерфейсы репозиториев
-├── data/
-│   ├── api/                                   # DataSource (interface + Impl)
-│   ├── repository/                            # Реализации репозиториев
-│   └── model/                                 # Request/Response DTO + маппинг
-└── di/
-    └── FeatureGraph.kt                        # Metro @DependencyGraph
-```
-
-Ресурсы фичи (строки, drawable) — в `src/main/res/`.
 
 ### Presentation pattern: ТОЛЬКО MVI на MviKotlin
 

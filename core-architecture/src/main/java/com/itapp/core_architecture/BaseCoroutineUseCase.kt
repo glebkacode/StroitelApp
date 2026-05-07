@@ -1,5 +1,6 @@
 package com.itapp.core_architecture
 
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -44,7 +45,13 @@ abstract class BaseCoroutineUseCase<I, O> : CoroutineUseCase<I, O> {
      */
     suspend operator fun invoke(input: I): Result<O> {
         return withContext(Dispatchers.IO) {
-            runCatching { run(input) }
+            try {
+                Result.success(run(input))
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Throwable) {
+                Result.failure(e)
+            }
         }
     }
 }
