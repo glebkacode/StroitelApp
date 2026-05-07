@@ -14,19 +14,24 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.itapp.auth_api.phone_validation.PhoneValidationComponent
 import com.itapp.auth_impl.R
+import com.itapp.uikit.input.RussianPhoneVisualTransformation
+import com.itapp.uikit.input.toRussianPhoneDigits
 import com.itapp.uikit.theme.StroitelTheme
 import kotlinx.coroutines.flow.StateFlow
 
@@ -36,6 +41,7 @@ fun PhoneValidationScreen(
     component: PhoneValidationComponent
 ) {
     val uiState by component.uiState.collectAsState()
+    val phoneVisualTransformation = remember { RussianPhoneVisualTransformation() }
 
     Column(
         modifier = modifier
@@ -64,6 +70,8 @@ fun PhoneValidationScreen(
                     fontSize = 20.sp,
                 )
             },
+            visualTransformation = phoneVisualTransformation,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
             colors = TextFieldDefaults.colors(
                 focusedContainerColor = StroitelTheme.colorScheme.text.transparent,
                 unfocusedContainerColor = StroitelTheme.colorScheme.text.transparent,
@@ -73,7 +81,7 @@ fun PhoneValidationScreen(
                 disabledIndicatorColor = StroitelTheme.colorScheme.text.transparent,
                 errorIndicatorColor = StroitelTheme.colorScheme.text.transparent,
             ),
-            onValueChange = { text -> component.onPhoneChanged(text) }
+            onValueChange = { text -> component.onPhoneChanged(text.toRussianPhoneDigits()) }
         )
         Spacer(modifier = Modifier.height(16.dp))
 

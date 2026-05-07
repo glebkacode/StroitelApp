@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -24,11 +25,13 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
@@ -36,6 +39,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.res.stringResource
 import com.itapp.auth_api.registration.RegistrationComponent
 import com.itapp.auth_impl.R
+import com.itapp.uikit.input.RussianPhoneVisualTransformation
+import com.itapp.uikit.input.toRussianPhoneDigits
 import com.itapp.uikit.theme.StroitelTheme
 
 private val ErrorColor = Color(0xFFE53935)
@@ -46,6 +51,7 @@ fun RegistrationScreen(
     component: RegistrationComponent,
 ) {
     val uiState by component.uiState.collectAsState()
+    val phoneVisualTransformation = remember { RussianPhoneVisualTransformation() }
 
     Column(
         modifier = modifier
@@ -133,8 +139,10 @@ fun RegistrationScreen(
             placeholder = stringResource(R.string.registration_hint_phone),
             isError = uiState.phoneError,
             errorText = stringResource(R.string.registration_error_phone),
-            onValueChange = { component.onPhoneChanged(it) },
+            onValueChange = { component.onPhoneChanged(it.toRussianPhoneDigits()) },
             onFocusLost = { component.onFieldFocusLost(RegistrationComponent.Field.PHONE) },
+            visualTransformation = phoneVisualTransformation,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
         )
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -170,6 +178,7 @@ private fun RegistrationTextField(
     onValueChange: (String) -> Unit,
     onFocusLost: () -> Unit,
     visualTransformation: VisualTransformation = VisualTransformation.None,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     trailingIcon: @Composable (() -> Unit)? = null,
 ) {
     val indicatorColor = if (isError) ErrorColor else StroitelTheme.colorScheme.text.moscow
@@ -192,6 +201,7 @@ private fun RegistrationTextField(
             )
         },
         visualTransformation = visualTransformation,
+        keyboardOptions = keyboardOptions,
         trailingIcon = trailingIcon,
         isError = isError,
         colors = TextFieldDefaults.colors(
