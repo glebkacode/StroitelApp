@@ -23,7 +23,7 @@ class MainActivity : ComponentActivity() {
         val authGraph = createGraphFactory<AuthGraph.Factory>().create(appGraph.storeFactory)
         val root = RootComponentImpl(
             componentContext = defaultComponentContext(),
-            authComponentFactory = authGraph.authComponentFactory
+            authComponentFactory = authGraph.authComponentFactory,
         )
         setContent {
             root.render(modifier = Modifier.fillMaxSize())

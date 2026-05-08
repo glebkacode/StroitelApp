@@ -66,21 +66,25 @@ StroitelApp/
         │   Бизнес-требования, User Flow, Acceptance Criteria.
         │   Согласование с пользователем до перехода дальше.
         ▼
-[2] Технический план      (subagent: Plan → presented via ExitPlanMode)
+[2] Технический план      (subagent: Plan -> plan.md)
         │   Анализ кодовой базы, разбивка на шаги, критичные файлы, trade-offs.
         │   Согласование с пользователем (Approve/Reject) до перехода дальше.
         ▼
-[3] Реализация            (skill: architecture; по ситуации compose-ui / kotlin-coroutines)
+[3] OpenAPI → data-модели (subagent: openapi-generator)  ← opt-in
+        │   Только если в задаче нужен HTTP-вызов к беку И есть OpenAPI-спека.
+        │   Генерирует *Request.kt / *Response.kt в *-impl/data/model/.
+        ▼
+[4] Реализация            (skill: architecture; по ситуации compose-ui / kotlin-coroutines)
         │
         ▼
-[4] Code review           (subagent: code-reviewer)
+[5] Code review           (subagent: code-reviewer)
         │   Critical/Major закрываются до следующего шага.
         │   Minor — согласовать с пользователем.
         ▼
-[5] Тесты    ║   Доки     (subagents: unit-tester, documentation-writer)
+[6] Тесты    ║   Доки     (subagents: unit-tester, documentation-writer)
         │              ↑ рекомендуется запустить параллельно
         ▼
-[6] Quality gate          (./gradlew :composeApp:assembleDebug — зелёный)
+[7] Quality gate          (./gradlew :composeApp:assembleDebug — зелёный)
         │
         ▼
     git commit
@@ -88,11 +92,12 @@ StroitelApp/
 
 ### Шаги
 1. **Спецификация.** Субагент `business-analyst` интервьюирует пользователя и формирует `spec.md` через skill `spec-generator` — Goal, User Flow, Functional Requirements, Edge Cases, Out of Scope, Acceptance Criteria. Без технических деталей. Согласовать спеку с пользователем перед переходом к следующему шагу. Для уже готовой спеки (в т.ч. правок существующей) — шаг пропускается.
-2. **Технический план.** Субагент `Plan` (software architect) изучает кодовую базу и формирует пошаговый план реализации: ключевые файлы, архитектурные решения, trade-offs, последовательность работ. План презентуется пользователю через `ExitPlanMode` и должен быть явно подтверждён до перехода к реализации.
-3. **Реализация.** Перед presentation-кодом — обязательно skill `architecture`. По ситуации — `compose-ui` для UI, `kotlin-coroutines` для асинхронной логики.
-4. **Code review.** Субагент `code-reviewer` по «сырому» коду. Critical/Major замечания закрываются до перехода к следующему шагу. Minor — согласовать с пользователем.
-5. **Unit-тесты + документация.** После закрытия замечаний — субагенты `unit-tester` и `documentation-writer`. Рекомендуется запускать параллельно (они не зависят друг от друга), но это **не строгое требование** — можно последовательно. Прогон `./gradlew :<module>:testDebugUnitTest` обязателен и должен быть зелёным.
-6. **Quality gate перед коммитом.** Не предлагать `git commit`, пока не выполнен п. 5 и `./gradlew :composeApp:assembleDebug` зелёный.
+2. **Технический план.** Субагент `Plan` (software architect) изучает кодовую базу и формирует пошаговый план реализации: ключевые файлы, архитектурные решения, trade-offs, последовательность работ. План сохраняется в отдельный файл plan.md рядом со спекой.
+3. **OpenAPI → data-модели (opt-in).** Если задача предполагает HTTP-вызов к бекенду И есть OpenAPI-спецификация (URL или локальный файл) — перед реализацией запустить субагент `openapi-generator`. Он сгенерирует `*Request.kt` / `*Response.kt` плоско в `*-impl/data/model/`. Маппинг в domain (`*Dto`), DataSource и репозитории — основной агент пишет уже на шаге 1, поверх готовых data-моделей. Если HTTP-вызова нет или нет спеки — шаг пропускается.
+4. **Реализация.** Перед presentation-кодом — обязательно skill `architecture`. По ситуации — `compose-ui` для UI, `kotlin-coroutines` для асинхронной логики.
+5. **Code review.** Субагент `code-reviewer` по «сырому» коду. Critical/Major замечания закрываются до перехода к следующему шагу. Minor — согласовать с пользователем.
+6. **Unit-тесты + документация.** После закрытия замечаний — субагенты `unit-tester` и `documentation-writer`. Рекомендуется запускать параллельно (они не зависят друг от друга), но это **не строгое требование** — можно последовательно. Прогон `./gradlew :<module>:testDebugUnitTest` обязателен и должен быть зелёным.
+7. **Quality gate перед коммитом.** Не предлагать `git commit`, пока не выполнен п. 5 и `./gradlew :composeApp:assembleDebug` зелёный.
 
 ### Skip-фильтр (мягкий)
 

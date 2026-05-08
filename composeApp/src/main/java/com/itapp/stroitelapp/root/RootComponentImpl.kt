@@ -10,12 +10,12 @@ import com.arkivanov.decompose.value.Value
 import com.itapp.auth_api.root.RootAuthComponent
 import com.itapp.core_navigation.BaseComponent
 import com.itapp.stroitelapp.App
-import com.itapp.stroitelapp.root.RootComponent.Child.*
+import com.itapp.stroitelapp.root.RootComponent.Child.Auth
 import kotlinx.serialization.Serializable
 
 internal class RootComponentImpl(
     componentContext: ComponentContext,
-    private val authComponentFactory: Lazy<RootAuthComponent.Factory>
+    private val authComponentFactory: Lazy<RootAuthComponent.Factory>,
 ) : BaseComponent(componentContext), RootComponent {
 
     private val navigation = StackNavigation<Config>()
@@ -35,19 +35,19 @@ internal class RootComponentImpl(
         }
 
     private fun authComponent(
-        componentContext: ComponentContext
+        componentContext: ComponentContext,
     ): RootAuthComponent = authComponentFactory.value(
         componentContext = componentContext,
         onAuthSuccess = {
             // TODO: Navigate to main screen after successful authentication
-        }
+        },
     )
 
     @Composable
     override fun render(modifier: Modifier) {
         App(
             modifier = modifier,
-            component = this
+            component = this,
         )
     }
 
