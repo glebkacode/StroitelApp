@@ -10,7 +10,6 @@ import com.arkivanov.decompose.value.Value
 import com.itapp.auth_api.root.RootAuthComponent
 import com.itapp.core_navigation.BaseComponent
 import com.itapp.stroitelapp.App
-import com.itapp.stroitelapp.root.RootComponent.Child.Auth
 import kotlinx.serialization.Serializable
 
 internal class RootComponentImpl(
@@ -31,17 +30,16 @@ internal class RootComponentImpl(
 
     private fun child(config: Config, componentContext: ComponentContext): RootComponent.Child =
         when (config) {
-            Config.Auth -> Auth(authComponent(componentContext))
+            Config.Auth -> RootComponent.Child.Auth(authComponent(componentContext))
         }
 
-    private fun authComponent(
-        componentContext: ComponentContext,
-    ): RootAuthComponent = authComponentFactory.value(
-        componentContext = componentContext,
-        onAuthSuccess = {
-            // TODO: Navigate to main screen after successful authentication
-        },
-    )
+    private fun authComponent(componentContext: ComponentContext): RootAuthComponent =
+        authComponentFactory.value(
+            componentContext = componentContext,
+            onAuthSuccess = {
+                // TODO: Navigate to main screen after successful authentication
+            },
+        )
 
     @Composable
     override fun render(modifier: Modifier) {

@@ -5,9 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import com.arkivanov.decompose.defaultComponentContext
 import com.itapp.auth_impl.di.AuthGraph
 import com.itapp.stroitelapp.di.AppGraph
@@ -20,7 +18,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         val appGraph = createGraph<AppGraph>()
-        val authGraph = createGraphFactory<AuthGraph.Factory>().create(appGraph.storeFactory)
+        val authGraph = createGraphFactory<AuthGraph.Factory>()
+            .create(appGraph.storeFactory)
         val root = RootComponentImpl(
             componentContext = defaultComponentContext(),
             authComponentFactory = authGraph.authComponentFactory,
@@ -29,10 +28,4 @@ class MainActivity : ComponentActivity() {
             root.render(modifier = Modifier.fillMaxSize())
         }
     }
-}
-
-@Preview
-@Composable
-fun AppAndroidPreview() {
-    //App()
 }

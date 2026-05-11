@@ -97,35 +97,6 @@ src/main/java/com/itapp/<feature>_impl/
 
 Ресурсы фичи (строки, drawable) — в `src/main/res/`.
 
-### Presentation pattern: ТОЛЬКО MVI на MviKotlin
-
-В presentation-слое всех `*-impl` модулей используется **исключительно MVI на основе MviKotlin Store**. Plain Kotlin ViewModel / `StateFlow + Channel` без Store — **запрещены**.
-
-```
-Compose Screen  ───►  Component  ───►  Store  ───►  UseCase  ───►  Repository
-                       (Decompose)     (MviKotlin)
-```
-
-- **Store** — `Store<Intent, State, Label>` из MviKotlin. Создаётся через `StoreFactory` (`DefaultStoreFactory`), внутри — `coroutineExecutorFactory` (обработка `Intent` + side effects) и `Reducer<State, Msg>` (чистая функция). Внутренние сообщения редьюсера (`Msg`) скрыты от внешнего мира.
-- **StoreFactory** (фича-локальный) — создаёт инстанс Store, конфигурирует executor (бизнес-логика, вызовы UseCase) и reducer.
-- **Component** — тонкая Decompose-обёртка: владеет Store через `instanceKeeper.getStore { storeFactory.create() }` (`com.itapp.core_architecture.getStore`), мапит `store.stateFlow` в `UiState`, подписывает `store.labels` на one-shot события и дёргает `Callbacks`. Без бизнес-логики.
-- **Screen** — чистый Compose-рендер, разбит на внешний `Screen(component)` и внутренний `private Content(state, onX, ...)` для preview/тестов.
-- 
-### Навигация (Decompose)
-
-- `StackNavigation<Config>` для стека экранов.
-- `childStack()` для создания навигационного стека.
-- `navigation.push()` / `navigation.pop()` для перехода между экранами.
-- Каждый экран — Decompose-компонент.
-
-### DI (Metro)
-
-- `@Inject` — конструкторное внедрение.
-- `@AssistedInject` / `@AssistedFactory` — для зависимостей с runtime-параметрами.
-- `@DependencyGraph` — конфигурация графа фичи.
-- `@Binds` — связывание интерфейсов с реализациями.
-- `@Provides` — фабрики (включая `StoreFactory` в `AppGraph`).
-
 ## Build Commands
 
 ```bash

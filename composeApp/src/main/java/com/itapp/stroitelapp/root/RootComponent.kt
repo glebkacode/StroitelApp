@@ -7,6 +7,7 @@ import com.itapp.core_navigation.UiComponent
 
 interface RootComponent : UiComponent {
     val stack: Value<ChildStack<*, Child>>
+
     sealed interface Child {
         class Auth(val component: RootAuthComponent) : Child
     }
